@@ -1,0 +1,171 @@
+"""
+Main function of the codebase. This file is intended to call different parts of our pipeline based on console arguments.
+
+To add new games to the pipeline, add your string_query-class constructor to the 'game_from_name' function.
+https://github.com/kaesve/muzero
+"""
+import random
+from datetime import datetime
+from src.config_ngedn import Config
+from src.coach import Coach
+from src.neural_nets.rule_predictor_skeleton import RulePredictorSkeleton
+from src.game.find_equation_game import FindEquationGame
+from src.mcts.classic_mcts import ClassicMCTS
+from src.mcts.amex_mcts import AmEx_MCTS
+import tensorflow as tf
+import numpy as np
+import wandb
+from definitions import ROOT_DIR
+from src.utils.get_grammar import read_grammar_file
+
+
+def run():
+    args = Config.arguments_parser()
+    args.ROOT_DIR = ROOT_DIR
+    time_string = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
+    unique_dir = f"{time_string}_{args.seed}"
+    wandb_path = ROOT_DIR / '.wandb' / 'AlphaZero' / args.experiment_name / \
+                 f"{unique_dir}"
+    wandb_path.mkdir(parents=True, exist_ok=True)
+    wandb.init(entity="wwjbrugger", config=args.__dict__,
+               project="neural_guided_symbolic_regression",
+               sync_tensorboard=True, tensorboard=True,
+               dir=wandb_path, mode=args.wandb,
+               name=args.experiment_name)
+
+    np.random.seed(args.seed)
+    tf.random.set_seed(args.seed)
+    random.seed(args.seed)
+
+    # Set up tensorflow backend.
+    if int(args.gpu) >= 0:
+        device = tf.DeviceSpec(device_type='GPU', device_index=int(args.gpu))
+    else:
+        device = tf.DeviceSpec(device_type='CPU', device_index=0)
+
+    grammar = read_grammar_file(args=args)
+
+    # preprocessor = get_preprocessor_class(args=args)
+    # reader_train = preprocessor(args=args, train_test_or_val='train')
+    # iter_train = reader_train.get_datasets()
+    game = FindEquationGame(
+        grammar,
+        args,
+        train_test_or_val='train'
+    )
+
+    game_test = FindEquationGame(
+        grammar,
+        args,
+        train_test_or_val='test'
+    )
+
+    learnA0(g=game,
+            args=args,
+            run_name=args.experiment_name,
+            game_test=game_test
+            )
+
+
+def learnA0(g, args, run_name: str, game_test) -> None:
+    """
+    Train an AlphaZero agent on the given environment with the specified configuration. If specified within the
+    configuration file, the function will load in a previous model along with previously generated data.
+    :param game_test: 
+    :param args:
+    :param g: Game Instance of a Game class that implements environment logic. Train agent on this environment.
+    :param run_name: str Run name to store data by and annotate results.
+    """
+    print("Testing:", ", ".join(run_name.split("_")))
+
+    # Extract neural network and algorithm arguments separately
+    rule_predictor_train = RulePredictorSkeleton(
+        args=args,
+        reader_train=g.reader
+    )
+    rule_predictor_test = RulePredictorSkeleton(
+        args=args,
+        reader_train=game_test.reader
+    )
+    checkpoint_AlphaZero, manager_AlphaZero = load_pretrained_net(
+        checkpoint_path=ROOT_DIR / 'saved_models',
+        dataset_number=args.data_path.name,
+        experiment_name=f"{args.experiment_name}/{args.seed}",
+        net=rule_predictor_train.net
+    )
+    checkpoint_AlphaZero_test, _ = load_pretrained_net(
+        checkpoint_path=ROOT_DIR / 'saved_models_test',
+        dataset_number=args.data_path.name,
+        experiment_name=f"{args.experiment_name}/{args.seed}",
+        net=rule_predictor_test.net
+    )
+    if args.MCTS_engine == 'Endgame':
+        search_engine = AmEx_MCTS
+    elif args.MCTS_engine == 'Normal':
+        search_engine = ClassicMCTS
+    else:
+        raise AssertionError(f"Engine: {args.MCTS_engine} not defined!")
+
+    c = Coach(
+        game=g,
+        game_test=game_test,
+        rule_predictor=rule_predictor_train,
+        rule_predictor_test=rule_predictor_test,
+        args=args,
+        search_engine=search_engine,
+        run_name=run_name,
+        checkpoint_train=checkpoint_AlphaZero,
+        checkpoint_manager=manager_AlphaZero,
+        checkpoint_test=checkpoint_AlphaZero_test
+    )
+
+    c.learn()
+
+
+def load_pretrained_net(checkpoint_path, dataset_number, experiment_name, net,
+                        optimizer=None, iterator=None):
+    checkpoint_path_AlphaZero = checkpoint_path / dataset_number / \
+                                'AlphaZero' / experiment_name
+
+    checkpoint_AlphaZero = tf.train.Checkpoint(
+        step=tf.Variable(1),
+        net=net
+    )
+    manager_AlphaZero = tf.train.CheckpointManager(
+        checkpoint=checkpoint_AlphaZero,
+        directory=str(checkpoint_path_AlphaZero / 'tf_ckpts'),
+        max_to_keep=3
+    )
+    checkpoint_path_NGSR = checkpoint_path / dataset_number / \
+                           'NGSR' / experiment_name
+    manager_NGSR = tf.train.CheckpointManager(
+        checkpoint=checkpoint_AlphaZero,
+        directory=str(checkpoint_path_NGSR / 'tf_ckpts'),
+        max_to_keep=3
+    )
+
+    if manager_AlphaZero.latest_checkpoint:
+        checkpoint_AlphaZero.restore(manager_AlphaZero.latest_checkpoint)
+        print("Restored from {}".format(manager_AlphaZero.latest_checkpoint))
+        pass
+
+    elif manager_NGSR.latest_checkpoint:
+        checkpoint_AlphaZero.restore(manager_NGSR.latest_checkpoint)
+        print("Restored from {}".format(manager_NGSR.latest_checkpoint))
+
+    else:
+        checkpoint_AlphaZero.restore(manager_AlphaZero.latest_checkpoint)
+        print("Initializing from scratch.")
+
+    return checkpoint_AlphaZero, manager_AlphaZero
+
+
+def get_run_name(config_name: str, architecture: str, game_name: str) -> str:
+    """ Macro function to wrap various ModelConfig properties into a run name. """
+    time = datetime.now().strftime("%Y%m%d-%H%M%S")
+    return f"{config_name}_{architecture}_{game_name}_{time}"
+
+
+if __name__ == "__main__":
+    run()
+    # cProfile.run('run()', filename='profile.prof')

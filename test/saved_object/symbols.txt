@@ -1,0 +1,1 @@
+Advanced, x_0, x_1, /, +, 2, -, Basic, Variable, exp, cos, log, S, c, sin, **, *, 
