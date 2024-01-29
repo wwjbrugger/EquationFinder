@@ -36,7 +36,7 @@ class MeasurementEncoderDummy(tf.keras.Model):
                 y = array[:, -1]
                 max_value = np.abs(y.max())
                 min_value = np.abs(y.min())
-                abs_value = max(max_value, min_value)
+                abs_value = max(max_value, min_value, 1)
                 y_norm = y / abs_value
                 array[:, -1] = y_norm
                 norm_array = array
