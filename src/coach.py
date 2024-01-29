@@ -182,6 +182,7 @@ class Coach(ABC):
             )
             # Update state of control
             state = next_state
+            num_MCTS_sims = max(1, int(num_MCTS_sims/2))
 
         # Cleanup environment and GameHistory
         wandb.log({f"states_explored_till_perfect_fit": mcts.states_explored_till_perfect_fit})
@@ -253,11 +254,6 @@ class Coach(ABC):
             #             print(prob)
             #             print()
             self.trainExamplesHistory.append(iteration_train_examples)
-            if self.args.logging_level <= 10:
-                GameHistory.print_statistics(
-                    self.trainExamplesHistory
-                )
-
             self.log_wandb_metric(metric=self.metrics_train)
 
             if self.args.prior_source in 'neural_net':
