@@ -12,21 +12,17 @@ class MeasurementEncoderPicture(MeasurementEncoderDummy):
 
         self.conv_0= tf.keras.layers.Conv2D(64, (3, 3), activation='relu',
                                    padding='same', strides=2,
-                                   data_format='channels_first',
                                             name="Convolution_0_Encoder_Picture")
         self.conv_1= tf.keras.layers.Conv2D(32, (3, 3), activation='relu',
                                    padding='same', strides=2,
-                                   data_format='channels_first',
                                             name="Convolution_1_Encoder_Picture"
                                             )
         self.conv_2 = tf.keras.layers.Conv2D(16, (3, 3), activation='relu',
                                              padding='same', strides=1,
-                                             data_format='channels_first',
                                              name="Convolution_2_Encoder_Picture"
                                              )
         self.conv_3 = tf.keras.layers.Conv2D(8, (3, 3), activation='relu',
                                              padding='same', strides=1,
-                                             data_format='channels_first',
                                              name="Convolution_3_Encoder_Picture"
                                              )
         self.last_layer_0 = tf.keras.layers.Dense(units=128, activation='gelu',
@@ -85,8 +81,8 @@ def table_to_picture(tensor, bins, histogram_range):
                                        weights=None
                                        )
             picture_list.append(tf.where(histogram >=1, np.float32(1), np.float32(0)))
-        batch_list.append(picture_list)
-    picture_tensor = tf.convert_to_tensor(batch_list, dtype=tf.float32)
+        batch_list.append(tf.stack(picture_list, axis=-1, name='stack_plots' ))
+    picture_tensor =  tf.stack(batch_list, axis=0, name='stack_datasets' )
     return  picture_tensor
 
 
