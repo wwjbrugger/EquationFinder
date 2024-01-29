@@ -117,6 +117,8 @@ class FindEquationGame(Game):
                 y_true = dataset.loc[:, 'y'].to_numpy()
                 error = Mse(y_pred=y_calc, y_true=y_true)
                 r = 1 + np.maximum(self.args.minimum_reward, - error, dtype=np.float32)
+                self.logger.debug(f"r = {r}  {syntax_tree.rearrange_equation_prefix_notation(new_start_node_id=-1)[1]} \n")
+
                 if math.isfinite(r):
                     self.max_list.add(
                         state=state,
@@ -141,7 +143,6 @@ class FindEquationGame(Game):
                 r = float(self.args.minimum_reward)
             except NonFiniteError as e:
                 r = float(self.args.minimum_reward)
-
         return r
 
     def getHash(self, state):
