@@ -89,7 +89,7 @@ class NT_Xent(tf.keras.layers.Layer):
         """
         if not target_dataset_encoding is None:
             sim = -1 * self.similarity(tf.expand_dims(zizj, 1), tf.expand_dims(zizj, 0))
-            sim_activation = tf.keras.activations.relu(sim, alpha=-0.1, max_value=1, threshold=0.0)
+            sim_activation = (sim + 1) / 2
 
             contrast_loss = self.criterion(
                 target_dataset_encoding[self.mask_contrast_dataset],
