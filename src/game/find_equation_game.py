@@ -134,7 +134,7 @@ class FindEquationGame(Game):
             except FloatingPointError:
                 self.logger.debug(f"In the calculation of the reward a FloatingPointError occur "
                                   f"the equation is: {syntax_tree.rearrange_equation_prefix_notation(new_start_node_id=-1)[1]} \n"
-                                  f"the dataset is: {dataset['data_frame']} ")
+                                  f"the dataset is: {dataset} ")
                 r = float(self.args.minimum_reward)
             except RuntimeError as e:
                 self.logger.debug(f"In the calculation of the reward a RuntimeError occur."
