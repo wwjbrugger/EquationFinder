@@ -178,8 +178,10 @@ class ClassicMCTS:
                 examples=[{'observation': state.observation}])
         elif self.args.prior_source == 'grammar':
             prior = self.game.grammar.prior_dict[state.observation['last_symbol']]
+            value = self.rollout_equation(state)
         elif self.args.prior_source == 'uniform':
             prior = self.game.grammar.prior_dict[state.observation['last_symbol']]
+            value = self.rollout_equation(state)
         elif self.args.prior_source == 'rollout':
             prior = self.game.grammar.prior_dict[state.observation['last_symbol']]
             value = self.rollout_equation(state)
