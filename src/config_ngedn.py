@@ -115,7 +115,8 @@ class Config:
                                      'DatasetTransformer',
                                      'MeasurementEncoderSelf',
                                      'MLP_Calculated_Features',
-                                     'MeasurementEncoderPicture'
+                                     'MeasurementEncoderPicture',
+                                     'TextTransformer'
                                      ]
                             )
         parser.add_argument("--normalize_approach", type=str,
@@ -139,7 +140,7 @@ class Config:
         parser.add_argument("--encoder_measurement_num_neurons", type=int,
                             help='How many neurons one layer should have')
 
-        ######### Encoder Measurement Transformer
+        ######### Encoder Measurement DatasetTransformer
 
         parser.add_argument("--model_dim_hidden_dataset_transformer", type=int,
                             help="The shared embedding dimension of each attribute is given by")
@@ -219,6 +220,10 @@ class Config:
         parser.add_argument("--path_to_pretrained_dataset_encoder",
                             help='Path to a pretrained model where the dataset encoder is copied from.',
                              type=str)
+
+        ######### Encoder Measurement TextTransformer
+        #todo add arguments
+
 
         ## Actor Decoder
         parser.add_argument("--actor_decoder_class", type=str,

@@ -7,6 +7,7 @@ from src.neural_nets.data_set_encoder.measurement_encoder_picture import Measure
 from src.neural_nets.data_set_encoder.LSTM_measurement_encoder import LstmEncoder
 from src.neural_nets.data_set_encoder.bi_LSTM_measurement_encoder import BiLSTMEncoder
 from src.neural_nets.data_set_encoder.dataset_transformer import DatasetTransformer
+from src.neural_nets.data_set_encoder.text_transformer import TextTransformer
 
 from src.neural_nets.decoder.mlp_decoder import MLP_Decoder
 
@@ -34,6 +35,8 @@ def get_rule_predictor(args, reader_data):
         encoder_measurement_class = DatasetTransformer
     elif args.class_measurement_encoder == "MeasurementEncoderPicture":
         encoder_measurement_class = MeasurementEncoderPicture
+    elif args.class_measurement_encoder == "TextTransformer":
+        encoder_measurement_class = TextTransformer
 
     else:
         raise ValueError(f'The class {args.class_measurement_encoder} is not a valid class. '
@@ -99,6 +102,7 @@ def get_rule_predictor(args, reader_data):
             'bit_embedding': args.bit_embedding_dataset_transformer,
             'use_feature_index_embedding': args.use_feature_index_embedding_dataset_transformer,
             'max_len_datasets': args.max_len_datasets
+            #ToDO Daniel add arguments you need
 
         },
         actor_decoder_class=actor_decoder_class,
