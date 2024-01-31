@@ -1,0 +1,9 @@
+nltk==3.7
+numpy==1.22.4
+pcfg==0.1.5
+scikit_learn==1.4.0
+scipy==1.12.0
+tensorboard==2.8.0
+tensorflow==2.8.4
+tensorflow_text==2.8.2
+tqdm==4.64.1
