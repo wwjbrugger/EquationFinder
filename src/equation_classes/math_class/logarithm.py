@@ -4,10 +4,12 @@ import numpy as np
 
 class Logarithm(AbstractOperator):
     def __init__(self, node):
+        super().__init__(node)
         self.num_child = 1
         self.node = node
         self.invertible = True
         self.neutral_element = 1
+        self.valid_min_value = 0
 
     def prefix_notation(self, call_node_id, kwargs):
         if call_node_id == self.node.node_id:
@@ -43,3 +45,6 @@ class Logarithm(AbstractOperator):
 
     def delete(self):
         pass
+
+    def operator_data_range(self, variable):
+        return super().operator_data_range(variable)

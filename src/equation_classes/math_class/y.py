@@ -3,6 +3,7 @@ from src.equation_classes.math_class.abstract_operator import AbstractOperator
 
 class Y(AbstractOperator):
     def __init__(self, node):
+        super().__init__(node)
         self.num_child = 1
         self.node = node
         self.invertible = True

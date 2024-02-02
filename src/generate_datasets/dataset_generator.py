@@ -1,3 +1,5 @@
+import copy
+
 from src.generate_datasets.equation_generator import EquationGenerator
 from nltk.grammar import Nonterminal
 import numpy as np
@@ -102,12 +104,12 @@ class DatasetGenerator():
         :param experiment_dataset_dic: Dict with information about the distribution of variables
         :return:
         """
-        data_frame = self.generate_values_for_variables()
+        data_frame = self.generate_values_for_variables(equation=equation)
         equation = self.generate_values_for_constants(equation=equation)
         data_frame = self.add_equation_result_to_df(data_frame, equation)
         return data_frame
 
-    def generate_values_for_variables(self):
+    def generate_values_for_variables(self, equation):
         """
         sample values for variables
         :param variables:
@@ -122,15 +124,56 @@ class DatasetGenerator():
         for variable in sorted_variables:
             distribution = self.experiment_dataset_dic[variable]['distribution']
             distribution_args = self.experiment_dataset_dic[variable]['distribution_args']
+
+            new_distribution_args = self.sample_new_boarder_values(
+                distribution_args,
+                variable = variable,
+                min_variable_range = self.experiment_dataset_dic[variable]['min_variable_range'],
+                equation=equation
+            )
             if self.experiment_dataset_dic[variable]['generate_all_values_with_one_call']:
-                measurements = [value for value in distribution(**distribution_args)[:num_calls_sampling]]
+                measurements = [value for value in distribution(**new_distribution_args)[:num_calls_sampling]]
             else:
-                measurements = [distribution(**distribution_args) for _ in range(num_calls_sampling)]
+                measurements = [distribution(**new_distribution_args) for _ in range(num_calls_sampling)]
             if self.experiment_dataset_dic[variable]['sample_with_noise']:
                 measurements = np.random.normal(
                     measurements, self.experiment_dataset_dic[variable]['noise_std'])
             measurement_dict[variable] = measurements
         return pd.DataFrame(measurement_dict)
+    
+    def sample_new_boarder_values(self, distribution_args, variable, min_variable_range, equation):
+        new_distribution_args = copy.deepcopy(distribution_args)
+        self.get_boarders_of_equation(equation, new_distribution_args, variable)
+        new_distribution_args = self.sample_range_in_allowed_range(
+            min_variable_range=min_variable_range,
+            new_distribution_args=new_distribution_args,
+            variable=variable
+        )
+        return new_distribution_args
+
+    def sample_range_in_allowed_range(self, min_variable_range, new_distribution_args, variable):
+        if self.experiment_dataset_dic[variable]['min_variable_range'] < new_distribution_args['high'] - new_distribution_args['low']:
+            new_data_range = 0
+            while new_data_range < min_variable_range:
+                new_low, new_high = np.sort(np.random.uniform(
+                    low=new_distribution_args['low'],
+                    high=new_distribution_args['high'],
+                    size=2
+                ))
+                new_data_range = new_high - new_low
+            new_distribution_args['low'] = new_low
+            new_distribution_args['high'] = new_high
+        return new_distribution_args
+
+    def get_boarders_of_equation(self, equation, new_distribution_args, variable):
+        v_low, v_high = equation.operators_data_range(variable)
+        if v_low > new_distribution_args['high'] or v_high < new_distribution_args['low']:
+            raise AssertionError(f"new boarders are outside of the distribution parameter")
+        if v_low > new_distribution_args['low']:
+            new_distribution_args['low'] = v_low
+        if v_high < new_distribution_args['high']:
+            new_distribution_args['high'] = v_high
+
 
     def generate_values_for_constants(self, equation):
         if 'c' in self.experiment_dataset_dic:

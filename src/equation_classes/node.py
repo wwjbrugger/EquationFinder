@@ -94,6 +94,9 @@ class Node():
             current_count = child.count_nodes_in_tree(current_count=current_count)
         return current_count
 
+    def __str__(self):
+        return f"{self.node_id}_{self.node_symbol}"
+
 
 def geometric_sum(max_branching_factor, n):
     # sum_k=0^n q^k

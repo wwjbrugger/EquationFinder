@@ -4,6 +4,7 @@ from src.equation_classes.math_class.abstract_operator import AbstractOperator
 
 class Constants(AbstractOperator):
     def __init__(self, node):
+        super(Constants, self).__init__(node)
         self.num_child = 0
         self.node = node
         self.invertible = True

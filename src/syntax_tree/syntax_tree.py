@@ -356,6 +356,12 @@ class SyntaxTree():
             self.constants_in_tree[f"c_{i + j}"]['value'] = np.float32(popt[j])
             self.constants_in_tree['num_fitted_constants'] += 1
 
+    def operators_data_range(self, variable):
+        node_to_evaluate = self.dict_of_nodes[0]
+        min_value, max_value, depends_on_variable = node_to_evaluate.math_class.operator_data_range(variable)
+        return min_value, max_value
+
+
 
     def __str__(self):
         return self.rearrange_equation_prefix_notation(new_start_node_id=-1)[1]

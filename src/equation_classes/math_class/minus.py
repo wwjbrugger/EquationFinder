@@ -3,6 +3,7 @@ from src.equation_classes.math_class.abstract_operator import AbstractOperator
 
 class Minus(AbstractOperator):
     def __init__(self, node):
+        super().__init__(node)
         self.num_child = 2
         self.node = node
         self.invertible = True

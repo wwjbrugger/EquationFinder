@@ -51,24 +51,25 @@ if __name__ == '__main__':
                         help='Maximum number of constants allowed in  equation'
                              'afterwards equation will be invalid')
 
+
     args = parser.parse_args()
 
     random.seed(args.seed)
     np.random.seed(args.seed)
     grammar_string = \
         """  
-        S -> '+' S S [0.1]
-        S -> '-' S S [0.1]
-        S -> '*' S S [0.1]
-        S -> 'sin' Inner_Function [0.1] 
-        S -> 'cos' Inner_Function [0.1] 
-        S -> 'log' Inner_Function [0.1]  
+        S -> '+' S S [0.2]
+        S -> '-' S S [0.2]
+        S -> '*' S S [0.2]
+        S -> 'sin' Inner_Function [0.04] 
+        S -> 'cos' Inner_Function [0.04] 
+        S -> 'log' Inner_Function [0.04]  
         S -> 'x_0' [0.05] 
         S -> 'x_1' [0.05]
-        S -> '**' Exponent Variable [0.1]
-        S -> '1' [0.05]
+        S -> '**' Exponent Variable [0.04]
+        S -> '1' [0.04]
         S -> '0.5' [0.05]
-        S -> '2' [0.1]
+        S -> '2' [0.05]
         Exponent -> '6' [0.1]
         Exponent -> '5' [0.1] 
         Exponent -> '4' [0.1] 
@@ -94,10 +95,11 @@ if __name__ == '__main__':
         'x_0': {
             'distribution': np.random.uniform,
             'distribution_args': {
-                'low': 0,
-                'high': 10,
+                'low': -1,
+                'high': 4,
                 'size': args.num_calls_sampling
             },
+            'min_variable_range' : 2,
             'generate_all_values_with_one_call': True,
             'sample_with_noise': args.sample_with_noise,
             'noise_std': 0.1
@@ -105,16 +107,17 @@ if __name__ == '__main__':
         'x_1': {
             'distribution': np.random.uniform,
             'distribution_args': {
-                'low': 0,
-                'high': 10,
+                'low': -1,
+                'high': 4,
                 'size': args.num_calls_sampling
             },
+            'min_variable_range': 2,
             'generate_all_values_with_one_call': True,
             'sample_with_noise': args.sample_with_noise,
             'noise_std': 0.1
         }
     }
-    save_folder = Path(args.save_folder)
+    save_folder = ROOT_DIR / Path(args.save_folder)
     save_folder.mkdir(exist_ok=True, parents=True)
     save_path = create_file_path(save_folder=save_folder, stem='run')
 
@@ -137,4 +140,5 @@ if __name__ == '__main__':
         args=args
     )
 
-    split_dataset(path=Path(f'{ROOT_DIR}/data_sets/{save_path.name}'))
+    split_dataset(path=Path(f'{ROOT_DIR}/data/{save_path.name}'))
+    print(f"Datasets are saved to  {ROOT_DIR}/data/{save_path.name}")

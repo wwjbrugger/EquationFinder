@@ -4,6 +4,7 @@ import numpy as np
 
 class Power(AbstractOperator):
     def __init__(self, node):
+        super().__init__(node)
         self.num_child = 2
         self.node = node
         self.invertible = True
@@ -60,3 +61,4 @@ class Power(AbstractOperator):
 
     def delete(self):
         pass
+

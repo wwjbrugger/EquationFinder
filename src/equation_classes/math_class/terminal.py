@@ -3,6 +3,7 @@ from src.equation_classes.math_class.abstract_operator import AbstractOperator
 
 class Terminal(AbstractOperator):
     def __init__(self, node):
+        super(Terminal, self).__init__(node)
         self.num_child = 0
         self.node = node
         self.invertible = True
@@ -36,3 +37,9 @@ class Terminal(AbstractOperator):
 
     def delete(self):
         pass
+
+    def operator_data_range(self, variable):
+        min_value, max_value, depends_on_variable = super(Terminal, self).operator_data_range(variable)
+        if variable == self.node.node_symbol:
+            depends_on_variable = True
+        return min_value, max_value, depends_on_variable
