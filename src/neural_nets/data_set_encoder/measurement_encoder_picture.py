@@ -7,7 +7,7 @@ from src.neural_nets.data_set_encoder.measurement_encoder_dummy import Measureme
 # https://github.com/arrigonialberto86/set_transformer a tensorflow implementation of Zaheer et al., “Deep Sets.”
 class MeasurementEncoderPicture(MeasurementEncoderDummy):
     def __init__(self,*args, **kwargs):
-        super(MeasurementEncoderDummy, self).__init__()
+        super(MeasurementEncoderPicture, self).__init__(*args, **kwargs)
         self.kwargs = kwargs
 
         self.conv_0= tf.keras.layers.Conv2D(64, (3, 3), activation='relu',
@@ -56,10 +56,7 @@ class MeasurementEncoderPicture(MeasurementEncoderDummy):
 
     def prepare_data(self, data):
 
-        norm_frame = self.normalize(
-            data_frame=data['data_frame'],
-            approach=self.kwargs['normalize_approach']
-        )
+        norm_frame = self.normalize(data_frame=data['data_frame'])
         tensor = tf.convert_to_tensor(norm_frame, dtype=tf.float32)
 
 

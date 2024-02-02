@@ -59,6 +59,8 @@ def get_rule_predictor(args, reader_data):
     vocab_size = int(max(reader_data.vocab_size,
                      args.max_branching_factor ** (args.max_depth_of_tree + 2 )))
 
+    input_feature_dims = get_input_feature_dim_for_DatasetTransformer(args, reader_data)
+
     rule_predictor = RulePredictorNet(
         encoder_tree_class=encoder_tree_class,
         encoder_tree_args=
@@ -83,7 +85,7 @@ def get_rule_predictor(args, reader_data):
             'dropout_rate': args.dropout_rate,
             #------ DatasetTransformer
             # input_feature_dims states for every entry in the data how big is the encoding.
-            'input_feature_dims': [32 if args.bit_embedding_dataset_transformer else 1 for i in range(len(reader_data.dataset_columns))],
+            'input_feature_dims': input_feature_dims,
             'stacking_depth': args.model_stacking_depth_dataset_transformer,
             'num_heads': args.model_num_heads_dataset_transformer,
             'model_dim_hidden': args.model_dim_hidden_dataset_transformer,
@@ -122,6 +124,13 @@ def get_rule_predictor(args, reader_data):
         args= args
     )
     return rule_predictor
+
+
+def get_input_feature_dim_for_DatasetTransformer(args, reader_data):
+    input_feature_dims = []
+    for i in range(len(reader_data.dataset_columns) + 2 if "lin_transform" in args.normalize_approach else 0):
+        input_feature_dims.append( 32 if args.bit_embedding_dataset_transformer else 1)
+    return input_feature_dims
 
 
 def get_measurement_keys(column_names):

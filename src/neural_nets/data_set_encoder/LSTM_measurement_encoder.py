@@ -18,10 +18,7 @@ class LstmEncoder(MeasurementEncoderDummy):
                 tf.zeros((batch_size, self.encoder_measurements_LSTM_units))]
 
     def prepare_data(self, data):
-        norm_frame = self.normalize(
-            data_frame=data['data_frame'],
-            approach=self.kwargs['normalize_approach']
-        )
+        norm_frame = self.normalize(data_frame=data['data_frame'])
 
         tensor_with_row= tf.expand_dims(tf.convert_to_tensor(norm_frame, dtype=tf.float32), axis=0)
         return tensor_with_row

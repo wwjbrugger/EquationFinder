@@ -120,10 +120,11 @@ class Config:
                                      ]
                             )
         parser.add_argument("--normalize_approach", type=str,
-                            help="How to normalize values, abs_max_value divide all elements in dataset by its absolute max value"
-                                 "row_wise uses sklearn.preprocess.normalize function, which maps every row to the length of a unit vector."
+                            help="How to normalize values:"
                                  "abs_max_y does the same as abs_max_value only for y values"
-                                 "Every other string will have no effect."
+                                 "lin_transform transforms x values to the range -1 and 1 "
+
+
                             )
         parser.add_argument("--contrastive_loss", type=str2bool,
                             help="If contrastive loss should be used" )

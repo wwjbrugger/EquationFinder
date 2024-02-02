@@ -147,8 +147,14 @@ class Coach(ABC):
         formula_started_from = state.observation['current_tree_representation_str']
         # Update MCTS visit count temperature according to an episode or weight update schedule.
         temp = self.get_temperature(game)
-        wandb.log({f"temperature": temp})
+        if game == self.game_test:
+            mode = 'test'
+        else:
+            mode = 'train'
+        wandb.log({f"temperature_{mode}": temp})
         num_MCTS_sims = self.args.num_MCTS_sims
+        self.logger.info(f"")
+        self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
 
         while not state.done:
             # Compute the move probability vector and state value using MCTS for the current state of the environment.
@@ -182,10 +188,28 @@ class Coach(ABC):
             )
             # Update state of control
             state = next_state
-            num_MCTS_sims = max(1, int(num_MCTS_sims/2))
+            num_MCTS_sims = max(1, int(num_MCTS_sims / 2))
 
         # Cleanup environment and GameHistory
-        wandb.log({f"states_explored_till_perfect_fit": mcts.states_explored_till_perfect_fit})
+        if mcts.states_explored_till_perfect_fit > 0:
+            wandb.log(
+                {
+                    f"num_states_to_perfect_fit_{mode}":
+                        mcts.states_explored_till_perfect_fit,
+                    f"{next_state.observation['true_equation_hash']}"
+                    f"_num_states_to_perfect_fit_{mode}":
+                        mcts.states_explored_till_perfect_fit
+                }
+            )
+        else:
+            wandb.log(
+                {
+                    f"equation_not_found_{next_state.observation['true_equation_hash']}_{mode}": 1,
+                    f"equation_not_found_{mode}": 1,
+
+                }
+            )
+
         game.close(state)
         history.terminate(
             formula_started_from=formula_started_from,
@@ -240,21 +264,15 @@ class Coach(ABC):
                 logger=self.logger,
                 num_selfplay_iterations=self.args.num_selfplay_iterations
             )
-            # for history in iteration_train_examples:
-            #     for observation in history.observations:
-            #         if not np.all(np.isfinite(observation['data_frame'])):
-            #             print('In dataframe an no infinite value happen ')
-            #             print(observation['data_frame'])
-            #     if not np.all(np.isfinite(history.observed_returns)):
-            #         print('In observed_returns an no infinite value happen ')
-            #         print(history.observed_returns)
-            #     for prob in history.probabilities:
-            #         if not np.all(np.isfinite(prob)):
-            #             print('In probabilities an no infinite value happen ')
-            #             print(prob)
-            #             print()
             self.trainExamplesHistory.append(iteration_train_examples)
-            self.log_wandb_metric(metric=self.metrics_train)
+            wandb.log(
+                {f"average_reward_iteration_{self.metrics_train['mode']}":
+                     self.metrics_train['rewards_mean'].result()}
+            )
+            wandb.log(
+                {f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
+                     self.metrics_train['done_rollout_ratio'].result()}
+            )
 
             if self.args.prior_source in 'neural_net':
                 self.saveTrainExamples(int(self.checkpoint.step))
@@ -272,16 +290,6 @@ class Coach(ABC):
             if self.args.test_network and \
                     self.checkpoint.step % self.args.test_every_n_steps == 1:
                 self.test_epoche(save_path=save_path)
-
-    def log_wandb_metric(self, metric):
-        wandb.log(
-            {f"average_reward_{metric['mode']}":
-                 metric['rewards_mean'].result()}
-        )
-        wandb.log(
-            {f"average_done_rollout_ratio_{metric['mode']}":
-                 metric['done_rollout_ratio'].result()}
-        )
 
     def update_network(self):
         # Flatten examples over self-play episodes and sample a training batch.
@@ -322,13 +330,7 @@ class Coach(ABC):
             if result_episode.observed_returns[0] == self.args.minimum_reward:
                 minimal_reward_runs += 1
             iteration_train_examples.append(result_episode)
-            if self.checkpoint.step % 5 == 1:
-                logger.warning('________________________________________')
-            for i in range(len(game.max_list.max_list_state)):
-                logger.info(f"found equation: {game.max_list.max_list_state[i].complete_discovered_equation:<80}"
-                            f" r={round(game.max_list.max_list_keys[i], 3)}"
-                            )
-                logger.info(game.max_list.max_list_state[i].syntax_tree.constants_in_tree)
+            self.log_best_list(game, logger)
 
             metrics['rewards_mean'].update_state(
                 np.sum(result_episode.rewards, dtype=np.float32)
@@ -344,6 +346,14 @@ class Coach(ABC):
             num_selfplay_iterations
         )
         return iteration_train_examples
+
+    def log_best_list(self, game, logger):
+        logger.info(f"Best equations found:")
+        for i in range(len(game.max_list.max_list_state)-1, 0,-1):
+            logger.info(f"{i}: found equation: {game.max_list.max_list_state[i].complete_discovered_equation:<80}"
+                        f" r={round(game.max_list.max_list_keys[i], 3)}"
+                        )
+            logger.info(game.max_list.max_list_state[i].syntax_tree.constants_in_tree)
 
     def augment_buffer(self, iteration_train_examples, metrics, minimal_reward_runs, num_selfplay_iterations):
         if metrics['mode'] == 'train':
@@ -381,7 +391,14 @@ class Coach(ABC):
                              logger=self.logger_test,
                              num_selfplay_iterations=self.args.num_selfplay_iterations_test
                              )
-        self.log_wandb_metric(metric=self.metrics_test)
+        wandb.log(
+            {f"average_reward_{self.metrics_test['mode']}":
+                 self.metrics_test['rewards_mean'].result()}
+        )
+        wandb.log(
+            {f"average_done_rollout_ratio_{self.metrics_test['mode']}":
+                 self.metrics_test['done_rollout_ratio'].result()}
+        )
 
     def saveTrainExamples(self, iteration: int) -> None:
         """
