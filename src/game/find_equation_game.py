@@ -54,7 +54,7 @@ class FindEquationGame(Game):
         observations['last_symbol'] = \
             syntax_tree.dict_of_nodes[syntax_tree.nodes_to_expand[0]].node_symbol
         observations['true_equation'] =batch_data['formula']
-        pattern = r'c_0_|___'
+        pattern = r'c_0_|___|__'
         matches = re.split(pattern, observations['true_equation'])
         observations['true_equation_hash'] = matches[0].strip()
         next_state = GameState(syntax_tree=syntax_tree, observation=observations)
