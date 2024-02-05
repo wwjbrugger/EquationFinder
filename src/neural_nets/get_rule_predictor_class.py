@@ -128,7 +128,7 @@ def get_rule_predictor(args, reader_data):
 
 def get_input_feature_dim_for_DatasetTransformer(args, reader_data):
     input_feature_dims = []
-    for i in range(len(reader_data.dataset_columns) + 2 if "lin_transform" in args.normalize_approach else 0):
+    for i in range(len(reader_data.dataset_columns) + 2 if "lin_transform" in args.normalize_approach else len(reader_data.dataset_columns) ):
         input_feature_dims.append( 32 if args.bit_embedding_dataset_transformer else 1)
     return input_feature_dims
 
