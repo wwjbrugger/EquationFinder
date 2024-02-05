@@ -36,10 +36,7 @@ class MeasurementEncoderPicture(MeasurementEncoderDummy):
                                                   )
 
     def __call__(self, x, *args, **kwargs):
-        x_picture = table_to_picture(x, bins=14, histogram_range=[
-            [tf.reduce_min(x).numpy(), tf.reduce_max(x).numpy()+ 1e-6],
-            [-1., 1.]
-        ])
+        x_picture = table_to_picture(x, bins=14)
         after_conv_0 = self.conv_0(x_picture)
         after_conv_1 = self.conv_1(after_conv_0)
         after_conv_2 = self.conv_2(after_conv_1)
@@ -63,15 +60,17 @@ class MeasurementEncoderPicture(MeasurementEncoderDummy):
         return tensor
 
 
-def table_to_picture(tensor, bins, histogram_range):
+def table_to_picture(tensor, bins):
     batch_list = []
     for b in range(tensor.shape[0]):
         picture_list = []
         for c in range(tensor.shape[-1] - 1):
-            histogram = histogram2d(x=tensor[b, :, c],
-                                    y=tensor[b, :, -1],
+            x = tensor[b, :, c]
+            y = tensor[b, :, -1]
+            histogram = histogram2d(x=x,
+                                    y=y,
                                     nbins=bins,
-                                    value_range=histogram_range,
+                                    value_range=[[tf.reduce_min(x), tf.reduce_max(x) + 1e-6],[-1., 1.]],
                                     weights=None
                                     )
             picture_list.append(tf.where(histogram >= 1, np.float32(1), np.float32(0)))

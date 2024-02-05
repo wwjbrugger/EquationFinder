@@ -20,7 +20,7 @@ class TestPandasToPicture(unittest.TestCase):
     def test_pandas_to_pictures(self):
         tensor_df = tf.convert_to_tensor(self.data_frame, dtype=tf.float32)
         tensor_df = tf.expand_dims(tensor_df, axis=0)
-        tensor = table_to_picture(tensor_df, bins=4, histogram_range=[[-10., 10.], [-1., 1.]])
+        tensor = table_to_picture(tensor_df, bins=4)
         true_value = np.array([[[[1., 1., 0., 0.],
          [0., 0., 0., 0.],
          [0., 0., 0., 0.],
