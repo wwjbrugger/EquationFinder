@@ -6,17 +6,17 @@ from src.neural_nets.data_set_encoder.measurement_encoder_dummy import Measureme
 # based on  https://github.com/OATML/non-parametric-transformers Kossen et al., “Self-Attention Between Datapoints.” and
 # https://github.com/arrigonialberto86/set_transformer a tensorflow implementation of Zaheer et al., “Deep Sets.”
 class MeasurementEncoderPicture(MeasurementEncoderDummy):
-    def __init__(self,*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(MeasurementEncoderPicture, self).__init__(*args, **kwargs)
         self.kwargs = kwargs
 
-        self.conv_0= tf.keras.layers.Conv2D(64, (3, 3), activation='relu',
-                                   padding='same', strides=2,
-                                            name="Convolution_0_Encoder_Picture")
-        self.conv_1= tf.keras.layers.Conv2D(32, (3, 3), activation='relu',
-                                   padding='same', strides=2,
-                                            name="Convolution_1_Encoder_Picture"
-                                            )
+        self.conv_0 = tf.keras.layers.Conv2D(64, (3, 3), activation='relu',
+                                             padding='same', strides=2,
+                                             name="Convolution_0_Encoder_Picture")
+        self.conv_1 = tf.keras.layers.Conv2D(32, (3, 3), activation='relu',
+                                             padding='same', strides=2,
+                                             name="Convolution_1_Encoder_Picture"
+                                             )
         self.conv_2 = tf.keras.layers.Conv2D(16, (3, 3), activation='relu',
                                              padding='same', strides=1,
                                              name="Convolution_2_Encoder_Picture"
@@ -35,11 +35,11 @@ class MeasurementEncoderPicture(MeasurementEncoderDummy):
                                                   name='Dense_2_Encoder_Picture'
                                                   )
 
-
-
-
     def __call__(self, x, *args, **kwargs):
-        x_picture = table_to_picture(x, bins=14, histogram_range=[[-10., 10.], [-1., 1.]])
+        x_picture = table_to_picture(x, bins=14, histogram_range=[
+            [tf.reduce_min(x).numpy(), tf.reduce_max(x).numpy()+ 1e-6],
+            [-1., 1.]
+        ])
         after_conv_0 = self.conv_0(x_picture)
         after_conv_1 = self.conv_1(after_conv_0)
         after_conv_2 = self.conv_2(after_conv_1)
@@ -52,13 +52,9 @@ class MeasurementEncoderPicture(MeasurementEncoderDummy):
         out = X_flat_2 / norm
         return out
 
-
-
     def prepare_data(self, data):
-
         norm_frame = self.normalize(data_frame=data['data_frame'])
         tensor = tf.convert_to_tensor(norm_frame, dtype=tf.float32)
-
 
         # Dataset transformer expect each cell in table to be encoded.
         # we are not doing so we add an extra dimension at the end
@@ -66,28 +62,29 @@ class MeasurementEncoderPicture(MeasurementEncoderDummy):
         tensor = tf.expand_dims(tensor, axis=0)
         return tensor
 
+
 def table_to_picture(tensor, bins, histogram_range):
     batch_list = []
     for b in range(tensor.shape[0]):
         picture_list = []
-        for c in range(tensor.shape[-1] -1):
-            histogram = histogram2d(x=tensor[b,:,c],
-                                       y=tensor[b,:,-1],
-                                       nbins=bins,
-                                       value_range=histogram_range,
-                                       weights=None
-                                       )
-            picture_list.append(tf.where(histogram >=1, np.float32(1), np.float32(0)))
-        batch_list.append(tf.stack(picture_list, axis=-1, name='stack_plots' ))
-    picture_tensor =  tf.stack(batch_list, axis=0, name='stack_datasets' )
-    return  picture_tensor
+        for c in range(tensor.shape[-1] - 1):
+            histogram = histogram2d(x=tensor[b, :, c],
+                                    y=tensor[b, :, -1],
+                                    nbins=bins,
+                                    value_range=histogram_range,
+                                    weights=None
+                                    )
+            picture_list.append(tf.where(histogram >= 1, np.float32(1), np.float32(0)))
+        batch_list.append(tf.stack(picture_list, axis=-1, name='stack_plots'))
+    picture_tensor = tf.stack(batch_list, axis=0, name='stack_datasets')
+    return picture_tensor
 
 
 def histogram2d(x, y,
-              value_range,
-              nbins=100,
-              weights=None,
-              bin_dtype=tf.dtypes.float32):
+                value_range,
+                nbins=100,
+                weights=None,
+                bin_dtype=tf.dtypes.float32):
     """
     Bins x, y coordinates of points onto simple square 2d histogram
 

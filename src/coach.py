@@ -318,11 +318,6 @@ class Coach(ABC):
         minimal_reward_runs = 0
         for i in range(num_selfplay_iterations):
             mcts.clear_tree()
-            if self.checkpoint.step % 5 == 1:
-                logger.warning('________________________________________')
-                logger.warning(
-                    f"{i}: {self.args.num_selfplay_iterations},"
-                )
             result_episode = self.execute_one_game(
                 game=game,
                 mcts=mcts
