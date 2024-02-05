@@ -32,4 +32,6 @@ class LstmEncoder(MeasurementEncoderDummy):
         )
         if self.encoder_measurements_LSTM_return_sequence == True:
             output = tf.math.reduce_max(output, axis=-2)
-        return output
+        norm = tf.linalg.norm(output, ord='euclidean', name=None, keepdims=True, axis=-1)
+        out_norm = output / norm
+        return out_norm

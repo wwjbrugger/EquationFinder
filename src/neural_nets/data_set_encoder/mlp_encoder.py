@@ -32,4 +32,7 @@ class  MlpMeasurementEncoder(MeasurementEncoderDummy):
         output = x
         for layer in self.class_layers:
             output = layer(output, training= kwargs['training'])
-        return output
+        norm = tf.linalg.norm(output, ord='euclidean', name=None, keepdims=True, axis=-1)
+        out_norm = output / norm
+        return out_norm
+
