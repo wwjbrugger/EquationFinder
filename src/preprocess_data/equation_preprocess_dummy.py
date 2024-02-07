@@ -11,7 +11,9 @@ class EquationPreprocessDummy():
     def __init__(self, args, train_test_or_val):
         self.args = args
         self.train_test_or_val = train_test_or_val
-        self.type_list, self.column_names = self.infer_record_defaults(approach=self.args.tree_representation)
+        self.type_list, self.column_names = self.infer_record_defaults(
+            approach=self.args.tree_representation
+        )
 
         self.symbol_hash_dic = self.get_hash_values_for_symbols()
         self.symbol_lookup = self.cast_dic_to_lookup_table(self.symbol_hash_dic)

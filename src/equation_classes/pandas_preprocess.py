@@ -54,12 +54,13 @@ class PandasPreprocess(EquationPreprocessDummy):
         return iterator
 
     def preprocess(self, dataset):
+        raise ImportError('This mathod can not be deleted' )
         dataset = self.add_int_rep_of_tree(dataset)
         dataset = self.split_production_index(dataset)
         return dataset
 
     def __str__(self):
-        return'EquationStringRepresentationPreprocess'
+        return'DataFrameReader'
 
 
 class PandasIterator:
