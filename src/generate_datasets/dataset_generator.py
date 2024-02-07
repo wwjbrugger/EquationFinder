@@ -31,10 +31,10 @@ class DatasetGenerator():
         dic_measurements = {}
 
         while num_sampled_equations < self.args.number_equations:
-            new_equation = self.equation_generator.create_new_equation()
+            new_equation, action_sequence = self.equation_generator.create_new_equation()
             i = 0
             while not new_equation.complete:
-                new_equation = self.equation_generator.create_new_equation()
+                new_equation, action_sequence = self.equation_generator.create_new_equation()
                 i += 1
 
             try:
@@ -44,7 +44,8 @@ class DatasetGenerator():
 
                 dic_measurements[num_sampled_equations] = {
                     'formula': full_equation_string + s,
-                    'df': df
+                    'df': df,
+                    'action_sequence': action_sequence
                 }
                 num_sampled_equations += 1
             except OverflowError as e:

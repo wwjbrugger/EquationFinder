@@ -3,7 +3,8 @@ from argparse import ArgumentParser
 from pcfg import PCFG
 import random
 import numpy as np
-from src.generate_datasets.save_dataset import save_panda_dataframes
+from src.generate_datasets.save_dataset import save_panda_dataframes, save_supervise_buffer
+
 from src.generate_datasets.save_grammar_files import save_grammar_to_file
 from pathlib import Path
 from src.utils.parse_args import str2bool
@@ -51,7 +52,6 @@ if __name__ == '__main__':
                         help='Maximum number of constants allowed in  equation'
                              'afterwards equation will be invalid')
 
-
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -88,7 +88,6 @@ if __name__ == '__main__':
         Variable -> 'x_0' [0.5] | 'x_1' [0.5]
            """
 
-
     grammar = PCFG.fromstring(grammar_string)
     experiment_dataset_dic = {
         'num_calls_sampling': args.num_calls_sampling,
@@ -99,7 +98,7 @@ if __name__ == '__main__':
                 'high': 4,
                 'size': args.num_calls_sampling
             },
-            'min_variable_range' : 2,
+            'min_variable_range': 2,
             'generate_all_values_with_one_call': True,
             'sample_with_noise': args.sample_with_noise,
             'noise_std': 0.1
@@ -142,3 +141,19 @@ if __name__ == '__main__':
 
     split_dataset(path=Path(f'{ROOT_DIR}/data/{save_path.name}'))
     print(f"Datasets are saved to  {ROOT_DIR}/data/{save_path.name}")
+
+    args.data_path = f"data/{save_path.name}"
+    args.prior_source = 'None'
+    args.max_elements_in_list = 1
+    args.tree_representation = 'tree_structure'
+    args.max_len_datasets = 2
+    args.max_tokens_equation = 64
+    args.minimum_reward = -1
+    args.selfplay_buffer_window = 10000
+    path_to_save_buffer = f'{ROOT_DIR}/saved_models/{save_path.name}/AlphaZero/supervised_buffer'
+    save_supervise_buffer(
+        args=args,
+        path_to_save_buffer=Path(path_to_save_buffer),
+        dic_measurements=dic_measurements
+    )
+    print(f"supervised_buffer is saved to {path_to_save_buffer}")
