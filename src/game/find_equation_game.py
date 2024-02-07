@@ -75,6 +75,9 @@ class FindEquationGame(Game):
         )
         next_observation = deepcopy(state.observation)
         next_observation['current_tree_representation_str'] = equation
+        current_tree_representation_int = self.reader.map_tree_representation_to_int(
+            symbol_list=equation.split())
+        next_observation['current_tree_representation_int'] = current_tree_representation_int
         done = next_tree.complete or next_tree.max_depth_reached or \
             next_tree.max_constants_reached
 
@@ -86,7 +89,13 @@ class FindEquationGame(Game):
             next_observation['last_symbol'] = \
                 next_tree.dict_of_nodes[next_tree.nodes_to_expand[0]].node_symbol
 
-        next_state = GameState(syntax_tree=next_tree, observation=next_observation, done=done, production_action=action, previous_state=state)
+        next_state = GameState(
+            syntax_tree=next_tree,
+            observation=next_observation,
+            done=done,
+            production_action=action,
+            previous_state=state
+        )
 
         reward = self.reward(state=next_state)
         next_state.reward = round(reward, 2)

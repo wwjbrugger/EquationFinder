@@ -173,7 +173,6 @@ class Coach(ABC):
             next_state, r = game.getNextState(
                 state=state,
                 action=state.action,
-                encoder_measurement=self.rule_predictor.net.encoder_measurement
             )
             complete_state.syntax_tree.expand_node_with_action(
                 node_id=complete_state.syntax_tree.nodes_to_expand[0],
@@ -257,36 +256,36 @@ class Coach(ABC):
             self.logger.warning(f'------------------ITER'
                                 f' {int(self.checkpoint.step)}----------------')
             # Self-play/ Gather training data.
-            iteration_train_examples = self.gather_data(
-                metrics=self.metrics_train,
-                mcts=self.mcts,
-                game=self.game,
-                logger=self.logger,
-                num_selfplay_iterations=self.args.num_selfplay_iterations
-            )
-            self.trainExamplesHistory.append(iteration_train_examples)
-            wandb.log(
-                {f"average_reward_iteration_{self.metrics_train['mode']}":
-                     self.metrics_train['rewards_mean'].result()}
-            )
-            wandb.log(
-                {f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
-                     self.metrics_train['done_rollout_ratio'].result()}
-            )
-
-            if self.args.prior_source in 'neural_net':
-                self.saveTrainExamples(int(self.checkpoint.step))
-                if self.checkpoint.step > self.args.cold_start_iterations:
-                    self.update_network()
-                self.checkpoint.step.assign_add(1)
-                save_path = self.checkpoint_manager.save()
-                self.logger.debug(
-                    f"Saved checkpoint for epoch {int(self.checkpoint.step)}: {save_path}"
-                )
-            else:
-                self.saveTrainExamples(int(self.checkpoint.step))
-                self.checkpoint.step.assign_add(1)
-                save_path = self.checkpoint_manager.save()
+            if not self.args.only_test:
+                if self.args.run_mcts:
+                    iteration_train_examples = self.gather_data(
+                        metrics=self.metrics_train,
+                        mcts=self.mcts,
+                        game=self.game,
+                        logger=self.logger,
+                        num_selfplay_iterations=self.args.num_selfplay_iterations
+                    )
+                    self.trainExamplesHistory.append(iteration_train_examples)
+                    wandb.log(
+                        {f"average_reward_iteration_{self.metrics_train['mode']}":
+                             self.metrics_train['rewards_mean'].result()}
+                    )
+                    wandb.log(
+                        {f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
+                             self.metrics_train['done_rollout_ratio'].result()}
+                    )
+                    self.saveTrainExamples(int(self.checkpoint.step))
+                if self.args.prior_source in 'neural_net':
+                    if self.checkpoint.step > self.args.cold_start_iterations:
+                        self.update_network()
+                    self.checkpoint.step.assign_add(1)
+                    save_path = self.checkpoint_manager.save()
+                    self.logger.debug(
+                        f"Saved checkpoint for epoch {int(self.checkpoint.step)}: {save_path}"
+                    )
+                else:
+                    self.checkpoint.step.assign_add(1)
+                    save_path = self.checkpoint_manager.save()
             if self.args.test_network and \
                     self.checkpoint.step % self.args.test_every_n_steps == 1:
                 self.test_epoche(save_path=save_path)
@@ -306,10 +305,10 @@ class Coach(ABC):
                 self.rule_predictor.train(batch)
             train_pi_loss += pi_batch_loss
             train_v_loss += v_batch_loss
-        wandb.log({f"Train pi loss": pi_batch_loss})
-        wandb.log({f"Train v loss": v_batch_loss})
-        if self.args.contrastive_loss:
-            wandb.log({f"Contrastive loss": contrastive_loss})
+            wandb.log({f"Train pi loss": pi_batch_loss})
+            wandb.log({f"Train v loss": v_batch_loss})
+            if self.args.contrastive_loss:
+                wandb.log({f"Contrastive loss": contrastive_loss})
 
     def gather_data(self, metrics, mcts, game, logger, num_selfplay_iterations):
         iteration_train_examples = list()
@@ -421,14 +420,22 @@ class Coach(ABC):
         """
         Load in a previously generated replay buffer from the path specified in the .json arguments.
         """
-        folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                 'AlphaZero' / self.args.experiment_name / str(self.args.seed)
-        buffer_number = highest_number_in_files(path=folder, stem='buffer_')
-        filename = folder / f"buffer_{buffer_number}.examples"
-
-        if os.path.isfile(filename):
-            with open(filename, "rb") as f:
-                self.logger.info(f"Replay buffer {buffer_number}  found. Read it.")
-                self.trainExamplesHistory = Unpickler(f).load()
+        if len(self.args.replay_buffer_path) >= 1:
+            if os.path.isfile(self.args.replay_buffer_path):
+                with open(self.args.replay_buffer_path, "rb") as f:
+                    self.logger.info(f"Replay buffer {self.args.replay_buffer_path}  found. Read it.")
+                    self.trainExamplesHistory = Unpickler(f).load()
+            else:
+                self.logger.info(f"No replay buffer found. Use empty one.")
         else:
-            self.logger.info(f"No replay buffer found. Use empty one.")
+            folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
+                     'AlphaZero' / self.args.experiment_name / str(self.args.seed)
+            buffer_number = highest_number_in_files(path=folder, stem='buffer_')
+            filename = folder / f"buffer_{buffer_number}.examples"
+
+            if os.path.isfile(filename):
+                with open(filename, "rb") as f:
+                    self.logger.info(f"Replay buffer {buffer_number}  found. Read it.")
+                    self.trainExamplesHistory = Unpickler(f).load()
+            else:
+                self.logger.info(f"No replay buffer found. Use empty one.")

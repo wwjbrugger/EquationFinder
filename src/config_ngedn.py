@@ -12,6 +12,13 @@ class Config:
         parser = ArgumentParser(description="A MuZero and AlphaZero implementation in Tensorflow.")
 
         parser.add_argument("--experiment_name", type=str, default='delete_me')
+        parser.add_argument("--replay_buffer_path", type=str,
+                            default='', help= "Path to a replay_buffer which should be loaded")
+        parser.add_argument("--run_mcts", type=str2bool,
+                            default=True, help="If mcts should be run for training"
+                                               "If False only replay buffer is used.")
+        parser.add_argument("--only_test", type=str2bool,
+                            default=False, help="If only test mode should be run")
         parser.add_argument("--seed", type=int)
         parser.add_argument("--minutes_to_run", type=int)
         parser.add_argument("--logging_level", type=int, default=10,
