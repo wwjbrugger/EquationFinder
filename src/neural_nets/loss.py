@@ -66,22 +66,25 @@ class NT_Xent(tf.keras.layers.Layer):
         [1] T. Chen, S. Kornblith, M. Norouzi, and G. Hinton, “A simple framework for contrastive learning of visual representations,” arXiv. 2020, Accessed: Jan. 15, 2021. [Online]. Available: https://github.com/google-research/simclr.
         From https://github.com/gabriel-vanzandycke/tf_layers/blob/main/tf_layers/layers.py
           """
-    def __init__(self, tau=1, **kwargs):
+    def __init__(self, args, **kwargs):
+        self.args = args
         super().__init__(**kwargs)
-        self.tau = tau
         # closer to -1 indicate greater similarity, 0 indicates orthogonality, The values closer to 1 indicate greater dissimilarity
         self.similarity = tf.keras.losses.CosineSimilarity(axis=-1, reduction=tf.keras.losses.Reduction.NONE)
         #self.criterion = tf.keras.losses.MeanSquaredError()
         self.criterion = tf.keras.losses.BinaryCrossentropy(from_logits=False)
-        self.mask_for_same_dataset = np.zeros((32, 32), dtype=np.bool_)
-        for i in range(16):
+        self.mask_for_same_dataset = np.zeros(
+            shape=(self.args.batch_size_training*2, self.args.batch_size_training*2),
+            dtype=np.bool_
+        )
+        for i in range(self.args.batch_size_training):
             self.mask_for_same_dataset[2 * i, 2 * i + 1] = True
 
-        self.mask_contrast_dataset = np.triu(np.ones((32, 32), dtype=np.bool_), k=1)
+        self.mask_contrast_dataset = np.triu(np.ones(
+            shape=(self.args.batch_size_training*2, self.args.batch_size_training*2),
+            dtype=np.bool_), k=1)
         self.mask_contrast_dataset[self.mask_for_same_dataset] = False
 
-    def get_config(self):
-        return {"tau": self.tau}
 
     def __call__(self, zizj, target_dataset_encoding=None, tau=None):
         """ zizj is [B,N] tensor with order z_i1 z_j1 z_i2 z_j2 z_i3 z_j3 ...

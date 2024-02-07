@@ -38,7 +38,7 @@ class RulePredictorSkeleton(tf.keras.Model):
         self.steps = 0
         self.logger = get_log_obj(args=args, name='AlphaZeroRulePredictor')
         if self.args.contrastive_loss:
-            self.contrastive_loss = NT_Xent(tau=1)
+            self.contrastive_loss = NT_Xent(args=self.args)
 
     def train(self, examples: typing.List):
         """
