@@ -32,7 +32,7 @@ from src.utils.logging import get_log_obj
 from src.utils.files import highest_number_in_files
 from definitions import ROOT_DIR
 import random
-
+import timeit
 
 class Coach(ABC):
     """
@@ -155,7 +155,7 @@ class Coach(ABC):
         num_MCTS_sims = self.args.num_MCTS_sims
         self.logger.info(f"")
         self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
-
+        start = timeit.timeit()
         while not state.done:
             # Compute the move probability vector and state value using MCTS for the current state of the environment.
 
@@ -164,8 +164,6 @@ class Coach(ABC):
                 num_mcts_sims=int(num_MCTS_sims),
                 temperature=temp
             )
-            if mcts.states_explored_till_perfect_fit > -1:
-                num_MCTS_sims = 5
             # visualize_mcts(mcts)
 
             # Take a step in the environment and observe the transition and store necessary statistics.
@@ -189,6 +187,9 @@ class Coach(ABC):
             state = next_state
             num_MCTS_sims = max(1, int(num_MCTS_sims / 2))
 
+        end = timeit.timeit()
+
+
         # Cleanup environment and GameHistory
         if mcts.states_explored_till_perfect_fit > 0:
             wandb.log(
@@ -197,7 +198,8 @@ class Coach(ABC):
                         mcts.states_explored_till_perfect_fit,
                     f"{next_state.observation['true_equation_hash']}"
                     f"_num_states_to_perfect_fit_{mode}":
-                        mcts.states_explored_till_perfect_fit
+                        mcts.states_explored_till_perfect_fit,
+                    f"time to perfect fit {next_state.observation['true_equation_hash']}": end - start
                 }
             )
         else:
@@ -252,6 +254,7 @@ class Coach(ABC):
             'done_rollout_ratio': tf.keras.metrics.Mean(dtype=tf.float32)
         }
         self.loadTrainExamples(int(self.checkpoint.step))
+        save_path = self.checkpoint_manager.save()
         while time.time() < t_end:
             self.logger.warning(f'------------------ITER'
                                 f' {int(self.checkpoint.step)}----------------')
@@ -287,7 +290,7 @@ class Coach(ABC):
                     self.checkpoint.step.assign_add(1)
                     save_path = self.checkpoint_manager.save()
             if self.args.test_network and \
-                    self.checkpoint.step % self.args.test_every_n_steps == 1:
+                    self.checkpoint.step % self.args.test_every_n_steps == 0:
                 self.test_epoche(save_path=save_path)
 
     def update_network(self):

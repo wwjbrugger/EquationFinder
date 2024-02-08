@@ -69,12 +69,13 @@ class AmEx_MCTS(ClassicMCTS):
         mct_return_list = []
         not_completely_explored = np.any(self.not_completely_explored_moves_for_s[state.hash])
         for num_sim in range(num_mcts_sims):
-            if not_completely_explored:
+            if not_completely_explored and self.states_explored_till_perfect_fit < 0:
                 mct_return, not_completely_explored = self._search(
                     state=state
                 )
                 mct_return_list.append(mct_return)
             else:
+                mct_return_list = [1]
                 break
 
         if not_completely_explored:
@@ -281,7 +282,7 @@ class AmEx_MCTS(ClassicMCTS):
             self.not_completely_explored_moves_for_s[next_state_hash] = [False] * self.action_size
             self.not_completely_explored_moves_for_s[state_hash][a] = False
             self.times_s_was_visited[next_state_hash] += 1  # debug value
-            if reward >= 0.98:
+            if reward >= 0.999:
                 self.states_explored_till_perfect_fit = len(self.times_s_was_visited)
         return value
 

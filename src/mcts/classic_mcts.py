@@ -87,10 +87,13 @@ class ClassicMCTS:
         # Aggregate root state value over MCTS back-propagated values
         mct_return_list = []
         for num_sim in range(num_mcts_sims):
-            mct_return = self._search(
-                state=state
-            )
-            mct_return_list.append(mct_return)
+            if self.states_explored_till_perfect_fit < 0:
+                mct_return = self._search(
+                    state=state
+                )
+                mct_return_list.append(mct_return)
+            else:
+                break
 
         # MCTS Visit count array for each edge 'a' from root node 's_0'.
         move_probabilities = self.calculate_move_probabilities(
@@ -291,7 +294,7 @@ class ClassicMCTS:
                 value = (value_search + value) / 2
         else:
             # next state is done
-            if reward >= 0.98:
+            if reward >= 0.999:
                 self.states_explored_till_perfect_fit = len(self.times_s_was_visited)
         return value
 
