@@ -291,7 +291,7 @@ class ClassicMCTS:
                 value = (value_search + value) / 2
         else:
             # next state is done
-            if reward >= 0.98:
+            if reward >= 0.999:
                 self.states_explored_till_perfect_fit = len(self.times_s_was_visited)
         return value
 

@@ -164,9 +164,6 @@ class Coach(ABC):
                 num_mcts_sims=int(num_MCTS_sims),
                 temperature=temp
             )
-            if mcts.states_explored_till_perfect_fit > -1:
-                num_MCTS_sims = 5
-            # visualize_mcts(mcts)
 
             # Take a step in the environment and observe the transition and store necessary statistics.
             state.action = np.random.choice(len(pi), p=pi)
