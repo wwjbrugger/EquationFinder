@@ -2,13 +2,13 @@ from src.syntax_tree.syntax_tree import SyntaxTree
 from src.game.game import Game, GameState
 import typing
 import numpy as np
-from src.equation_classes.pandas_preprocess import PandasPreprocess
+from src.preprocess_data.pandas_preprocess import PandasPreprocess
 from copy import deepcopy
 from src.utils.logging import get_log_obj
 from src.constant_fitting.contant_fitting import refit_all_constants
 import hashlib
 import math
-from src.game.rewards import ReMSe, Mse
+from src.game.rewards import Mse
 from src.utils.error import NonFiniteError
 from src.equation_classes.max_list import MaxList
 import re
