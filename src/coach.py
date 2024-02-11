@@ -117,7 +117,7 @@ class Coach(ABC):
         examples = [
             {
                 'observation': histories[h_i].stackObservations(
-                    self.rule_predictor.args.observation_length, t=i),
+                    length=1, t=i),
                 'probabilities_actor': histories[h_i].probabilities[i],
                 'observed_return': histories[h_i].observed_returns[i],
                 'loss_scale': loss_scale,

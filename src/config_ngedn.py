@@ -15,7 +15,7 @@ class Config:
         parser.add_argument("--replay_buffer_path", type=str,
                             default='', help= "Path to a replay_buffer which should be loaded")
         parser.add_argument("--path_to_complete_model", type=str,
-                            default='', help="Path to a complete model")
+                            default='', help="Path to a complete model  which should be loaded")
         parser.add_argument("--run_mcts", type=str2bool,
                             default=True, help="If mcts should be run for training"
                                                "If False only replay buffer is used.")
@@ -45,8 +45,6 @@ class Config:
         parser.add_argument("--test_every_n_steps", type=int,
                             help="How many training epochs there should "
                                  "before network is tested")
-        parser.add_argument("--precision",
-                            help="", choices=['float32'])
 
         ### Infos about Tree
         parser.add_argument('--minimum_reward', type=np.float32)
@@ -60,9 +58,8 @@ class Config:
                                  'afterwards equation will be invalid')
         ### Training neural net
 
-        parser.add_argument("--batch_size_loading", type=int,
-                            help='How many equation examples to load')
-        parser.add_argument("--batch_size_training", type=int)
+        parser.add_argument("--batch_size_training", type=int,
+                            help='Batch size used for learning. Depends on available space on GPU or CPU')
         parser.add_argument("--num_gradient_steps", type=int,
                             help="(int) Number of weight updates to perform in the backpropagation step in one iteration")
         parser.add_argument("--average_policy_if_wrong", type=str2bool,
@@ -74,10 +71,8 @@ class Config:
         ## Preprocess
         parser.add_argument("--equation_preprocess_class", type=str,
                             choices=['EquationPreprocessDummy',
-                                     'EquationStringRepresentationPreprocess',
-                                     'EquationLSTMHashPathPreprocess',
                                      'PandasPreprocess'],
-                            help='Equations can be represent in multiple ways.'
+                            help='Datasets can be represent in multiple ways.'
                                  'EquationPreprocessDummy is a interface and if selected, the '
                                  'system will not use any information from the equation representation.'
                             )
@@ -87,15 +82,15 @@ class Config:
         )
 
         ## Encoder Equations
-        parser.add_argument("--class_equation_encoder", type=str,
+        parser.add_argument("--class_equation_encoder",
+                            type=str,
                             choices=['EquationEncoderDummy',
-                                     'Transformer_Encoder_String',
-                                     'LSTMHashPathEncoder'])
+                                     'Transformer_Encoder_String'],
+                            help='Equations are represented as syntax trees. '
+                                 'Select the class to embed them.')
 
         parser.add_argument("--embedding_dim_encoder_equation", type=int,
                             help='Symbols have to be mapped on a float vector how many dimensions to use')
-        parser.add_argument("--tree_representation", help='Which method to encode the tress',
-                            type=str, choices=["path_hash", "outer_tree", 'tree_structure'])
         parser.add_argument("--max_tokens_equation", type=int,
                             help='How many symbols should the tree representation have. '
                                  'everything above will be truncated, below will be pad')
@@ -112,9 +107,6 @@ class Config:
                             help='Number of units in Feed-forward-net in attention mechanism ')
         parser.add_argument("--dropout_rate", type=np.float32,
                             help='dropout rate of mlp in attention mechanism ')
-        ########## Encoder General
-        parser.add_argument("--observation_length", type=int,
-                            help="Number of observations in the history to be passed into the encoder")
         ########## Encoder Measurement
         parser.add_argument("--class_measurement_encoder", type=str,
                             choices=['MeasurementEncoderDummy',
@@ -122,18 +114,15 @@ class Config:
                                      'Bi_LSTM_Measurement_Encoder',
                                      'MLP_Measurement_Encoder',
                                      'DatasetTransformer',
-                                     'MeasurementEncoderSelf',
-                                     'MLP_Calculated_Features',
                                      'MeasurementEncoderPicture',
                                      'TextTransformer'
                                      ]
                             )
         parser.add_argument("--normalize_approach", type=str,
                             help="How to normalize values:"
-                                 "abs_max_y does the same as abs_max_value only for y values"
+                                 "abs_max_y normalize y values to the range -1 and 1"
                                  "lin_transform transforms x values to the range -1 and 1 "
-
-
+                                 "both option can be used together by writing both keywords."
                             )
         parser.add_argument("--contrastive_loss", type=str2bool,
                             help="If contrastive loss should be used" )
@@ -213,7 +202,7 @@ class Config:
                           type=str2bool,
                             help='(Disable) use of layer normalization after in-/out-embedding.')
 
-        parser.add_argument('--use_latent_vector_dataset_transformer_dataset_transformer',
+        parser.add_argument('--dataset_transformer_use_latent_vector',
                             type=str2bool,
                             help="If the output of the dataset transformer should have the shape of the "
                                  "dataset (for testing) or be an Tensor with the shape (batch, -1 ) "
@@ -252,9 +241,9 @@ class Config:
         ## MCTS
         parser.add_argument('--MCTS_engine', type=str,
                             choices=['Endgame', 'Normal'],
-                            help="Select which MCTS to use, endgame visits each leafnode once "
+                            help="Select which MCTS to use, endgame visits each leaf node once "
                             )
-        parser.add_argument('--max_elements_in_list', type=int,
+        parser.add_argument('--max_elements_in_best_list', type=int,
                             help='How many of the best results should be saved?')
 
         parser.add_argument('--prior_source', type=str,
@@ -274,18 +263,10 @@ class Config:
                             help="Temperature for noise on "
                                                 "actor prediction and MCTS "
                                                 "prediction")
-        parser.add_argument('--dirichlet_alpha', type=np.float32,
-                            help="(double) Alpha parameter of the dirichlet distribution "
-                                 "to sample noise from for exploration"
-                                 "alpha of 1 is a equal distribution. "
-                                 "As smaller alpha get as more weight to the extrema is given"
-                                 "As bigger alpha gets as more weight to the middle is given. ")
         parser.add_argument("--num_MCTS_sims", type=int,
                             help="(int) Number of planning moves for MCTS to simulate")
         parser.add_argument("--c1", type=np.float32,
                             help="(double) First exploration constant for MuZero in the PUCT formula")
-        parser.add_argument("--c2", type=np.float32,
-                            help="(double) Second exploration constant for MuZero in the PUCT formula")
         parser.add_argument("--gamma", type=np.float32,
                             help="(double: [0, 1]) MDP Discounting factor for future rewards")
         parser.add_argument('--n_steps',  type=np.float32,
@@ -304,8 +285,6 @@ class Config:
                             help="(double) Exponentiation factor for exponentiating the importance sampling ratio in prioritized replay")
         parser.add_argument('--selfplay_buffer_window', type=int,
                             help="(int) Maximum number of self play iterations kept in the deque.")
-        parser.add_argument('--max_buffer_size', type=int,
-                            help='Maximum number of iterations game examples to train the neural networks are kept in the buffer')
         parser.add_argument("--balance_buffer", type=str2bool,
                             help='Whether positive an negative samples in the buffer in the should be balanced  ')
         parser.add_argument("--max_percent_of_minimal_reward_runs_in_buffer", type=np.float32,

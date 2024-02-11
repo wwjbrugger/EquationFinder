@@ -213,7 +213,7 @@ class RulePredictorSkeleton(tf.keras.Model):
         tree_representation = \
             network_input['current_tree_representation_int']
         if self.args.use_position_encoding:
-            node_to_expand = tf.cast(network_input['id_last_node'], self.args.precision)
+            node_to_expand = tf.cast(network_input['id_last_node'], np.float32)
             node_to_expand = expand_tensor_to_same_size(
                 to_change=node_to_expand,
                 reference=tree_representation

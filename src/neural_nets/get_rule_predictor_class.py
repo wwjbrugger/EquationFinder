@@ -100,7 +100,7 @@ def get_rule_predictor(args, reader_data):
             'model_att_score_dropout_prob': args.model_att_score_dropout_prob_dataset_transformer,
             'model_mix_heads': args.model_mix_heads_dataset_transformer,
             'model_embedding_layer_norm': args.model_embedding_layer_norm_dataset_transformer,
-            'use_latent_vector': args.use_latent_vector_dataset_transformer_dataset_transformer,
+            'use_latent_vector': args.dataset_transformer_use_latent_vector,
             'bit_embedding': args.bit_embedding_dataset_transformer,
             'use_feature_index_embedding': args.use_feature_index_embedding_dataset_transformer,
             'max_len_datasets': args.max_len_datasets
@@ -110,14 +110,14 @@ def get_rule_predictor(args, reader_data):
         actor_decoder_class=actor_decoder_class,
         actor_decoder_args={
             'out_dim': reader_data.num_production_rules,
-            'batch_sz': args.batch_size_loading,
+            'batch_sz': 1,
             'normalize_way': args.actor_decoder_normalize_way,
             'name': 'actor'
         },
         critic_decoder_class=critic_decoder_class,
         critic_decoder_args={
             'out_dim': 1,
-            'batch_sz': args.batch_size_loading,
+            'batch_sz': 1,
             'normalize_way': args.critic_decoder_normalize_way,
             'name': 'critic'
         },
