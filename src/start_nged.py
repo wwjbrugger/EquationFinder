@@ -17,8 +17,7 @@ import numpy as np
 import wandb
 from definitions import ROOT_DIR
 from src.utils.get_grammar import read_grammar_file
-
-
+from src.utils.copy_weights import copy_dataset_encoder_weights_from_pretrained_agent
 def run():
     args = Config.arguments_parser()
     args.ROOT_DIR = ROOT_DIR
@@ -88,16 +87,14 @@ def learnA0(g, args, run_name: str, game_test) -> None:
         reader_train=game_test.reader
     )
     checkpoint_AlphaZero, manager_AlphaZero = load_pretrained_net(
-        checkpoint_path=ROOT_DIR / 'saved_models',
-        dataset_number=args.data_path.name,
-        experiment_name=f"{args.experiment_name}/{args.seed}",
-        net=rule_predictor_train.net
+        args = args,
+        rule_predictor=rule_predictor_train,
+        game = g
     )
     checkpoint_AlphaZero_test, _ = load_pretrained_net(
-        checkpoint_path=ROOT_DIR / 'saved_models_test',
-        dataset_number=args.data_path.name,
-        experiment_name=f"{args.experiment_name}/{args.seed}",
-        net=rule_predictor_test.net
+        args=args,
+        rule_predictor=rule_predictor_test,
+        game=g
     )
     if args.MCTS_engine == 'Endgame':
         search_engine = AmEx_MCTS
@@ -122,42 +119,44 @@ def learnA0(g, args, run_name: str, game_test) -> None:
     c.learn()
 
 
-def load_pretrained_net(checkpoint_path, dataset_number, experiment_name, net,
-                        optimizer=None, iterator=None):
-    checkpoint_path_AlphaZero = checkpoint_path / dataset_number / \
+def load_pretrained_net(args, rule_predictor, game):
+    dataset_number = args.data_path.name
+    experiment_name = f"{args.experiment_name}/{args.seed}"
+    net = rule_predictor.net
+    checkpoint_path_current_model = ROOT_DIR / 'saved_models' / dataset_number / \
                                 'AlphaZero' / experiment_name
+    print(f"Model will be saved at {checkpoint_path_current_model}")
 
-    checkpoint_AlphaZero = tf.train.Checkpoint(
+    checkpoint_current_model = tf.train.Checkpoint(
         step=tf.Variable(1),
         net=net
     )
     manager_AlphaZero = tf.train.CheckpointManager(
-        checkpoint=checkpoint_AlphaZero,
-        directory=str(checkpoint_path_AlphaZero / 'tf_ckpts'),
-        max_to_keep=3
-    )
-    checkpoint_path_NGSR = checkpoint_path / dataset_number / \
-                           'NGSR' / experiment_name
-    manager_NGSR = tf.train.CheckpointManager(
-        checkpoint=checkpoint_AlphaZero,
-        directory=str(checkpoint_path_NGSR / 'tf_ckpts'),
+        checkpoint=checkpoint_current_model,
+        directory=str(checkpoint_path_current_model / 'tf_ckpts'),
         max_to_keep=3
     )
 
-    if manager_AlphaZero.latest_checkpoint:
-        checkpoint_AlphaZero.restore(manager_AlphaZero.latest_checkpoint)
+    if len(args.path_to_complete_model) > 0:
+        checkpoint_current_model.restore(f"{ROOT_DIR / args.path_to_complete_model }")
+        print("Restored from {}".format(f"{ROOT_DIR / args.path_to_complete_model }"))
+
+    elif manager_AlphaZero.latest_checkpoint:
+        checkpoint_current_model.restore(manager_AlphaZero.latest_checkpoint)
         print("Restored from {}".format(manager_AlphaZero.latest_checkpoint))
-        pass
-
-    elif manager_NGSR.latest_checkpoint:
-        checkpoint_AlphaZero.restore(manager_NGSR.latest_checkpoint)
-        print("Restored from {}".format(manager_NGSR.latest_checkpoint))
-
     else:
-        checkpoint_AlphaZero.restore(manager_AlphaZero.latest_checkpoint)
+        checkpoint_current_model.restore(manager_AlphaZero.latest_checkpoint)
         print("Initializing from scratch.")
 
-    return checkpoint_AlphaZero, manager_AlphaZero
+
+
+    copy_dataset_encoder_weights_from_pretrained_agent(
+        args=args,
+        checkpoint_current_model=checkpoint_current_model,
+        game=game
+    )
+
+    return checkpoint_current_model, manager_AlphaZero
 
 
 def get_run_name(config_name: str, architecture: str, game_name: str) -> str:
