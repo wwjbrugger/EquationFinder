@@ -155,7 +155,7 @@ class Coach(ABC):
         num_MCTS_sims = self.args.num_MCTS_sims
         self.logger.info(f"")
         self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
-        start = timeit.timeit()
+        start = time.time()
         while not state.done:
             # Compute the move probability vector and state value using MCTS for the current state of the environment.
 
@@ -185,9 +185,7 @@ class Coach(ABC):
             )
             # Update state of control
             state = next_state
-            num_MCTS_sims = max(1, int(num_MCTS_sims / 2))
-
-        end = timeit.timeit()
+        end = time.time()
 
 
         # Cleanup environment and GameHistory
