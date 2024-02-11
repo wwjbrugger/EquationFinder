@@ -11,31 +11,8 @@ class EquationPreprocessDummy():
     def __init__(self, args, train_test_or_val):
         self.args = args
         self.train_test_or_val = train_test_or_val
-        self.type_list, self.column_names = self.infer_record_defaults(
-            approach=self.args.tree_representation
-        )
-
         self.symbol_hash_dic = self.get_hash_values_for_symbols()
         self.symbol_lookup = self.cast_dic_to_lookup_table(self.symbol_hash_dic)
-
-    def infer_record_defaults(self, approach='path_hash'):
-        """
-        Get the data type of the files which are read
-        :param approach:
-        :return:
-        """
-        info_frame = pd.read_csv(ROOT_DIR / self.args.data_path /
-                                 f'{self.train_test_or_val}/info_{approach}.csv')
-        dic = {"<class 'str'>": tf.string,
-               "<class 'int'>": tf.int32,
-               "<class 'float'>": tf.float32,
-               "<class 'list'>": tf.string
-               }
-        data_type_array = info_frame.iloc[0].to_numpy()
-        type_list = [dic[type_str] for type_str in data_type_array]
-
-        column_name = info_frame.iloc[1].to_numpy()
-        return type_list, column_name
 
     def get_hash_values_for_symbols(self):
         symbol_hash_dic = {}
@@ -60,7 +37,7 @@ class EquationPreprocessDummy():
     def get_datasets(self):
         self.num_production_rules = self.get_num_production_rules()
         file_pattern = tf.io.gfile.glob(f"{ROOT_DIR / self.args.data_path}/{self.train_test_or_val}/"
-                                        f"combined_data_set_{self.args.tree_representation}/*")
+                                        f"pandas")
 
         dataset = tf.data.experimental.make_csv_dataset(
             column_names=self.column_names,
@@ -71,7 +48,7 @@ class EquationPreprocessDummy():
         )
 
         preprocessed_dataset = self.preprocess(dataset)
-        iterator = iter(preprocessed_dataset.batch(self.args.batch_size_loading).prefetch(tf.data.experimental.AUTOTUNE))
+        iterator = iter(preprocessed_dataset.batch(1).prefetch(tf.data.experimental.AUTOTUNE))
         return iterator
 
     def get_num_production_rules(self):

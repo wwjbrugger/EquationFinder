@@ -31,14 +31,6 @@ class PandasPreprocess(EquationPreprocessDummy):
         num_variables = len([key for key in symbol_hash_dic.keys() if key.startswith('x_') and key[2:].isdigit()])
         return num_variables
 
-    def infer_record_defaults(self, approach=''):
-        """
-        Get the data type of the files which are read
-        :param approach:
-        :return:
-        """
-        # We get the column name when loading the pandas frame
-        return '', ''
 
 
     def get_datasets(self):
