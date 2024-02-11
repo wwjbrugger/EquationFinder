@@ -33,6 +33,7 @@ class AmEx_MCTS(ClassicMCTS):
         super().__init__(game=game, args=args, rule_predictor=rule_predictor)
         self.not_completely_explored_moves_for_s = {}
         self.states = {}
+        self.num_simulation_till_perfect_fit = -1
 
     def run_mcts(self, state: GameState, num_mcts_sims,
                  temperature: float) -> typing.Tuple[np.ndarray, float]:
@@ -76,6 +77,8 @@ class AmEx_MCTS(ClassicMCTS):
                 mct_return_list.append(mct_return)
             else:
                 mct_return_list = [1]
+                if self.num_simulation_till_perfect_fit < 0 and self.states_explored_till_perfect_fit > 0:
+                    self.num_simulation_till_perfect_fit = num_sim
                 break
 
         if not_completely_explored:
