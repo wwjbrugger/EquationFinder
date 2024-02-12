@@ -148,7 +148,7 @@ def load_pretrained_net(args, rule_predictor, game):
         checkpoint_current_model.restore(manager_AlphaZero.latest_checkpoint)
         print("Initializing from scratch.")
 
-
+    initialize_net(args, checkpoint_current_model, game)
 
     copy_dataset_encoder_weights_from_pretrained_agent(
         args=args,
@@ -157,6 +157,22 @@ def load_pretrained_net(args, rule_predictor, game):
     )
 
     return checkpoint_current_model, manager_AlphaZero
+
+
+def initialize_net(args, checkpoint_current_model, game):
+    iter = game.reader.get_datasets()
+    net = checkpoint_current_model.net
+    data_dict = next(iter)
+    prepared_syntax_tree = np.zeros(
+        shape=(1, args.max_tokens_equation),
+        dtype=np.float32)
+    prepared_dataset = net.encoder_measurement.prepare_data(
+        data=data_dict
+    )
+    net(
+        input_encoder_tree=prepared_syntax_tree,
+        input_encoder_measurement=prepared_dataset
+    )
 
 
 def get_run_name(config_name: str, architecture: str, game_name: str) -> str:

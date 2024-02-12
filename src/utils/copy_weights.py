@@ -10,20 +10,6 @@ def copy_dataset_encoder_weights_from_pretrained_agent(args, checkpoint_current_
             checkpoint_path_dataset_encoder
         )
         print(f"Copy weights of DatasetEncoder from {checkpoint_path_dataset_encoder}")
-        iter = game.reader.get_datasets()
-        net = checkpoint_current_model.net
-        data_dict = next(iter)
-        prepared_syntax_tree = np.zeros(
-                shape=(1, args.max_tokens_equation),
-                dtype=np.float32)
-        prepared_dataset = net.encoder_measurement.prepare_data(
-            data=data_dict
-        )
-
-        net(
-            input_encoder_tree=prepared_syntax_tree,
-            input_encoder_measurement=prepared_dataset
-        )
         selected_path = []
         for path in chkpoint_reader_dataset_encoder.get_variable_to_shape_map():
             if 'encoder_measurement' in path:
