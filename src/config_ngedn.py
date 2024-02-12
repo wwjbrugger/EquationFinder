@@ -222,7 +222,7 @@ class Config:
                              type=str)
 
         ######### Encoder Measurement TextTransformer
-        #todo add arguments
+        # TODO Daniel add arguments
 
 
         ## Actor Decoder

@@ -102,7 +102,7 @@ def get_rule_predictor(args, reader_data):
             'bit_embedding': args.bit_embedding_dataset_transformer,
             'use_feature_index_embedding': args.use_feature_index_embedding_dataset_transformer,
             'max_len_datasets': args.max_len_datasets
-            #ToDO Daniel add arguments you need
+            # TODO Daniel add arguments
 
         },
         actor_decoder_class=actor_decoder_class,
