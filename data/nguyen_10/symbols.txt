@@ -1,1 +1,1 @@
-SUM, 1, 2, x_1, 4, 3, log, cos, S, +, 5, *, x_0, sin, -, 0.5, Inner_Function, Variable, **, Exponent, 6,
+log, 5, Exponent, S, Variable, cos, Inner_Function, 0.5, 3, x_1, 6, sin, -, 4, 2, x_0, 1, **, *, +, SUM, 
