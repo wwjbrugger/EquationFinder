@@ -18,8 +18,7 @@ class Cosine(AbstractOperator):
         elif call_node_id == self.node.parent_node.node_id or call_node_id is None:
             return f""" cos {self.node.list_children[0].math_class.prefix_notation(
                 self.node.node_id, kwargs=kwargs
-            )
-            }"""
+            )}"""
         elif call_node_id == self.node.list_children[0].node_id:
             raise AssertionError('Cosine is not invertible.'
                                  ' This part should never be called'
@@ -31,11 +30,10 @@ class Cosine(AbstractOperator):
                 call_node_id=self.node.node_id, kwargs=kwargs
             )
         elif call_node_id == self.node.parent_node.node_id or call_node_id is None:
-            return f""" cos ( 
-            {self.node.list_children[0].math_class.infix_notation(
+            return f""" cos ({
+            self.node.list_children[0].math_class.infix_notation(
                 self.node.node_id, kwargs
-            )
-            } )"""
+            )} )"""
         elif call_node_id == self.node.list_children[0].node_id:
             raise AssertionError('Cosine is not invertible.'
                                  ' This part should never be called'
