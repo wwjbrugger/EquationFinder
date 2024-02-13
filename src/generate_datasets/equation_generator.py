@@ -32,7 +32,7 @@ class EquationGenerator():
         action_sequence =  []
         syntax_tree = SyntaxTree(grammar=self.grammar, args=self.args)
         while not ( syntax_tree.complete or  syntax_tree.max_depth_reached or
-        syntax_tree.max_constants_reached):
+        syntax_tree.max_constants_reached or syntax_tree.max_nodes_reached):
             node_id_to_expand = syntax_tree.nodes_to_expand[0]
             _ , production_index = self.sample_production_rule(
                 syntax_tree=syntax_tree,
