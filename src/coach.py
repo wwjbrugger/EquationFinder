@@ -199,8 +199,13 @@ class Coach(ABC):
                         mcts.states_explored_till_perfect_fit,
                     f"time to perfect fit {next_state.observation['true_equation_hash']}":
                         end - start,
+                    f"time to perfect fit":
+                        end - start,
                     f"num simulation to perfect fit {next_state.observation['true_equation_hash']}":
+                        mcts.num_simulation_till_perfect_fit,
+                    f"num simulation to perfect fit":
                         mcts.num_simulation_till_perfect_fit
+
                 }
             )
         else:
