@@ -4,7 +4,7 @@ from src.equation_classes.math_class.abstract_operator import AbstractOperator
 
 class Division(AbstractOperator):
     def __init__(self, node):
-        super.__init__(Division)
+        super().__init__(node)
         self.num_child = 2
         self.node = node
         self.neutral_element = 1
@@ -40,14 +40,12 @@ class Division(AbstractOperator):
 
         elif call_node_id == self.node.parent_node.node_id or call_node_id is None:
             return f"""( {self.node.list_children[0].math_class
-            .infix_notation(self.node.node_id, kwargs)} /
-                   {self.node.list_children[1].math_class
+            .infix_notation(self.node.node_id, kwargs)} / {self.node.list_children[1].math_class
             .infix_notation(self.node.node_id, kwargs)} ) """
 
         elif call_node_id == self.node.list_children[0].node_id:
             return f"""( {self.node.parent_node.math_class
-            .infix_notation(self.node.node_id, kwargs)} * 
-            {self.node.list_children[1].math_class
+            .infix_notation(self.node.node_id, kwargs)} * {self.node.list_children[1].math_class
             .infix_notation(self.node.node_id, kwargs)} ) """
 
         elif call_node_id == self.node.list_children[1].node_id:
