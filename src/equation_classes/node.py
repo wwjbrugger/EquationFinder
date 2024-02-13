@@ -21,6 +21,8 @@ class Node():
             self.tree.current_depth = self.depth
         if self.depth + 1 == self.tree.max_depth:
             self.tree.max_depth_reached = True
+        if len(self.tree.dict_of_nodes) > self.tree.max_nodes_allowed:
+            self.tree.max_nodes_reached = True
 
     def prefix_to_syntax_tree(self, prefix, recursive=True):
         self.node_symbol = prefix.pop(0)
