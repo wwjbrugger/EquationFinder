@@ -17,10 +17,10 @@ class Constants(AbstractOperator):
         if self.node.tree.num_constants_in_complete_tree > self.node.tree.args.max_constants_in_tree:
             self.node.tree.max_constants_reached = True
 
-    def prefix_notation(self, call_node_id):
+    def prefix_notation(self, call_node_id, kwargs):
         if call_node_id == self.node.node_id:
             return self.node.parent_node.math_class.prefix_notation(
-                call_node_id=self.node.node_id)
+                call_node_id=self.node.node_id, kwargs=kwargs)
         else:
             return 'c'
 
