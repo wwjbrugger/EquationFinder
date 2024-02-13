@@ -178,13 +178,11 @@ class ClassicMCTS:
                 examples=[{'observation': state.observation}])
         elif self.args.prior_source == 'grammar':
             prior = self.game.grammar.prior_dict[state.observation['last_symbol']]
-            value = self.rollout_equation(state)
+            value = 0
         elif self.args.prior_source == 'uniform':
             prior = self.game.grammar.prior_dict[state.observation['last_symbol']]
-            value = self.rollout_equation(state)
-        elif self.args.prior_source == 'rollout':
-            prior = self.game.grammar.prior_dict[state.observation['last_symbol']]
-            value = self.rollout_equation(state)
+            value = 0
+
         else:
             raise NotImplementedError(f"The prior for self.args.prior_source"
                                       f"={self.args.prior_source} is not"
@@ -282,7 +280,6 @@ class ClassicMCTS:
             self.valid_moves_for_s[next_state_hash] = self.game.getLegalMoves(
                 state=next_state
             )
-            # todo maybe delete depth_first
             if self.args.depth_first_search:
                 value_search = self._search(
                     state=next_state,
@@ -366,31 +363,4 @@ class ClassicMCTS:
 
         return q_value + exploration
     
-    def rollout_gym(self, state):
-        env = copy.deepcopy(state.env)
-        done = state.done
-        ret = 0.0
-        gamma = 1.0
 
-        while not done:
-            _, r, term, trunc, __ = env.step(env.action_space.sample())
-            done = (term or trunc)
-            ret += gamma * r
-            gamma *= self.args.gamma
-        return ret
-
-    def rollout_equation(self, state):
-        ret = 0.0
-        gamma = 1.0
-        while not state.done:
-            possible_actions = state.syntax_tree.get_possible_moves(
-                node_id=state.syntax_tree.nodes_to_expand[0]
-            )
-            random_action = random.choice(possible_actions)
-            state, r = self.game.getNextState(
-                state=state,
-                action=random_action
-            )
-            ret += gamma * r
-            gamma *= self.args.gamma
-        return ret
