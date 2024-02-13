@@ -93,7 +93,7 @@ class ClassicMCTS:
                     state=state
                 )
                 mct_return_list.append(mct_return)
-                if num_sim % 1000 == 0:
+                if num_sim % 1000 == 0 and len(self.game.max_list.max_list_state)>0:
                     print(f"number simulation: {num_sim:<8} "
                           f"current best equation: {self.game.max_list.max_list_state[-1].complete_discovered_equation:<80}"
                           f"  r:{self.game.max_list.max_list_state[-1].reward}")
