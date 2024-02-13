@@ -241,8 +241,10 @@ class DatasetGenerator():
         save_folder.mkdir(exist_ok=True, parents=True)
         all_symbols_from_grammar = self.get_all_symbols_usable()
         all_symbols = all_symbols_from_grammar.union(set(additional_symbols))
+        all_symbols = [str(symbol) for symbol in all_symbols]
+        all_symbols.sort()
         with open(save_folder / 'symbols.txt', "a") as file:
-            file.writelines(str(symbol) + ', ' for symbol in list(all_symbols))
+            file.writelines(str(symbol) + ', ' for symbol in all_symbols)
 
     def get_all_symbols_usable(self):
         terminal_symbols = set(self.grammar._lexical_index.keys())
