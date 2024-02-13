@@ -51,6 +51,8 @@ class Config:
         parser.add_argument('--maximum_reward', type=np.float32)
         parser.add_argument('--max_depth_of_tree', type=int,
                             help='Maximum depth of generated equations')
+        parser.add_argument('--max_num_nodes_in_syntax_tree', type=int,
+                            help='Maximum depth of generated equations', default=30)
         parser.add_argument('--max_branching_factor', type=np.float32,
                             help='Estimate how many children a node will have at average')
         parser.add_argument('--max_constants_in_tree', type=int,

@@ -21,10 +21,12 @@ if __name__ == '__main__':
                         help="how many trees to generate", required=False,
                         type=int)
     parser.add_argument("--seed", default=42,
-                        help="paths per tree", required=False, type=int)
+                        help="seed to generate trees", required=False, type=int)
     parser.add_argument("--max_depth_of_tree", default=6,
                         help="how many recursions a formula is allowed to have"
                         , required=False, type=int)
+    parser.add_argument('--max_num_nodes_in_syntax_tree', type=int,
+                        help='Maximum depth of generated equations', default=20)
     parser.add_argument("--num_calls_sampling", default=50,
                         help="How often the sampling procedure is called per example",
                         required=False, type=int)
@@ -139,17 +141,17 @@ if __name__ == '__main__':
         args=args
     )
 
-    split_dataset(path=Path(f'{ROOT_DIR}/data/{save_path.name}'))
-    print(f"Datasets are saved to  {ROOT_DIR}/data/{save_path.name}")
+    split_dataset(path=Path(f'{ROOT_DIR}/{save_path.parent.name}/{save_path.name}'))
+    print(f"Datasets are saved to  {ROOT_DIR}/{save_path.parent.name}/{save_path.name}")
 
-    args.data_path = f"data/{save_path.name}"
+    args.data_path = f"{save_path.parent.name}/{save_path.name}"
     args.prior_source = 'None'
     args.max_elements_in_best_list = 1
     args.max_len_datasets = 2
     args.max_tokens_equation = 64
     args.minimum_reward = -1
     args.selfplay_buffer_window = 10000
-    path_to_save_buffer = f'{ROOT_DIR}/saved_models/{save_path.name}/AlphaZero/supervised_buffer'
+    path_to_save_buffer = f'{ROOT_DIR}/saved_models/{save_path.parent.name}/{save_path.name}/AlphaZero/supervised_buffer'
     save_supervise_buffer(
         args=args,
         path_to_save_buffer=Path(path_to_save_buffer),

@@ -79,7 +79,7 @@ class FindEquationGame(Game):
             symbol_list=equation.split())
         next_observation['current_tree_representation_int'] = current_tree_representation_int
         done = next_tree.complete or next_tree.max_depth_reached or \
-            next_tree.max_constants_reached
+            next_tree.max_constants_reached or next_tree.max_nodes_reached
 
         if done:
             next_observation['id_last_node'] = []
@@ -108,8 +108,11 @@ class FindEquationGame(Game):
         if syntax_tree.max_depth_reached:
             self.logger.debug('done max depth')
             r = self.args.minimum_reward
-        if syntax_tree.max_constants_reached:
+        elif syntax_tree.max_constants_reached:
             self.logger.debug('done max constant')
+            r = self.args.minimum_reward
+        elif syntax_tree.max_nodes_reached:
+            self.logger.debug('done max number nodes')
             r = self.args.minimum_reward
         elif syntax_tree.complete:
             try:

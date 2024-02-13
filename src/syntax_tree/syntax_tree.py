@@ -58,6 +58,8 @@ class SyntaxTree():
         self.complete = False
         self.max_depth_reached = False
         self.max_constants_reached = False
+        self.max_nodes_reached = False
+        self.max_nodes_allowed = self.args.max_num_nodes_in_syntax_tree
         self.non_terminals = []
         self.max_branching_factor = args.max_branching_factor
         self.add_start_node()
