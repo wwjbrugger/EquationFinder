@@ -98,8 +98,8 @@ class FindEquationGame(Game):
         )
 
         reward = self.reward(state=next_state)
-        next_state.reward = round(reward, 2)
-        return next_state, round(reward, 2)
+        next_state.reward = reward
+        return next_state, reward
 
     def reward(self, state):
         dataset = state.observation['data_frame']
