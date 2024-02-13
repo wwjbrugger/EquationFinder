@@ -128,7 +128,7 @@ class RulePredictorSkeleton(tf.keras.Model):
                 real=target_vs,
                 pred=v
             )
-        if self.args.path_to_pretrained_dataset_encoder:
+        if self.args.path_to_pretrained_dataset_encoder is None:
             variables_encoder_measurements = [resourceVariable for resourceVariable in
                                               self.net.encoder_measurement.trainable_variables]
             if self.args.contrastive_loss:
