@@ -60,33 +60,26 @@ if __name__ == '__main__':
     np.random.seed(args.seed)
     grammar_string = \
         """  
-        S -> '+' S S [0.6]
-        S -> '-' S S [0.05]
-        S -> '*' S S [0.05]
+        S -> '+' S S [0.15]
+        S -> '-' S S [0.1]
+        S -> '*' S S [0.15]
+        S -> '/' S S [0.1]
+        S -> 'c'     [0.1]
+        S -> 'x_0'   [0.1]
+        S -> 'x_1'   [0.1]
+        S -> '**' 2 'x_0'      [0.05]
+        S -> '**' 2 'x_1'      [0.05]
+        S -> '**' S S     [0.025]
+        S -> 'sin' I      [0.025] 
+        S -> 'cos' I      [0.025]
+        S -> 'log' I      [0.025]
         
-        S -> '**' '6' 'x_0'[0.03]
-        S -> '**' '5' 'x_0'[0.02]
-        S -> '**' '4' 'x_0'[0.05]
-        S -> '**' '3' 'x_0'[0.05]
-        S -> '**' '2' 'x_0'[0.05]
-        S -> 'x_0'      [0.06]
-        S -> '1'        [0.01]
-        S -> '**' 'x_1' 'x_0'[0.01]
-        
-        S -> 'sin' Inner_Function [0.005] 
-        S -> 'cos' Inner_Function [0.005] 
-        S -> 'log' Inner_Function [0.005]  
-        S -> 'exp' Inner_Function [0.005] 
-        
-        Inner_Function -> '+' I I [0.3]
-        Inner_Function -> '*' I I [0.3]
-        Inner_Function ->  I    [0.4]
-        
-        I -> '**' '2' 'x_0'     [0.2]
-        I -> 'x_0'          [0.2]
-        I -> '1'            [0.2]
-        I -> '**' '2' 'x_1'     [0.2]
-        I -> 'x_1'          [0.2]
+        I -> '+' I I [0.1]
+        I -> '*' I I [0.1]
+        I -> '/' I I [0.05]
+        I ->  'x_0'      [0.25]
+        I ->  'x_1'      [0.25]
+        I ->  'c'      [0.25]
         Variable -> 'x_0'[0.5] | 'x_1' [0.5]
            """
 
@@ -116,6 +109,13 @@ if __name__ == '__main__':
             'generate_all_values_with_one_call': True,
             'sample_with_noise': args.sample_with_noise,
             'noise_std': 0.1
+        },
+        'c': {
+            'distribution': np.random.uniform,
+            'distribution_args': {
+                'low': 0.5,
+                'high': 5,
+            }
         }
     }
     save_folder = ROOT_DIR / Path(args.save_folder)
