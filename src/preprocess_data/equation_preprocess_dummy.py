@@ -18,9 +18,11 @@ class EquationPreprocessDummy():
         symbol_hash_dic = {}
         with open(ROOT_DIR / self.args.data_path / 'symbols.txt') as f:
             content = f.read().splitlines()
-            symbols = content[0].split(sep=', ')
+            symbols = content[0].split(sep=',')
+            symbols = [symbol.strip() for symbol in symbols]
+            symbols = [symbol for symbol in symbols if len(symbol)>0]
             for i, symbol in enumerate(symbols):
-                symbol_hash_dic[symbol] = np.float32(i + 1)
+                symbol_hash_dic[symbol.strip()] = np.float32(i + 1)
         self.vocab_size = len(symbols) + 1
 
         return symbol_hash_dic
