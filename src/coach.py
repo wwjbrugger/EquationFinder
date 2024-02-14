@@ -320,7 +320,7 @@ class Coach(ABC):
                 wandb.log({f"Contrastive loss": contrastive_loss})
 
     def gather_data(self, metrics, mcts, game, logger, num_selfplay_iterations):
-        iteration_train_examples = list()
+        iteration_examples = list()
         metrics['rewards_mean'].reset_state()
         metrics['done_rollout_ratio'].reset_state()
         minimal_reward_runs = 0
@@ -332,7 +332,7 @@ class Coach(ABC):
             )
             if result_episode.observed_returns[0] == self.args.minimum_reward:
                 minimal_reward_runs += 1
-            iteration_train_examples.append(result_episode)
+            iteration_examples.append(result_episode)
             self.log_best_list(game, logger)
 
             metrics['rewards_mean'].update_state(
@@ -342,13 +342,13 @@ class Coach(ABC):
                 mcts.visits_done_state / mcts.visits_roll_out
             )
 
-        iteration_train_examples = self.augment_buffer(
-            iteration_train_examples,
+        iteration_examples = self.augment_buffer(
+            iteration_examples,
             metrics,
             minimal_reward_runs,
             num_selfplay_iterations
         )
-        return iteration_train_examples
+        return iteration_examples
 
     def log_best_list(self, game, logger):
         logger.info(f"Best equations found:")
@@ -358,32 +358,32 @@ class Coach(ABC):
                         )
             logger.info(game.max_list.max_list_state[i].syntax_tree.constants_in_tree)
 
-    def augment_buffer(self, iteration_train_examples, metrics, minimal_reward_runs, num_selfplay_iterations):
+    def augment_buffer(self, iteration_examples, metrics, minimal_reward_runs, num_selfplay_iterations):
         if metrics['mode'] == 'train':
             if self.args.balance_buffer:
-                iteration_train_examples = self.balance_buffer(
-                    iteration_train_examples=iteration_train_examples,
+                iteration_examples = self.balance_buffer(
+                    iteration_examples=iteration_examples,
                     minimal_reward_runs=minimal_reward_runs,
                     num_selfplay_iterations=num_selfplay_iterations
                 )
-        return iteration_train_examples
+        return iteration_examples
 
-    def balance_buffer(self, iteration_train_examples, minimal_reward_runs, num_selfplay_iterations):
+    def balance_buffer(self, iteration_examples, minimal_reward_runs, num_selfplay_iterations):
         allowed_minimal_runs = int(num_selfplay_iterations * self.args.max_percent_of_minimal_reward_runs_in_buffer)
         if allowed_minimal_runs < minimal_reward_runs:
-            balanced_iteration_train_examples = []
+            balanced_iteration_examples = []
             allowed_minimal_runs_to_add = allowed_minimal_runs
-            for example in iteration_train_examples:
+            for example in iteration_examples:
                 if example.observed_returns[0] > self.args.minimum_reward:
-                    balanced_iteration_train_examples.append(example)
+                    balanced_iteration_examples.append(example)
                 elif allowed_minimal_runs_to_add > 0:
-                    balanced_iteration_train_examples.append(example)
+                    balanced_iteration_examples.append(example)
                     allowed_minimal_runs_to_add -= 1
                 else:
                     pass
-            return balanced_iteration_train_examples
+            return balanced_iteration_examples
         else:
-            return iteration_train_examples
+            return iteration_examples
 
     def test_epoche(self, save_path):
         self.logger.warning(f'------------------ Test ----------------')
