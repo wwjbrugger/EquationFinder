@@ -182,6 +182,10 @@ class RulePredictorSkeleton(tf.keras.Model):
         self.net.training = False
         measurement_representation, target_pis, target_vs, tree_representation = \
             self.prepare_batch_for_NN(examples)
+        eq_float = tf.convert_to_tensor([example['observation']['true_equation_hash'] for example in examples])
+        expanded_floats = tf.expand_dims(eq_float, axis=1)
+        equality_matrix = tf.equal(eq_float, expanded_floats).numpy()
+        target_dataset_encoding = tf.repeat(tf.repeat(equality_matrix, 2, axis=0), 2, axis=1).numpy()
 
         action_prediction, v, encoding_measurement, input_encoder_contrastive = self.net(
             input_encoder_tree=tree_representation,
@@ -197,7 +201,10 @@ class RulePredictorSkeleton(tf.keras.Model):
                 pred=v
             )
             if self.args.contrastive_loss:
-                loss_measurement_encoder = self.contrastive_loss(zizj=encoding_measurement)
+                loss_measurement_encoder = self.contrastive_loss(
+                    zizj=encoding_measurement,
+                    target_dataset_encoding=target_dataset_encoding
+                )
             else:
                 loss_measurement_encoder = None
         else:
