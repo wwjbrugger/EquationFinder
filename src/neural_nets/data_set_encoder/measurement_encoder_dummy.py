@@ -16,8 +16,9 @@ class MeasurementEncoderDummy(tf.keras.Model):
         self.norm_lin_transform = "lin_transform" in kwargs['normalize_approach']
 
     def prepare_data(self, data):
-        batch_size = tf.shape(data['formula']).numpy()[0]
-        return tf.zeros([batch_size, 0])
+        batch_size = tf.shape(data['data_frame']).numpy()
+        output_size = [1] + list(batch_size)
+        return tf.zeros(output_size)
 
     def normalize(self, data_frame):
         data_frame = data_frame.sample(
