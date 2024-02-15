@@ -286,7 +286,7 @@ class Coach(ABC):
                     self.checkpoint.step.assign_add(1)
                     save_path = self.checkpoint_manager.save()
             if self.args.test_network and \
-                    self.checkpoint.step % self.args.test_every_n_steps == 1:
+                    self.checkpoint.step % self.args.test_every_n_steps == 0:
                 self.test_epoche(save_path=save_path)
 
     def update_network(self):
