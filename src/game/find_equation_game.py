@@ -155,6 +155,8 @@ class FindEquationGame(Game):
                 r = float(self.args.minimum_reward)
             except NonFiniteError as e:
                 r = float(self.args.minimum_reward)
+        if r < 0.999:
+            r = 0
         return r
 
     def getHash(self, state):
