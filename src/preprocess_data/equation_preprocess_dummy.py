@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 from definitions import ROOT_DIR
 import numpy as np
+from src.utils.get_grammar import read_grammar_file
 class EquationPreprocessDummy():
     """
     Class to read data dynamically to transformer model
@@ -54,10 +55,8 @@ class EquationPreprocessDummy():
         return iterator
 
     def get_num_production_rules(self):
-        with open(ROOT_DIR / self.args.data_path / 'production_rules.txt') as f:
-            content = f.read().splitlines()
-        num_production_rules = len(content)
-        return num_production_rules
+        grammar = read_grammar_file(self.args)
+        return len(grammar._productions)
 
     def preprocess(self, dataset):
         RuntimeWarning('This method should be overwritten by a child class.'
