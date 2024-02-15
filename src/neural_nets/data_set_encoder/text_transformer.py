@@ -31,7 +31,10 @@ class TextTransformer(MeasurementEncoderDummy):
 
     def __init__(self, *args, **kwargs):
         super(TextTransformer, self).__init__(*args, **kwargs)
-        # get your arguments from kwargs 
+        # get your arguments from kwargs
+
+        kwargs = default_kwargs  # only needed during development
+
         self.num_blocks_text_transformer = kwargs['num_blocks_text_transformer']
         self.model = self.build_model(args, kwargs)
 
@@ -50,53 +53,20 @@ class TextTransformer(MeasurementEncoderDummy):
             ["E" + str(i) for i in range(-self.max_exponent, self.max_exponent + 1)]
         )
 
-    def call(self, x, *args, **kwargs):
-        # TODO add call
-        X_flat_2 = x
-        norm = tf.linalg.norm(X_flat_2, ord='euclidean', name=None, keepdims=True, axis=-1)
-        out = X_flat_2 / norm
+        # Define the model layers
+        max_dimensions = kwargs['max_dimensions']  # or max_variables
+        embedding_dim = kwargs['embedding_dim']
+        units = kwargs['units']
 
-        inputs = out
-        indices = self.lookup(inputs)
-        embeddings = self.embedding(indices)
-        x1 = self.dense1(embeddings)
-        x2 = self.dense2(x1)
-        output = self.encoder(x2)
+        self.lookup = tf.keras.layers.StringLookup(num_oov_indices=0, vocabulary=self.vocab)
 
-        return output
+        input_length = (self.mantissa_len + 2) * max_dimensions
+        self.embedding = tf.keras.layers.Embedding(len(self.vocab), embedding_dim, mask_zero=False,
+                                                   input_length=input_length)  # do we need to use mask_zero=True?
 
-    def build_model(self, *args, **kwargs):
-        input_dim = 32
-        output_dim = 32
-        units = 32
+        return  # TODO continue from here
 
-        self.lookup = tf.keras.layers.StringLookup(
-            max_tokens=None,
-            num_oov_indices=1,
-            mask_token=None,
-            oov_token='[UNK]',
-            vocabulary=None,
-            idf_weights=None,
-            encoding=None,
-            invert=False,
-            output_mode='int',
-            sparse=False,
-            pad_to_max_tokens=False,
-            **kwargs
-        )
-
-        self.embedding = tf.keras.layers.Embedding(
-            input_dim,
-            output_dim,
-            embeddings_initializer='uniform',
-            embeddings_regularizer=None,
-            activity_regularizer=None,
-            embeddings_constraint=None,
-            mask_zero=False,
-            input_length=None,
-            **kwargs
-        )
-
+        # element-wise!
         self.dense_1 = tf.keras.layers.Dense(
             units,
             activation=None,
@@ -139,6 +109,32 @@ class TextTransformer(MeasurementEncoderDummy):
             **kwargs
         )
 
+    def prepare_data(self, data: dict) -> tf.Tensor:
+        # convert data to a tensor
+        tensor = tf.convert_to_tensor(data['data_frame'], dtype=tf.float32)
+        # add batch dimension
+        tensor = tf.expand_dims(tensor, axis=0)
+        return tensor
+
+    def call(self, x: tf.Tensor, *args, **kwargs) -> tf.Tensor:
+        tokens = self.encode(x)
+        indices = self.lookup(tokens)
+
+        return indices  # TODO continue from here
+
+        inputs = x
+        indices = self.lookup(inputs)
+        embeddings = self.embedding(indices)
+        x1 = self.dense1(embeddings)
+        x2 = self.dense2(x1)
+        output = self.encoder(x2)
+
+        norm = tf.linalg.norm(output, ord='euclidean', name=None, keepdims=True, axis=-1)
+        y = output / norm
+
+        return y
+
+    def build_model(self, *args, **kwargs):
         model = 'Your architecture'
         return model
 
