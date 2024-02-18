@@ -11,10 +11,11 @@ default_kwargs = {
     'float_precision': 3,  # num decimal places
     'mantissa_len': 1,  # num blocks
     'max_exponent': 100,
-    'units': 32,
-    'vocab_file': "data/text_transformer_vocab.txt",
     'max_dimensions': 3,
     'embedding_dim': 512,
+    'num_encoder_layers': 4,
+    'num_attention_heads': 8,
+    'intermediate_size': 2048,
 }
 
 
@@ -31,83 +32,45 @@ class TextTransformer(MeasurementEncoderDummy):
 
     def __init__(self, *args, **kwargs):
         super(TextTransformer, self).__init__(*args, **kwargs)
-        # get your arguments from kwargs
 
-        kwargs = default_kwargs  # only needed during development
+        # Get your arguments from kwargs
+
+        kwargs = default_kwargs | kwargs  # only needed during development TODO remove
 
         self.num_blocks_text_transformer = kwargs['num_blocks_text_transformer']
-        self.model = self.build_model(args, kwargs)
+        self.max_dimensions = kwargs['max_dimensions']  # or max_variables
+        self.embedding_dim = kwargs['embedding_dim']
+        self.num_encoder_layers = kwargs['num_encoder_layers']
+        self.num_attention_heads = kwargs['num_attention_heads']
+        self.intermediate_size = kwargs['intermediate_size']
 
         # Create the vocabulary
         # Adapted from https://github.com/facebookresearch/symbolicregression/blob/main/symbolicregression/envs/encoders.py
+
         self.float_precision = kwargs['float_precision']
         self.mantissa_len = kwargs['mantissa_len']
         self.max_exponent = kwargs['max_exponent']
         self.base = (self.float_precision + 1) // self.mantissa_len
         self.max_token = 10 ** self.base
         self.vocab = ["+", "-"]
-        self.vocab.extend(
-            ["N" + f"%0{self.base}d" % i for i in range(self.max_token)]
-        )
-        self.vocab.extend(
-            ["E" + str(i) for i in range(-self.max_exponent, self.max_exponent + 1)]
-        )
+        self.vocab.extend(["N" + f"%0{self.base}d" % i for i in range(self.max_token)])
+        self.vocab.extend(["E" + str(i) for i in range(-self.max_exponent, self.max_exponent + 1)])
 
         # Define the model layers
-        max_dimensions = kwargs['max_dimensions']  # or max_variables
-        embedding_dim = kwargs['embedding_dim']
-        units = kwargs['units']
 
         self.lookup = tf.keras.layers.StringLookup(num_oov_indices=0, vocabulary=self.vocab)
 
-        input_length = (self.mantissa_len + 2) * max_dimensions
-        self.embedding = tf.keras.layers.Embedding(len(self.vocab), embedding_dim, mask_zero=False,
+        input_length = (self.mantissa_len + 2) * self.max_dimensions
+        self.embedding = tf.keras.layers.Embedding(len(self.vocab), self.embedding_dim, mask_zero=False,
                                                    input_length=input_length)  # do we need to use mask_zero=True?
 
-        return  # TODO continue from here
-
         # element-wise!
-        self.dense_1 = tf.keras.layers.Dense(
-            units,
-            activation=None,
-            use_bias=True,
-            kernel_initializer='glorot_uniform',
-            bias_initializer='zeros',
-            kernel_regularizer=None,
-            bias_regularizer=None,
-            activity_regularizer=None,
-            kernel_constraint=None,
-            bias_constraint=None,
-            **kwargs
-        )
+        self.dense_1 = tf.keras.layers.Dense(input_length, activation='relu')
+        self.dense_2 = tf.keras.layers.Dense(self.embedding_dim, activation='relu')
 
-        self.dense_2 = tf.keras.layers.Dense(
-            units,
-            activation=None,
-            use_bias=True,
-            kernel_initializer='glorot_uniform',
-            bias_initializer='zeros',
-            kernel_regularizer=None,
-            bias_regularizer=None,
-            activity_regularizer=None,
-            kernel_constraint=None,
-            bias_constraint=None,
-            **kwargs
-        )
-
-        self.encoder = tfm.nlp.models.TransformerEncoder(
-            num_layers=6,
-            num_attention_heads=8,
-            intermediate_size=2048,
-            activation='relu',
-            dropout_rate=0.0,
-            attention_dropout_rate=0.0,
-            use_bias=False,
-            norm_first=True,
-            norm_epsilon=1e-06,
-            intermediate_dropout=0.0,
-            **kwargs
-        )
+        self.encoder = tfm.nlp.models.TransformerEncoder(num_layers=self.num_encoder_layers,
+                                                         num_attention_heads=self.num_attention_heads,
+                                                         intermediate_size=self.intermediate_size)  # should we use bias and/or dropout?
 
     def prepare_data(self, data: dict) -> tf.Tensor:
         # convert data to a tensor
@@ -118,25 +81,16 @@ class TextTransformer(MeasurementEncoderDummy):
 
     def call(self, x: tf.Tensor, *args, **kwargs) -> tf.Tensor:
         tokens = self.encode(x)
-        indices = self.lookup(tokens)
-
-        return indices  # TODO continue from here
-
-        inputs = x
-        indices = self.lookup(inputs)
+        indices: tf.Tensor = self.lookup(tokens)
         embeddings = self.embedding(indices)
-        x1 = self.dense1(embeddings)
-        x2 = self.dense2(x1)
-        output = self.encoder(x2)
-
-        norm = tf.linalg.norm(output, ord='euclidean', name=None, keepdims=True, axis=-1)
-        y = output / norm
-
-        return y
-
-    def build_model(self, *args, **kwargs):
-        model = 'Your architecture'
-        return model
+        embeddings = tf.reshape(embeddings, [-1])  # TODO
+        projected_down = self.dense_1(embeddings)
+        projected_down = self.dense_2(projected_down)
+        projected_down = tf.reshape(projected_down, [-1])  # TODO
+        y = self.encoder(projected_down)
+        norm = tf.linalg.norm(y, ord='euclidean', axis=-1, keepdims=True)
+        y_normalized = y / norm
+        return y_normalized
 
     def encode(self, values: np.ndarray | tf.Tensor) -> list[str] | list[list[str]]:
         """
