@@ -22,13 +22,18 @@ default_kwargs = {
 def chunks(lst: list, n: int) -> Generator:
     """
     Yield successive n-sized chunks from lst.
-    Adapted from https://github.com/facebookresearch/symbolicregression/blob/main/symbolicregression/envs/encoders.py
+    (Adapted from Kamienny et al.)
     """
     for i in range(0, len(lst), n):
         yield lst[i: i + n]
 
 
 class TextTransformer(MeasurementEncoderDummy):
+    """
+    Basically a reimplementation of the tokenizer, embedder, and encoder described by Kamienny et al. in "End-to-end
+    symbolic regression with transformers" (2022). Parts of the code are directly adapted from their code at
+    https://github.com/facebookresearch/symbolicregression/blob/main/symbolicregression/envs/encoders.py.
+    """
 
     def __init__(self, *args, **kwargs):
         super(TextTransformer, self).__init__(*args, **kwargs)
@@ -44,8 +49,7 @@ class TextTransformer(MeasurementEncoderDummy):
         self.num_attention_heads = kwargs['num_attention_heads']
         self.encoder_intermediate_size = kwargs['encoder_intermediate_size']
 
-        # Create the vocabulary
-        # Adapted from https://github.com/facebookresearch/symbolicregression/blob/main/symbolicregression/envs/encoders.py
+        # Create the vocabulary (adapted from Kamienny et al.)
 
         self.float_precision = kwargs['float_precision']
         self.mantissa_len = kwargs['mantissa_len']
@@ -72,13 +76,20 @@ class TextTransformer(MeasurementEncoderDummy):
                                                          intermediate_size=self.encoder_intermediate_size)  # should we use bias and/or dropout?
 
     def prepare_data(self, data: dict) -> tf.Tensor:
-        # convert data to a tensor
+        """
+        Prepare the data for the model. For this architecture, we skip the normalization and only unpack the data and
+        add a batch dimension.
+        :param data: Dictionary containing the measurement data in a dataframe
+        """
         tensor = tf.convert_to_tensor(data['data_frame'], dtype=tf.float32)
-        # add batch dimension
         tensor = tf.expand_dims(tensor, axis=0)
         return tensor
 
     def call(self, x: tf.Tensor, *args, **kwargs) -> tf.Tensor:
+        """
+        Propagate the input data forward through the model.
+        :param x: Input data tensor
+        """
         tokens = self.encode(x)
         indices = self.lookup(tokens, **kwargs)
         embeddings = self.embedding(indices, **kwargs)
@@ -92,7 +103,7 @@ class TextTransformer(MeasurementEncoderDummy):
     def encode(self, values: np.ndarray | tf.Tensor) -> list[str] | list[list[str]]:
         """
         Write a float number.
-        Adapted from https://github.com/facebookresearch/symbolicregression/blob/main/symbolicregression/envs/encoders.py
+        (Adapted from Kamienny et al.)
         """
         if len(values.shape) == 1:
             seq = []
@@ -120,7 +131,7 @@ class TextTransformer(MeasurementEncoderDummy):
         """
         Parse a list that starts with a float.
         Return the float value, and the position it ends in the list.
-        Adapted from https://github.com/facebookresearch/symbolicregression/blob/main/symbolicregression/envs/encoders.py
+        (Adapted from Kamienny et al.)
         """
         if len(lst) == 0:
             return None
@@ -145,6 +156,7 @@ class TextTransformer(MeasurementEncoderDummy):
 
 
 if __name__ == "__main__":
+    # Only for debugging
     tt = TextTransformer(**default_kwargs)
 
     values = np.array([3.745401188473625, 0.3142918568673425, 70.31403])
