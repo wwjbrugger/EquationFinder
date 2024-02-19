@@ -7,15 +7,15 @@ import tensorflow_models as tfm
 from src.neural_nets.data_set_encoder.measurement_encoder_dummy import MeasurementEncoderDummy
 
 default_kwargs = {
-    'num_blocks_text_transformer': 4,
     'float_precision': 3,  # num decimal places
     'mantissa_len': 1,  # num blocks
     'max_exponent': 100,
-    'max_dimensions': 3,
+    'max_dimensions': 3,  # max variables in measurement data (x_1, ..., x_n, y)
     'embedding_dim': 512,
+    'embedder_intermediate_size': 3 * 3 * 512,  # output size = input size
     'num_encoder_layers': 4,
     'num_attention_heads': 8,
-    'intermediate_size': 2048,
+    'encoder_intermediate_size': 2048,
 }
 
 
@@ -37,12 +37,12 @@ class TextTransformer(MeasurementEncoderDummy):
 
         kwargs = default_kwargs | kwargs  # only needed during development TODO remove
 
-        self.num_blocks_text_transformer = kwargs['num_blocks_text_transformer']
-        self.max_dimensions = kwargs['max_dimensions']  # or max_variables
+        self.max_dimensions = kwargs['max_dimensions']
         self.embedding_dim = kwargs['embedding_dim']
+        self.embedder_intermediate_size = kwargs['embedder_intermediate_size']
         self.num_encoder_layers = kwargs['num_encoder_layers']
         self.num_attention_heads = kwargs['num_attention_heads']
-        self.intermediate_size = kwargs['intermediate_size']
+        self.encoder_intermediate_size = kwargs['encoder_intermediate_size']
 
         # Create the vocabulary
         # Adapted from https://github.com/facebookresearch/symbolicregression/blob/main/symbolicregression/envs/encoders.py
@@ -60,17 +60,16 @@ class TextTransformer(MeasurementEncoderDummy):
 
         self.lookup = tf.keras.layers.StringLookup(num_oov_indices=0, vocabulary=self.vocab)
 
-        input_length = (self.mantissa_len + 2) * self.max_dimensions
+        self.input_length = (self.mantissa_len + 2) * self.max_dimensions
         self.embedding = tf.keras.layers.Embedding(len(self.vocab), self.embedding_dim, mask_zero=False,
-                                                   input_length=input_length)  # do we need to use mask_zero=True?
+                                                   input_length=self.input_length)  # do we need to use mask_zero=True?
 
-        # element-wise!
-        self.dense_1 = tf.keras.layers.Dense(input_length, activation='relu')
+        self.dense_1 = tf.keras.layers.Dense(self.embedder_intermediate_size, activation='relu')
         self.dense_2 = tf.keras.layers.Dense(self.embedding_dim, activation='relu')
 
         self.encoder = tfm.nlp.models.TransformerEncoder(num_layers=self.num_encoder_layers,
                                                          num_attention_heads=self.num_attention_heads,
-                                                         intermediate_size=self.intermediate_size)  # should we use bias and/or dropout?
+                                                         intermediate_size=self.encoder_intermediate_size)  # should we use bias and/or dropout?
 
     def prepare_data(self, data: dict) -> tf.Tensor:
         # convert data to a tensor
@@ -81,15 +80,13 @@ class TextTransformer(MeasurementEncoderDummy):
 
     def call(self, x: tf.Tensor, *args, **kwargs) -> tf.Tensor:
         tokens = self.encode(x)
-        indices: tf.Tensor = self.lookup(tokens)
-        embeddings = self.embedding(indices)
-        embeddings = tf.reshape(embeddings, [-1])  # TODO
-        projected_down = self.dense_1(embeddings)
-        projected_down = self.dense_2(projected_down)
-        projected_down = tf.reshape(projected_down, [-1])  # TODO
-        y = self.encoder(projected_down)
-        norm = tf.linalg.norm(y, ord='euclidean', axis=-1, keepdims=True)
-        y_normalized = y / norm
+        indices = self.lookup(tokens, **kwargs)
+        embeddings = self.embedding(indices, **kwargs)
+        embeddings_concatenated = tf.reshape(embeddings, [2, -1, self.input_length * self.embedding_dim])
+        projected_down_1 = self.dense_1(embeddings_concatenated, **kwargs)
+        projected_down_2 = self.dense_2(projected_down_1, **kwargs)
+        y = self.encoder(projected_down_2, **kwargs)
+        y_normalized, _ = tf.linalg.normalize(y, ord='euclidean', axis=-1)
         return y_normalized
 
     def encode(self, values: np.ndarray | tf.Tensor) -> list[str] | list[list[str]]:
