@@ -24,7 +24,7 @@ class TextTransformer(MeasurementEncoderDummy):
     """
 
     def __init__(self, *args, **kwargs):
-        super(TextTransformer, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Get your arguments from kwargs
 
@@ -47,6 +47,7 @@ class TextTransformer(MeasurementEncoderDummy):
         self.vocab.extend(["E" + str(i) for i in range(-self.max_exponent, self.max_exponent + 1)])
 
         # Define the model layers
+        # TODO use dropout somewhere?
 
         self.lookup = tf.keras.layers.StringLookup(num_oov_indices=0, vocabulary=self.vocab)
 
@@ -60,7 +61,7 @@ class TextTransformer(MeasurementEncoderDummy):
 
         self.encoder = tfm.nlp.models.TransformerEncoder(num_layers=self.num_encoder_layers,
                                                          num_attention_heads=self.num_attention_heads,
-                                                         intermediate_size=self.encoder_intermediate_size)  # should we use bias and/or dropout?
+                                                         intermediate_size=self.encoder_intermediate_size)  # should we use attention bias?
 
     def prepare_data(self, data: dict) -> tf.Tensor:
         """
@@ -74,17 +75,18 @@ class TextTransformer(MeasurementEncoderDummy):
 
     def call(self, x: tf.Tensor, *args, **kwargs) -> tf.Tensor:
         """
-        Propagate the input data forward through the model.
+        Propagate the input data forward through the model to compute a single embedding for the measurements.
         :param x: Input data tensor
         """
         tokens = self.encode(x)
         indices = self.lookup(tokens, **kwargs)
         embeddings = self.embedding(indices, **kwargs)
-        embeddings_concatenated = tf.reshape(embeddings, [2, -1, self.input_length * self.embedding_dim])
+        embeddings_concatenated = tf.reshape(embeddings, [*embeddings.shape[0:-2], -1])  # or tf.keras.layers.Reshape?
         projected_down_1 = self.dense_1(embeddings_concatenated, **kwargs)
         projected_down_2 = self.dense_2(projected_down_1, **kwargs)
         y = self.encoder(projected_down_2, **kwargs)
-        y_normalized, _ = tf.linalg.normalize(y, ord='euclidean', axis=-1)
+        y_pooled = tf.math.reduce_max(y, axis=-2)  # or tf.keras.layers.GlobalMaxPool1D?
+        y_normalized, _ = tf.linalg.normalize(y_pooled, ord='euclidean', axis=-1)  # or tf.keras.layers.Normalization?
         return y_normalized
 
     def encode(self, values: np.ndarray | tf.Tensor) -> list[str] | list[list[str]]:
