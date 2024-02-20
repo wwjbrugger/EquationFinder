@@ -222,8 +222,25 @@ class Config:
                              type=str)
 
         ######### Encoder Measurement TextTransformer
-        # TODO Daniel add arguments
-
+        parser.add_argument('--float_precision_text_transformer', default=3, type=int,
+                            help="Number of decimal places for the token representation of the measurement data. "
+                                 "The number of digits in the mantissa is float_precision + 1.")
+        parser.add_argument('--mantissa_len_text_transformer', default=1, type=int,
+                            help="Number of mantissa blocks in the token representation of the measurement data.")
+        parser.add_argument('--max_exponent_text_transformer', default=100, type=int,
+                            help="Maximum (and negative minimum) exponent in the token representation of the measurement data.")
+        parser.add_argument('--max_dimensions_text_transformer', default=3, type=int,
+                            help="Maximum number of variables (x_1, ..., x_n, y) of the measurement data.")
+        parser.add_argument('--embedding_dim_text_transformer', default=512, type=int,
+                            help="Size of the embedding vectors.")
+        parser.add_argument('--embedder_intermediate_expansion_factor_text_transformer', default=1.0, type=float,
+                            help="By how much to increase (or reduce) the embedding size from the first to the second dense layer in the embedder.")
+        parser.add_argument('--num_encoder_layers_text_transformer', default=4, type=int,
+                            help="Number of encoder layers in the text transformer.")
+        parser.add_argument('--num_attention_heads_text_transformer', default=8, type=int,
+                            help="Number of attention heads per layer in the text transformer.")
+        parser.add_argument('--encoder_intermediate_size_text_transformer', default=2048, type=int,
+                            help="Intermediate size of the dense layer in the encoder.")
 
         ## Actor Decoder
         parser.add_argument("--actor_decoder_class", type=str,

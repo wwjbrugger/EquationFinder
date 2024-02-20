@@ -6,18 +6,6 @@ import tensorflow_models as tfm
 
 from src.neural_nets.data_set_encoder.measurement_encoder_dummy import MeasurementEncoderDummy
 
-default_kwargs = {
-    'float_precision': 3,  # num decimal places
-    'mantissa_len': 1,  # num blocks
-    'max_exponent': 100,
-    'max_dimensions': 3,  # max variables in measurement data (x_1, ..., x_n, y)
-    'embedding_dim': 512,
-    'embedder_intermediate_size': 3 * 3 * 512,  # output size = input size
-    'num_encoder_layers': 4,
-    'num_attention_heads': 8,
-    'encoder_intermediate_size': 2048,
-}
-
 
 def chunks(lst: list, n: int) -> Generator:
     """
@@ -40,20 +28,18 @@ class TextTransformer(MeasurementEncoderDummy):
 
         # Get your arguments from kwargs
 
-        kwargs = default_kwargs | kwargs  # only needed during development TODO remove
-
+        self.float_precision = kwargs['float_precision']
+        self.mantissa_len = kwargs['mantissa_len']
+        self.max_exponent = kwargs['max_exponent']
         self.max_dimensions = kwargs['max_dimensions']
         self.embedding_dim = kwargs['embedding_dim']
-        self.embedder_intermediate_size = kwargs['embedder_intermediate_size']
+        self.embedder_intermediate_expansion_factor = kwargs['embedder_intermediate_expansion_factor']
         self.num_encoder_layers = kwargs['num_encoder_layers']
         self.num_attention_heads = kwargs['num_attention_heads']
         self.encoder_intermediate_size = kwargs['encoder_intermediate_size']
 
         # Create the vocabulary (adapted from Kamienny et al.)
 
-        self.float_precision = kwargs['float_precision']
-        self.mantissa_len = kwargs['mantissa_len']
-        self.max_exponent = kwargs['max_exponent']
         self.base = (self.float_precision + 1) // self.mantissa_len
         self.max_token = 10 ** self.base
         self.vocab = ["+", "-"]
@@ -68,6 +54,7 @@ class TextTransformer(MeasurementEncoderDummy):
         self.embedding = tf.keras.layers.Embedding(len(self.vocab), self.embedding_dim, mask_zero=False,
                                                    input_length=self.input_length)  # do we need to use mask_zero=True?
 
+        self.embedder_intermediate_size = self.input_length * self.embedding_dim * self.embedder_intermediate_expansion_factor
         self.dense_1 = tf.keras.layers.Dense(self.embedder_intermediate_size, activation='relu')
         self.dense_2 = tf.keras.layers.Dense(self.embedding_dim, activation='relu')
 
@@ -157,6 +144,17 @@ class TextTransformer(MeasurementEncoderDummy):
 
 if __name__ == "__main__":
     # Only for debugging
+    default_kwargs = {
+        'float_precision': 3,  # num decimal places
+        'mantissa_len': 1,  # num blocks
+        'max_exponent': 100,
+        'max_dimensions': 3,  # max variables in measurement data (x_1, ..., x_n, y)
+        'embedding_dim': 512,
+        'embedder_intermediate_expansion_factor': 1,
+        'num_encoder_layers': 4,
+        'num_attention_heads': 8,
+        'encoder_intermediate_size': 2048,
+    }
     tt = TextTransformer(**default_kwargs)
 
     values = np.array([3.745401188473625, 0.3142918568673425, 70.31403])
