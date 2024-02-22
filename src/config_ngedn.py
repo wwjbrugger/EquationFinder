@@ -22,7 +22,6 @@ class Config:
         parser.add_argument("--only_test", type=str2bool,
                             default=False, help="If only test mode should be run")
         parser.add_argument("--seed", type=int)
-        parser.add_argument("--minutes_to_run", type=int)
         parser.add_argument("--logging_level", type=int, default=10,
                             help="CRITICAL = 50, ERROR = 40, "
                                  "WARNING = 30, INFO = 20, "
