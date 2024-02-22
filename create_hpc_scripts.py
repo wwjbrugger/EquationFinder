@@ -8,8 +8,8 @@ def run():
         'output_folder': ['output'],
         'minutes_to_run': ['240'],
         ## General
-        'experiment_name': ['test_mcts'],
-        'path_to_complete_model': ['None'],
+        'experiment_name': ['test_mcts_1000'],
+        'path_to_complete_model': ['saved_models/run_1/AlphaZero/DatasetTransformer_lin_1000/1/tf_ckpts/ckpt-138'],
         'run_mcts': [False],
         'only_test': [True],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
@@ -99,7 +99,7 @@ def run():
         ## MCTS
         'MCTS_engine': ['Endgame'],
         'max_elements_in_list': [10],
-        'prior_source': ['neural_net','grammar', 'uniform'],  # 'neural_net''grammar', 'uniform'
+        'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'use_puct': [False],
         'temp_0': [0.1],
         'temperature_decay': ['-0.01'],
@@ -144,7 +144,7 @@ def run():
 def create_experiment_name(settings_one_script):
     basic_experiment_name = settings_one_script['experiment_name']
     experiment_name = f"{settings_one_script['prior_source']}__"\
-                      f"{settings_one_script['data']}"
+                      f"{settings_one_script['data']}_1000"
 
 
     # f"{settings_one_script['class_measurement_encoder']}"\
