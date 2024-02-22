@@ -58,7 +58,7 @@ def run():
         'dropout_rate': ['0.1'],
         ## Encoder Measurement
         'class_measurement_encoder': [
-            'DatasetTransformer'
+            'Bi_LSTM_Measurement_Encoder'
         ],
         'normalize_approach': [
             # 'abs_max_value',
