@@ -8,8 +8,8 @@ def run():
         'output_folder': ['output'],
         'minutes_to_run': ['240'],
         ## General
-        'experiment_name': ['test_mcts_1000'],
-        'path_to_complete_model': ['saved_models/run_1/AlphaZero/DatasetTransformer_lin_1000/1/tf_ckpts/ckpt-138'],
+        'experiment_name': ['test_mcts_supervised'],
+        'path_to_complete_model': ['saved_models/run_1/AlphaZero/supervised_only_Bi_LSTM_Measurement_Encoder_lin/0/tf_ckpts/ckpt-887'],
         'run_mcts': [False],
         'only_test': [True],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
@@ -144,7 +144,7 @@ def run():
 def create_experiment_name(settings_one_script):
     basic_experiment_name = settings_one_script['experiment_name']
     experiment_name = f"{settings_one_script['prior_source']}__"\
-                      f"{settings_one_script['data']}_1000"
+                      f"{settings_one_script['data']}_supervised"
 
 
     # f"{settings_one_script['class_measurement_encoder']}"\
