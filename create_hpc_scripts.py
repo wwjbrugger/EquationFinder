@@ -100,7 +100,7 @@ def run():
         'MCTS_engine': ['Endgame'],
         'max_elements_in_list': [10],
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
-        'use_puct': [False],
+        'use_puct': [True],
         'temp_0': [0.1],
         'temperature_decay': ['-0.01'],
         'num_MCTS_sims': ['300_000'],
