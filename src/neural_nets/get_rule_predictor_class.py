@@ -111,7 +111,9 @@ def get_rule_predictor(args, reader_data):
             'embedder_intermediate_expansion_factor': args.embedder_intermediate_expansion_factor_text_transformer,
             'num_encoder_layers': args.num_encoder_layers_text_transformer,
             'num_attention_heads': args.num_attention_heads_text_transformer,
-            'encoder_intermediate_size': args.encoder_intermediate_size_text_transformer,
+            'encoder_intermediate_expansion_factor': args.encoder_intermediate_expansion_factor_text_transformer,
+            'intermediate_dropout_rate': args.intermediate_dropout_rate_text_transformer,
+            'attention_dropout_rate': args.attention_dropout_rate_text_transformer,
         },
         actor_decoder_class=actor_decoder_class,
         actor_decoder_args={

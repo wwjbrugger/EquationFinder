@@ -239,8 +239,12 @@ class Config:
                             help="Number of encoder layers in the text transformer.")
         parser.add_argument('--num_attention_heads_text_transformer', default=8, type=int,
                             help="Number of attention heads per layer in the text transformer.")
-        parser.add_argument('--encoder_intermediate_size_text_transformer', default=2048, type=int,
-                            help="Intermediate size of the dense layer in the encoder.")
+        parser.add_argument('--encoder_intermediate_expansion_factor_text_transformer', default=4.0, type=float,
+                            help="By how much to increase (or reduce) the embedding size from the first to the second dense layer in the encoder.")
+        parser.add_argument('--intermediate_dropout_rate_text_transformer', default=0.2, type=float,
+                            help="Dropout probability for all places except the attention layer.")
+        parser.add_argument('--attention_dropout_rate_text_transformer', default=0.1, type=float,
+                            help="Dropout probability for the attention layer.")
 
         ## Actor Decoder
         parser.add_argument("--actor_decoder_class", type=str,

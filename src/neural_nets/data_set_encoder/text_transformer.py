@@ -36,7 +36,9 @@ class TextTransformer(MeasurementEncoderDummy):
         self.embedder_intermediate_expansion_factor = kwargs['embedder_intermediate_expansion_factor']
         self.num_encoder_layers = kwargs['num_encoder_layers']
         self.num_attention_heads = kwargs['num_attention_heads']
-        self.encoder_intermediate_size = kwargs['encoder_intermediate_size']
+        self.encoder_intermediate_expansion_factor = kwargs['encoder_intermediate_expansion_factor']
+        self.intermediate_dropout_rate = kwargs['intermediate_dropout_rate']
+        self.attention_dropout_rate = kwargs['attention_dropout_rate']
 
         # Create the vocabulary (adapted from Kamienny et al.)
 
@@ -47,21 +49,23 @@ class TextTransformer(MeasurementEncoderDummy):
         self.vocab.extend(["E" + str(i) for i in range(-self.max_exponent, self.max_exponent + 1)])
 
         # Define the model layers
-        # TODO use dropout somewhere?
 
         self.lookup = tf.keras.layers.StringLookup(num_oov_indices=0, vocabulary=self.vocab)
 
         self.input_length = (self.mantissa_len + 2) * self.max_dimensions
-        self.embedding = tf.keras.layers.Embedding(len(self.vocab), self.embedding_dim, mask_zero=False,
-                                                   input_length=self.input_length)  # do we need to use mask_zero=True?
+        self.embedding = tf.keras.layers.Embedding(len(self.vocab), self.embedding_dim, input_length=self.input_length)
 
         self.embedder_intermediate_size = self.input_length * self.embedding_dim * self.embedder_intermediate_expansion_factor
         self.dense_1 = tf.keras.layers.Dense(self.embedder_intermediate_size, activation='relu')
         self.dense_2 = tf.keras.layers.Dense(self.embedding_dim, activation='relu')
 
+        self.encoder_intermediate_size = int(self.embedding_dim * self.encoder_intermediate_expansion_factor)
         self.encoder = tfm.nlp.models.TransformerEncoder(num_layers=self.num_encoder_layers,
                                                          num_attention_heads=self.num_attention_heads,
-                                                         intermediate_size=self.encoder_intermediate_size)  # should we use attention bias?
+                                                         intermediate_size=self.encoder_intermediate_size,
+                                                         dropout_rate=self.intermediate_dropout_rate,
+                                                         attention_dropout_rate=self.attention_dropout_rate,
+                                                         intermediate_dropout=self.intermediate_dropout_rate)
 
     def prepare_data(self, data: dict) -> tf.Tensor:
         """
@@ -81,12 +85,12 @@ class TextTransformer(MeasurementEncoderDummy):
         tokens = self.encode(x)
         indices = self.lookup(tokens, **kwargs)
         embeddings = self.embedding(indices, **kwargs)
-        embeddings_concatenated = tf.reshape(embeddings, [*embeddings.shape[0:-2], -1])  # or tf.keras.layers.Reshape?
+        embeddings_concatenated = tf.reshape(embeddings, [*embeddings.shape[0:-2], -1])
         projected_down_1 = self.dense_1(embeddings_concatenated, **kwargs)
         projected_down_2 = self.dense_2(projected_down_1, **kwargs)
         y = self.encoder(projected_down_2, **kwargs)
-        y_pooled = tf.math.reduce_max(y, axis=-2)  # or tf.keras.layers.GlobalMaxPool1D?
-        y_normalized, _ = tf.linalg.normalize(y_pooled, ord='euclidean', axis=-1)  # or tf.keras.layers.Normalization?
+        y_pooled = tf.math.reduce_max(y, axis=-2)
+        y_normalized, _ = tf.linalg.normalize(y_pooled, ord='euclidean', axis=-1)
         return y_normalized
 
     def encode(self, values: np.ndarray | tf.Tensor) -> list[str] | list[list[str]]:
@@ -147,15 +151,17 @@ class TextTransformer(MeasurementEncoderDummy):
 if __name__ == "__main__":
     # Only for debugging
     default_kwargs = {
-        'float_precision': 3,  # num decimal places
-        'mantissa_len': 1,  # num blocks
+        'float_precision': 3,
+        'mantissa_len': 1,
         'max_exponent': 100,
-        'max_dimensions': 3,  # max variables in measurement data (x_1, ..., x_n, y)
+        'max_dimensions': 3,
         'embedding_dim': 512,
         'embedder_intermediate_expansion_factor': 1,
         'num_encoder_layers': 4,
         'num_attention_heads': 8,
-        'encoder_intermediate_size': 2048,
+        'encoder_intermediate_expansion_factor': 4,
+        'intermediate_dropout_rate': 0.2,
+        'attention_dropout_rate': 0.1,
     }
     tt = TextTransformer(**default_kwargs)
 
