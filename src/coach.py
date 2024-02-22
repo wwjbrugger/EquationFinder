@@ -185,6 +185,8 @@ class Coach(ABC):
             )
             # Update state of control
             state = next_state
+        print(f"Equation found: {game.max_list.max_list_state[-1].syntax_tree.rearrange_equation_infix_notation(-1)[1]:<80}")
+        print(f"{print(game.max_list.max_list_state[-1].syntax_tree.constants_in_tree)}")
         end = time.time()
 
 
