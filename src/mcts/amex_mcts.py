@@ -332,5 +332,12 @@ class AmEx_MCTS(ClassicMCTS):
         a_max = tie_breaking_argmax(np.where(self.valid_moves_for_s[state_hash],
                                     confidence_bounds,
                                     -np.inf))  # never choose these actions!
+        # for the unlikely event that a and a_max should be the same,
+        # but because of the tie_breaking_argmax are not we have to ckeck if
+        # a_max really already exist
+        if not (state_hash, a_max) in self.Qsa:
+            a = a_max
+
+
 
         return a, a_max
