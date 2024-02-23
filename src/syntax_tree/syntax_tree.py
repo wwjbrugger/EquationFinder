@@ -14,6 +14,7 @@ from src.equation_classes.math_class.y import Y
 from src.equation_classes.math_class.power import Power
 from src.equation_classes.math_class.logarithm import Logarithm
 from src.equation_classes.math_class.constants import Constants
+from src.equation_classes.math_class.logarithmus_naturalis import Logarithm_naturalis
 from src.utils.logging import get_log_obj
 import numpy as np
 import bisect
@@ -24,6 +25,7 @@ from scipy.optimize import OptimizeWarning
 from src.equation_classes.math_class.exp import Exp
 from src.utils.error import NonFiniteError
 import copy
+
 
 
 class SyntaxTree():
@@ -44,7 +46,7 @@ class SyntaxTree():
             'cos': Cosine,
             'y': Y,
             '**': Power,
-            'log': Logarithm,
+            'log': Logarithm_naturalis,
             'c': Constants,
             'exp': Exp
         }
