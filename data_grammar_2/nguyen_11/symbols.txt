@@ -1,1 +1,1 @@
-*, **, +, -, 1, 2, 3, 4, 5, 6, I, Inner_Function, S, Variable, cos, exp, log, sin, x_0, x_1,
+*, **, +, -, /, I, S, Variable, c, cos, log, sin, x_0, x_1,
