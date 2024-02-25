@@ -59,6 +59,8 @@ class Coach(ABC):
         # Initialize replay buffer and helper variable
         self.trainExamplesHistory = deque(
             maxlen=self.args.selfplay_buffer_window)
+        self.testExamplesHistory = deque(
+            maxlen=self.args.selfplay_buffer_window)
 
         # Initialize network and search engine
         self.rule_predictor = rule_predictor
@@ -375,20 +377,34 @@ class Coach(ABC):
     def test_epoche(self, save_path):
         self.logger.warning(f'------------------ Test ----------------')
         self.checkpoint_test.restore(save_path)
-        _ = self.gather_data(metrics=self.metrics_test,
+        iteration_test_examples = self.gather_data(metrics=self.metrics_test,
                              mcts=self.mcts_test,
                              game=self.game_test,
                              logger=self.logger_test,
                              num_selfplay_iterations=self.args.num_selfplay_iterations_test
                              )
-        wandb.log(
-            {f"average_reward_{self.metrics_test['mode']}":
-                 self.metrics_test['rewards_mean'].result()}
-        )
-        wandb.log(
-            {f"average_done_rollout_ratio_{self.metrics_test['mode']}":
-                 self.metrics_test['done_rollout_ratio'].result()}
-        )
+        self.testExamplesHistory.append(iteration_test_examples)
+        if self.checkpoint.step > self.args.cold_start_iterations:
+            """ Same as in update_network"""
+            complete_history = GameHistory.flatten(self.testExamplesHistory)
+            batch = self.sampleBatch(complete_history)
+            action_prediction, v, pi_batch_loss, v_batch_loss, contrastive_loss = \
+                self.rule_predictor.predict_with_loss(batch)
+
+            wandb.log({
+                f"iteration": self.checkpoint.step,
+                f"Test pi loss": pi_batch_loss,
+                       "Test v loss": v_batch_loss,
+                       "Test Contrastive loss": contrastive_loss})
+            print(f"Test Contrastive loss: {contrastive_loss}")
+            wandb.log(
+                {f"average_reward_{self.metrics_test['mode']}":
+                     self.metrics_test['rewards_mean'].result()}
+            )
+            wandb.log(
+                {f"average_done_rollout_ratio_{self.metrics_test['mode']}":
+                     self.metrics_test['done_rollout_ratio'].result()}
+            )
 
     def saveTrainExamples(self, iteration: int) -> None:
         """
