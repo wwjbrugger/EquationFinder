@@ -3,8 +3,8 @@ from argparse import ArgumentParser
 from pcfg import PCFG
 import random
 import numpy as np
-from src.generate_datasets.save_dataset import save_panda_dataframes, save_supervise_buffer
-
+from src.generate_datasets.save_dataset import save_panda_dataframes
+from src.generate_datasets.grammars import get_grammars
 from src.generate_datasets.save_grammar_files import save_grammar_to_file
 from pathlib import Path
 from src.utils.parse_args import str2bool
@@ -12,33 +12,41 @@ from src.utils.files import create_file_path
 from src.generate_datasets.dataset_generator import DatasetGenerator
 from src.generate_datasets.split_dataset import split_dataset
 from definitions import ROOT_DIR
+from src.generate_datasets.save_buffer_for_supervised_learning import save_buffer_for_supervised_learning
+
+
+
+
 
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument("--save_folder", help="where to save data_ set",
                         required=True, type=str)
-    parser.add_argument("--number_equations", default=10,
+    parser.add_argument("--grammar_to_use", default=True, type=int)
+    parser.add_argument("--number_equations", default=10000,
                         help="how many trees to generate", required=False,
                         type=int)
     parser.add_argument("--seed", default=42,
                         help="seed to generate trees", required=False, type=int)
-    parser.add_argument("--max_depth_of_tree", default=6,
+    parser.add_argument("--max_depth_of_tree", default=10,
                         help="how many recursions a formula is allowed to have"
                         , required=False, type=int)
     parser.add_argument('--max_num_nodes_in_syntax_tree', type=int,
-                        help='Maximum depth of generated equations', default=20)
-    parser.add_argument("--num_calls_sampling", default=50,
+                        help='Maximum depth of generated equations', default=30)
+    parser.add_argument("--num_calls_sampling", default=20,
                         help="How often the sampling procedure is called per example",
                         required=False, type=int)
-    parser.add_argument("--how_to_select_node_to_delete", type=str,
+    parser.add_argument("--how_to_select_node_to_delete", default=0,
+                        type=str,
                         help="Choose int to delete this node id in all generated trees. "
                              "Choose 'all' to delete one node after each other"
                              "Choose random to delete one random node from each tree nodes "
                         )
-    parser.add_argument("--sample_with_noise", type=str2bool,
+    parser.add_argument("--sample_with_noise", default=False,
+                        type=str2bool,
                         help="Noise on x values "
                         )
-    parser.add_argument("--logging_level", type=int, default=10,
+    parser.add_argument("--logging_level", type=int, default=30,
                         help="CRITICAL = 50, ERROR = 40, "
                              "WARNING = 30, INFO = 20, "
                              "DEBUG = 10, NOTSET = 0")
@@ -55,43 +63,8 @@ if __name__ == '__main__':
                              'afterwards equation will be invalid')
 
     args = parser.parse_args()
-
     random.seed(args.seed)
     np.random.seed(args.seed)
-    grammar_string = \
-        """  
-        S -> '+' S S [0.3]
-        S -> '-' S S [0.05]
-        S -> '*' S S [0.1]
-        
-        S -> '**' '6' 'x_0'[0.02]
-        S -> '**' '5' 'x_0'[0.03]
-        S -> '**' '4' 'x_0'[0.05]
-        S -> '**' '3' 'x_0'[0.05]
-        S -> '**' '2' 'x_0'[0.05]
-        S -> '**' 'x_1' 'x_0'[0.01]
-        S -> 'x_0'      [0.1]
-        S -> 'x_1'      [0.1]
-        S -> 'c'        [0.05]
-        
-        
-        S -> 'sin' Inner_Function [0.03] 
-        S -> 'cos' Inner_Function [0.03] 
-        S -> 'log' Inner_Function [0.03]  
-        
-        Inner_Function -> '+' I I [0.3]
-        Inner_Function -> '*' I I [0.3]
-        Inner_Function ->  I    [0.4]
-        
-        I -> 'x_0'          [0.2]
-        I -> 'x_1'          [0.2]
-        I -> 'c'            [0.2]
-        I -> '**' '2' 'x_0'     [0.2]
-        I -> '**' '2' 'x_1'     [0.2]
-        Variable -> 'x_0'[0.5] | 'x_1' [0.5]
-           """
-
-    grammar = PCFG.fromstring(grammar_string)
     experiment_dataset_dic = {
         'num_calls_sampling': args.num_calls_sampling,
         'x_0': {
@@ -126,6 +99,10 @@ if __name__ == '__main__':
             }
         }
     }
+
+
+    grammar = PCFG.fromstring(get_grammars(args))
+
     save_folder = ROOT_DIR / Path(args.save_folder)
     save_folder.mkdir(exist_ok=True, parents=True)
     save_path = create_file_path(save_folder=save_folder, stem='run')
@@ -152,17 +129,8 @@ if __name__ == '__main__':
     split_dataset(path=Path(f'{ROOT_DIR}/{save_path.parent.name}/{save_path.name}'))
     print(f"Datasets are saved to  {ROOT_DIR}/{save_path.parent.name}/{save_path.name}")
 
-    args.data_path = f"{save_path.parent.name}/{save_path.name}"
-    args.prior_source = 'None'
-    args.max_elements_in_best_list = 1
-    args.max_len_datasets = 2
-    args.max_tokens_equation = 64
-    args.minimum_reward = -1
-    args.selfplay_buffer_window = 10000
-    path_to_save_buffer = f'{ROOT_DIR}/saved_models/{save_path.parent.name}/{save_path.name}/AlphaZero/supervised_buffer'
-    save_supervise_buffer(
+    save_buffer_for_supervised_learning(
         args=args,
-        path_to_save_buffer=Path(path_to_save_buffer),
+        save_path = save_path,
         dic_measurements=dic_measurements
     )
-    print(f"supervised_buffer is saved to {path_to_save_buffer}")
