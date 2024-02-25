@@ -5,50 +5,63 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['test_dataset_encoder'],
-        'minutes_to_run': ['600'],
-        'max_iteration_to_run': [400],
+        'experiment_name': ['no_net'],
+        'minutes_to_run': ['180'],
+        'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
         'replay_buffer_path': [''],
         'run_mcts': [True],
-        'only_test': [False],
+        'only_test': [True],
         'data': [
-            'data_grammar_1/run_1',
-            # 'data_grammar_1/nguyen_1',
-            # 'data_grammar_1/nguyen_2',
-            # 'data_grammar_1/nguyen_3',
-            # 'data_grammar_1/nguyen_4',
-            # 'data_grammar_1/nguyen_5',
-            # 'data_grammar_1/nguyen_6',
-            # 'data_grammar_1/nguyen_7',
-            # 'data_grammar_1/nguyen_8',
-            # 'data_grammar_1/nguyen_9',
-            # 'data_grammar_1/nguyen_10',
-            # 'data_grammar_1/nguyen_11',
-            # 'data_grammar_1/nguyen_12'
+            #'data_grammar_1/run_1',
+            'data_grammar_1/nguyen_1',
+            'data_grammar_1/nguyen_2',
+            'data_grammar_1/nguyen_3',
+            'data_grammar_1/nguyen_4',
+            'data_grammar_1/nguyen_5',
+            'data_grammar_1/nguyen_6',
+            'data_grammar_1/nguyen_7',
+            'data_grammar_1/nguyen_8',
+            'data_grammar_1/nguyen_9',
+            'data_grammar_1/nguyen_10',
+            'data_grammar_1/nguyen_11',
+            'data_grammar_1/nguyen_12',
+            'data_grammar_2/nguyen_1',
+            'data_grammar_2/nguyen_2',
+            'data_grammar_2/nguyen_3',
+            'data_grammar_2/nguyen_4',
+            'data_grammar_2/nguyen_5',
+            'data_grammar_2/nguyen_6',
+            'data_grammar_2/nguyen_7',
+            'data_grammar_2/nguyen_8',
+            'data_grammar_2/nguyen_9',
+            'data_grammar_2/nguyen_10',
+            'data_grammar_2/nguyen_11',
+            'data_grammar_2/nguyen_12'
         ],
 
         'script_folder': ['scripts_final'],
         'output_folder': ['output'],
-        'cold_start_iterations': [20],
+        'cold_start_iterations': [0],
         'class_measurement_encoder': [
-            # 'MeasurementEncoderDummy',
-             'LSTM_Measurement_Encoder',
-             'Bi_LSTM_Measurement_Encoder',
-             'MLP_Measurement_Encoder',
-             'DatasetTransformer',
-             'MeasurementEncoderPicture',
+             'MeasurementEncoderDummy',
+            # 'LSTM_Measurement_Encoder',
+            # 'Bi_LSTM_Measurement_Encoder',
+            # 'MLP_Measurement_Encoder',
+            # 'DatasetTransformer',
+            # 'MeasurementEncoderPicture',
             # 'TextTransformer'
         ],
-        'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
+        'prior_source': ['grammar', 'uniform'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
+            'None'
             # 'abs_max_y',
             # 'row_wise',
-            'abs_max_y__lin_transform',
-            'abs_max_y',
+            # 'abs_max_y__lin_transform',
+            # 'abs_max_y',
         ],
-        'num_MCTS_sims': ['1'],
+        'num_MCTS_sims': ['300_000'],
         ## General
 
         'logging_level': ['30'],
@@ -56,7 +69,7 @@ def run():
         'gpu': ['0'],
 
         'num_selfplay_iterations': ['10'],
-        'num_selfplay_iterations_test': ['2'],
+        'num_selfplay_iterations_test': ['1'],
         'test_network': ['True'],
         'test_every_n_steps': [1],
         ## Infos about Tree
@@ -222,7 +235,7 @@ def write_SBATCH_commants(settings_one_script, file1):
     file1.writelines("#SBATCH --nodes=1 \n")
     file1.writelines("#SBATCH --cpus-per-task=4 \n")
     file1.writelines("#SBATCH --mem=20GB \n")
-    file1.writelines("#SBATCH --array=1-20 \n")
+    file1.writelines("#SBATCH --array=1-5 \n")
     file1.writelines("\n")
     file1.writelines("#SBATCH -o \%x_\%j_profile.out \n")
     file1.writelines("#SBATCH -C anyarch \n")
