@@ -4,28 +4,55 @@ from pathlib import Path
 
 def run():
     parameter_list_dict = {
-        'script_folder': ['scripts_test_mcts'],
-        'output_folder': ['output'],
+        # paprameter to change
+        'experiment_name': ['test_dataset_encoder'],
         'minutes_to_run': ['240'],
-        ## General
-        'experiment_name': ['test_mcts_supervised'],
-        'path_to_complete_model': ['saved_models/run_1/AlphaZero/supervised_only_Bi_LSTM_Measurement_Encoder_lin/0/tf_ckpts/ckpt-887'],
+        'max_iteration_to_run': [200],
+        'path_to_complete_model': [''],
         'run_mcts': [False],
         'only_test': [True],
+        'data': ['nguyen_1',
+                 'nguyen_2',
+                 'nguyen_3',
+                 'nguyen_4',
+                 'nguyen_5',
+                 'nguyen_6',
+                 'nguyen_7',
+                 'nguyen_8',
+                 'nguyen_9',
+                 'nguyen_10',
+                 'nguyen_11',
+                 'nguyen_12'],
+
+        'script_folder': ['scripts_final'],
+        'output_folder': ['output'],
+        'cold_start_iterations': [20],
+        'class_measurement_encoder': [
+            'MeasurementEncoderDummy',
+            'LSTM_Measurement_Encoder',
+            'Bi_LSTM_Measurement_Encoder',
+            'MLP_Measurement_Encoder',
+            'DatasetTransformer',
+            'MeasurementEncoderPicture',
+            'TextTransformer'
+        ],
+        'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
+        'normalize_approach': [
+            # 'abs_max_y',
+            # 'row_wise',
+            'abs_max_y__lin_transform',
+        ],
+        'num_MCTS_sims': ['300_000'],
+        ## General
         'seed': ['$SLURM_ARRAY_TASK_ID'],
-        'max_num_simulation': ['200_000'],
         'logging_level': ['30'],
         'wandb': ['offline'],
         'gpu': ['0'],
 
-        'data': ['nguyen_1', 'nguyen_2', 'nguyen_3',
-                 'nguyen_4', 'nguyen_5', 'nguyen_6',
-                 'nguyen_7', 'nguyen_8', 'nguyen_9',
-                 'nguyen_10', 'nguyen_11', 'nguyen_12'],
-        'num_selfplay_iterations': ['1'],
-        'num_selfplay_iterations_test': [1],
+        'num_selfplay_iterations': ['10'],
+        'num_selfplay_iterations_test': ['2'],
         'test_network': ['True'],
-        'test_every_n_steps': [1],
+        'test_every_n_steps': [10],
         ## Infos about Tree
         'minimum_reward': ['-1'],
         'maximum_reward': ['1'],
@@ -34,11 +61,9 @@ def run():
         'max_branching_factor': [2],
         'max_constants_in_tree': [3],
         ## Training neural net
-        'batch_size_loading': ['1'],
         'batch_size_training': ['16'],
-        'num_gradient_steps': ['20'],
+        'num_gradient_steps': ['200'],
         'average_policy_if_wrong': [False],
-        'cold_start_iterations': [0],
 
         ## Preprocess
         'equation_preprocess_class': [
@@ -48,7 +73,6 @@ def run():
         ## Encoder Equations
         'class_equation_encoder': ['Transformer_Encoder_String'],
         'embedding_dim_encoder_equation': ['8'],
-        'tree_representation': ['tree_structure'],  # 'tree_structure'
         'max_tokens_equation': ['64'],
         'use_position_encoding': ['False'],
         ## Attention String
@@ -57,14 +81,7 @@ def run():
         'dim_feed_forward_equation_encoder_transformer': ['32'],
         'dropout_rate': ['0.1'],
         ## Encoder Measurement
-        'class_measurement_encoder': [
-            'Bi_LSTM_Measurement_Encoder'
-        ],
-        'normalize_approach': [
-            # 'abs_max_value',
-            # 'row_wise',
-            'abs_max_y__lin_transform',
-        ],
+
         'contrastive_loss': [True],
         ## Encoder Measurement LSTM
         'encoder_measurements_LSTM_units': ['64'],
@@ -79,37 +96,37 @@ def run():
         'model_stacking_depth_dataset_transformer': [4],
         'model_sep_res_embed_dataset_transformer': ['True'],
         'model_att_block_layer_norm_dataset_transformer': ['True'],
-        'model_layer_norm_eps_dataset_transformer': [0.000000000001],
+        'model_layer_norm_eps_dataset_transformer': [1e-12],
         'model_att_score_norm_dataset_transformer': ['softmax'],
         'model_pre_layer_norm_dataset_transformer': ['False'],
         'model_rff_depth_dataset_transformer': [2],
-        'model_hidden_dropout_prob_dataset_transformer': [0.000001],
-        'model_att_score_dropout_prob_dataset_transformer': [0.000001],
+        'model_hidden_dropout_prob_dataset_transformer': [1e-06],
+        'model_att_score_dropout_prob_dataset_transformer': [1e-06],
         'model_mix_heads_dataset_transformer': ['True'],
         'model_embedding_layer_norm_dataset_transformer': ['False'],
         'bit_embedding_dataset_transformer': ['False'],
+        'use_feature_index_embedding_dataset_transformer': [False],
         'dataset_transformer_use_latent_vector': ['True'],
-        #'path_to_pretrained_dataset_encoder': ['']
+        # 'path_to_pretrained_dataset_encoder': ['']
         ## Actor Decoder
         'actor_decoder_class': ['mlp_decoder'],
-        'actor_decoder_normalize_way': ['positive_sum_1'],
+        'actor_decoder_normalize_way': ['soft_max'],
         ## Critic Decoder
         'critic_decoder_class': ['mlp_decoder'],
         'critic_decoder_normalize_way': ['tanh'],
         ## MCTS
         'MCTS_engine': ['Endgame'],
         'max_elements_in_list': [10],
-        'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'use_puct': [True],
         'temp_0': [0.1],
         'temperature_decay': ['-0.01'],
-        'num_MCTS_sims': ['300_000'],
         'c1': ['1.25'],
         'gamma': ['0.98'],
         'n_steps': ['100'],
         'risk_seeking': [True],
         'depth_first_search': [True],
         ## Replay buffer
+        'replay_buffer_path': [''],
         'prioritize': ['False'],
         'prioritize_alpha': ['0.5'],
         'prioritize_beta': ['1'],
@@ -143,16 +160,17 @@ def run():
 
 def create_experiment_name(settings_one_script):
     basic_experiment_name = settings_one_script['experiment_name']
-    experiment_name = f"{settings_one_script['prior_source']}__"\
-                      f"{settings_one_script['data']}_supervised"
-
+    experiment_name = f"{basic_experiment_name}__" \
+                      f"{settings_one_script['prior_source']}__" \
+                      f"{settings_one_script['data']}__" \
+                      f"{settings_one_script['class_measurement_encoder']}"
 
     # f"{settings_one_script['class_measurement_encoder']}"\
     #                   f"norm_{settings_one_script['normalize_approach']}"\
     #                   f"_{settings_one_script['MCTS_engine']}"
     # f"bbuffer_" \
     # f"{settings_one_script['balance_buffer']}__" \
-#  f"{settings_one_script['prior_source']}__" \
+    #  f"{settings_one_script['prior_source']}__" \
     # f"num_gradient_steps" \
     # f"{settings_one_script['num_gradient_steps']}__"
     # f"risk_seeking_" \
@@ -232,7 +250,7 @@ def write_python_call(settings_one_script, file1):
                      f"src/start_nged.py \\\n")
     ## General
     if len(settings_one_script['path_to_complete_model']) > 5:
-        file1.writelines(f"--path_to_complete_model {settings_one_script['path_to_complete_model']} \\\n") 
+        file1.writelines(f"--path_to_complete_model {settings_one_script['path_to_complete_model']} \\\n")
     file1.writelines(f"--experiment_name $SLURM_JOB_NAME \\\n")
 
     file1.writelines(
@@ -347,6 +365,9 @@ def write_python_call(settings_one_script, file1):
         f"--bit_embedding_dataset_transformer {settings_one_script['bit_embedding_dataset_transformer']} \\\n")
     file1.writelines(
         f"--dataset_transformer_use_latent_vector {settings_one_script['dataset_transformer_use_latent_vector']} \\\n")
+    file1.writelines(
+        f"--use_feature_index_embedding_dataset_transformer {settings_one_script['use_feature_index_embedding_dataset_transformer']} \\\n")
+
     ## Actor Decoder
     file1.writelines(
         f"--actor_decoder_class {settings_one_script['actor_decoder_class']} \\\n")
@@ -377,6 +398,8 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(f"--risk_seeking {settings_one_script['risk_seeking']} \\\n")
     file1.writelines(f"--depth_first_search {settings_one_script['depth_first_search']} \\\n")
     ## Replay buffer
+    if len(settings_one_script['replay_buffer_path']) > 5:
+        file1.writelines(f"--replay_buffer_path {settings_one_script['path_to_complete_model']} \\\n")
     file1.writelines(f"--prioritize {settings_one_script['prioritize']} \\\n")
     file1.writelines(
         f"--prioritize_alpha {settings_one_script['prioritize_alpha']} \\\n")
@@ -392,7 +415,6 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(
         f"--use-puct"
         f" {settings_one_script['use_puct']} \\\n")
-
 
 
 def write_experiment_names_to_file(experiment_list, script_folder):
