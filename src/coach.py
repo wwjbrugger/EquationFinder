@@ -184,7 +184,6 @@ class Coach(ABC):
             )
             # Update state of control
             state = next_state
-            num_MCTS_sims = max(1, int(num_MCTS_sims / 2))
 
         # Cleanup environment and GameHistory
         if mcts.states_explored_till_perfect_fit > 0:
