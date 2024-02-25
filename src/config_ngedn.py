@@ -229,8 +229,8 @@ class Config:
                             help="Number of mantissa blocks in the token representation of the measurement data.")
         parser.add_argument('--max_exponent_text_transformer', default=100, type=int,
                             help="Maximum (and negative minimum) exponent in the token representation of the measurement data.")
-        parser.add_argument('--max_dimensions_text_transformer', default=3, type=int,
-                            help="Maximum number of variables (x_1, ..., x_n, y) of the measurement data.")
+        parser.add_argument('--num_dimensions_text_transformer', default=3, type=int,
+                            help="Exact number of variables (x_1, ..., x_n, y) of the measurement data.")
         parser.add_argument('--embedding_dim_text_transformer', default=512, type=int,
                             help="Size of the embedding vectors.")
         parser.add_argument('--embedder_intermediate_expansion_factor_text_transformer', default=1.0, type=float,

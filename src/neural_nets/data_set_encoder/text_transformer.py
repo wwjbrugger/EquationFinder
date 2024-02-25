@@ -26,12 +26,12 @@ class TextTransformer(MeasurementEncoderDummy):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Get your arguments from kwargs
+        # Get the arguments from kwargs
 
         self.float_precision = kwargs['float_precision']
         self.mantissa_len = kwargs['mantissa_len']
         self.max_exponent = kwargs['max_exponent']
-        self.max_dimensions = kwargs['max_dimensions']
+        self.num_dimensions = kwargs['num_dimensions']
         self.embedding_dim = kwargs['embedding_dim']
         self.embedder_intermediate_expansion_factor = kwargs['embedder_intermediate_expansion_factor']
         self.num_encoder_layers = kwargs['num_encoder_layers']
@@ -52,7 +52,7 @@ class TextTransformer(MeasurementEncoderDummy):
 
         self.lookup = tf.keras.layers.StringLookup(num_oov_indices=0, vocabulary=self.vocab)
 
-        self.input_length = (self.mantissa_len + 2) * self.max_dimensions
+        self.input_length = (self.mantissa_len + 2) * self.num_dimensions
         self.embedding = tf.keras.layers.Embedding(len(self.vocab), self.embedding_dim, input_length=self.input_length)
 
         self.embedder_intermediate_size = self.input_length * self.embedding_dim * self.embedder_intermediate_expansion_factor
@@ -95,7 +95,7 @@ class TextTransformer(MeasurementEncoderDummy):
 
     def encode(self, values: np.ndarray | tf.Tensor) -> list[str] | list[list[str]]:
         """
-        Write a float number.
+        Convert float numbers to a token representation.
         (Adapted from Kamienny et al.)
         """
         if len(values.shape) == 1:
@@ -122,8 +122,7 @@ class TextTransformer(MeasurementEncoderDummy):
 
     def decode(self, lst: list[str]) -> None | float | list[float]:
         """
-        Parse a list that starts with a float.
-        Return the float value, and the position it ends in the list.
+        Convert tokens back to float numbers.
         (Adapted from Kamienny et al.)
         """
         if len(lst) == 0:
@@ -154,7 +153,7 @@ if __name__ == "__main__":
         'float_precision': 3,
         'mantissa_len': 1,
         'max_exponent': 100,
-        'max_dimensions': 3,
+        'num_dimensions': 3,
         'embedding_dim': 512,
         'embedder_intermediate_expansion_factor': 1,
         'num_encoder_layers': 4,
@@ -164,10 +163,9 @@ if __name__ == "__main__":
         'attention_dropout_rate': 0.1,
     }
     tt = TextTransformer(**default_kwargs)
-
-    values = np.array([3.745401188473625, 0.3142918568673425, 70.31403])
-    print(f"{values=}")
-    encoded = tt.encode(values)
+    floats = np.array([3.745401188473625, 0.3142918568673425, 70.31403])
+    print(f"{floats=}")
+    encoded = tt.encode(floats)
     print(f"{encoded=}")
     decoded = tt.decode(encoded)
     print(f"{decoded=}")

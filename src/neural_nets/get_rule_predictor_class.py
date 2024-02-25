@@ -106,7 +106,7 @@ def get_rule_predictor(args, reader_data):
             'float_precision': args.float_precision_text_transformer,
             'mantissa_len': args.mantissa_len_text_transformer,
             'max_exponent': args.max_exponent_text_transformer,
-            'max_dimensions': args.max_dimensions_text_transformer,
+            'num_dimensions': args.num_dimensions_text_transformer,
             'embedding_dim': args.embedding_dim_text_transformer,
             'embedder_intermediate_expansion_factor': args.embedder_intermediate_expansion_factor_text_transformer,
             'num_encoder_layers': args.num_encoder_layers_text_transformer,
