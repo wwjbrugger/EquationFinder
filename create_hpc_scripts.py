@@ -6,45 +6,51 @@ def run():
     parameter_list_dict = {
         # paprameter to change
         'experiment_name': ['test_dataset_encoder'],
-        'minutes_to_run': ['240'],
-        'max_iteration_to_run': [200],
+        'minutes_to_run': ['600'],
+        'max_iteration_to_run': [400],
+        'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
-        'run_mcts': [False],
-        'only_test': [True],
-        'data': ['nguyen_1',
-                 'nguyen_2',
-                 'nguyen_3',
-                 'nguyen_4',
-                 'nguyen_5',
-                 'nguyen_6',
-                 'nguyen_7',
-                 'nguyen_8',
-                 'nguyen_9',
-                 'nguyen_10',
-                 'nguyen_11',
-                 'nguyen_12'],
+        'replay_buffer_path': [''],
+        'run_mcts': [True],
+        'only_test': [False],
+        'data': [
+            'data_grammar_1/run_1',
+            # 'data_grammar_1/nguyen_1',
+            # 'data_grammar_1/nguyen_2',
+            # 'data_grammar_1/nguyen_3',
+            # 'data_grammar_1/nguyen_4',
+            # 'data_grammar_1/nguyen_5',
+            # 'data_grammar_1/nguyen_6',
+            # 'data_grammar_1/nguyen_7',
+            # 'data_grammar_1/nguyen_8',
+            # 'data_grammar_1/nguyen_9',
+            # 'data_grammar_1/nguyen_10',
+            # 'data_grammar_1/nguyen_11',
+            # 'data_grammar_1/nguyen_12'
+        ],
 
         'script_folder': ['scripts_final'],
         'output_folder': ['output'],
         'cold_start_iterations': [20],
         'class_measurement_encoder': [
-            'MeasurementEncoderDummy',
-            'LSTM_Measurement_Encoder',
-            'Bi_LSTM_Measurement_Encoder',
-            'MLP_Measurement_Encoder',
-            'DatasetTransformer',
-            'MeasurementEncoderPicture',
-            'TextTransformer'
+            # 'MeasurementEncoderDummy',
+             'LSTM_Measurement_Encoder',
+             'Bi_LSTM_Measurement_Encoder',
+             'MLP_Measurement_Encoder',
+             'DatasetTransformer',
+             'MeasurementEncoderPicture',
+            # 'TextTransformer'
         ],
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
             # 'abs_max_y',
             # 'row_wise',
             'abs_max_y__lin_transform',
+            'abs_max_y',
         ],
-        'num_MCTS_sims': ['300_000'],
+        'num_MCTS_sims': ['1'],
         ## General
-        'seed': ['$SLURM_ARRAY_TASK_ID'],
+
         'logging_level': ['30'],
         'wandb': ['offline'],
         'gpu': ['0'],
@@ -52,7 +58,7 @@ def run():
         'num_selfplay_iterations': ['10'],
         'num_selfplay_iterations_test': ['2'],
         'test_network': ['True'],
-        'test_every_n_steps': [10],
+        'test_every_n_steps': [1],
         ## Infos about Tree
         'minimum_reward': ['-1'],
         'maximum_reward': ['1'],
@@ -126,7 +132,7 @@ def run():
         'risk_seeking': [True],
         'depth_first_search': [True],
         ## Replay buffer
-        'replay_buffer_path': [''],
+
         'prioritize': ['False'],
         'prioritize_alpha': ['0.5'],
         'prioritize_beta': ['1'],
@@ -162,8 +168,9 @@ def create_experiment_name(settings_one_script):
     basic_experiment_name = settings_one_script['experiment_name']
     experiment_name = f"{basic_experiment_name}__" \
                       f"{settings_one_script['prior_source']}__" \
-                      f"{settings_one_script['data']}__" \
-                      f"{settings_one_script['class_measurement_encoder']}"
+                      f"{settings_one_script['data'].replace('/','_')}__" \
+                      f"{settings_one_script['class_measurement_encoder']}__" \
+                      f"{settings_one_script['normalize_approach']}"
 
     # f"{settings_one_script['class_measurement_encoder']}"\
     #                   f"norm_{settings_one_script['normalize_approach']}"\
@@ -252,6 +259,8 @@ def write_python_call(settings_one_script, file1):
     if len(settings_one_script['path_to_complete_model']) > 5:
         file1.writelines(f"--path_to_complete_model {settings_one_script['path_to_complete_model']} \\\n")
     file1.writelines(f"--experiment_name $SLURM_JOB_NAME \\\n")
+    file1.writelines(f"--minutes_to_run {settings_one_script['minutes_to_run']} \\\n")
+    file1.writelines(f"--max_iteration_to_run {settings_one_script['max_iteration_to_run']} \\\n")
 
     file1.writelines(
         f"--max_num_nodes_in_syntax_tree {settings_one_script['max_num_nodes_in_syntax_tree']} \\\n")
@@ -262,7 +271,7 @@ def write_python_call(settings_one_script, file1):
         f"--logging_level {settings_one_script['logging_level']} \\\n")
     file1.writelines(f"--wandb {settings_one_script['wandb']} \\\n")
     file1.writelines(f"--gpu {settings_one_script['gpu']} \\\n")
-    file1.writelines(f"--data data_grammar_1/{settings_one_script['data']} \\\n")
+    file1.writelines(f"--data {settings_one_script['data']} \\\n")
     file1.writelines(
         f"--num_selfplay_iterations {settings_one_script['num_selfplay_iterations']} \\\n")
     file1.writelines(

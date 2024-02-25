@@ -339,7 +339,7 @@ class Coach(ABC):
 
     def log_best_list(self, game, logger):
         logger.info(f"Best equations found:")
-        for i in range(len(game.max_list.max_list_state)-1, 0,-1):
+        for i in range(len(game.max_list.max_list_state) - 1, 0, -1):
             logger.info(f"{i}: found equation: {game.max_list.max_list_state[i].complete_discovered_equation:<80}"
                         f" r={round(game.max_list.max_list_keys[i], 3)}"
                         )
@@ -383,12 +383,12 @@ class Coach(ABC):
                              )
         wandb.log(
             {f"average_reward_{self.metrics_test['mode']}":
-                 self.metrics_test['rewards_mean'].result()}
+                 self.metrics_test['rewards_mean'].result(),
+             f"average_done_rollout_ratio_{self.metrics_test['mode']}":
+                 self.metrics_test['done_rollout_ratio'].result()
+             }
         )
-        wandb.log(
-            {f"average_done_rollout_ratio_{self.metrics_test['mode']}":
-                 self.metrics_test['done_rollout_ratio'].result()}
-        )
+
 
     def saveTrainExamples(self, iteration: int) -> None:
         """
