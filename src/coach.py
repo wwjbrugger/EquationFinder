@@ -155,7 +155,7 @@ class Coach(ABC):
         num_MCTS_sims = self.args.num_MCTS_sims
         self.logger.info(f"")
         self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
-
+        start = time.time()
         while not state.done:
             # Compute the move probability vector and state value using MCTS for the current state of the environment.
 
@@ -184,7 +184,10 @@ class Coach(ABC):
             )
             # Update state of control
             state = next_state
-            num_MCTS_sims = max(1, int(num_MCTS_sims / 2))
+        print(f"Equation found: {game.max_list.max_list_state[-1].syntax_tree.rearrange_equation_infix_notation(-1)[1]:<80}")
+        print(f"{print(game.max_list.max_list_state[-1].syntax_tree.constants_in_tree)}")
+        end = time.time()
+
 
         # Cleanup environment and GameHistory
         if mcts.states_explored_till_perfect_fit > 0:
@@ -194,7 +197,16 @@ class Coach(ABC):
                         mcts.states_explored_till_perfect_fit,
                     f"{next_state.observation['true_equation_hash']}"
                     f"_num_states_to_perfect_fit_{mode}":
-                        mcts.states_explored_till_perfect_fit
+                        mcts.states_explored_till_perfect_fit,
+                    f"time to perfect fit {next_state.observation['true_equation_hash']}":
+                        end - start,
+                    f"time to perfect fit":
+                        end - start,
+                    f"num simulation to perfect fit {next_state.observation['true_equation_hash']}":
+                        mcts.num_simulation_till_perfect_fit,
+                    f"num simulation to perfect fit":
+                        mcts.num_simulation_till_perfect_fit
+
                 }
             )
         else:
@@ -237,7 +249,6 @@ class Coach(ABC):
         specified win/ lose ratio. Neural network weights and the replay buffer are stored after every iteration.
         Note that for highly granular vision based environments, that the replay buffer may grow to large sizes.
         """
-        t_end = time.time() + 60 * self.args.minutes_to_run
         self.metrics_train = {
             'mode': 'train',
             'rewards_mean': tf.keras.metrics.Mean(dtype=tf.float32),
@@ -249,42 +260,44 @@ class Coach(ABC):
             'done_rollout_ratio': tf.keras.metrics.Mean(dtype=tf.float32)
         }
         self.loadTrainExamples(int(self.checkpoint.step))
-        while time.time() < t_end and self.checkpoint.step < self.args.max_iteration_to_run:
-            self.logger.warning(f'------------------ITER'
-                                f' {int(self.checkpoint.step)}----------------')
-            # Self-play/ Gather training data.
-            if not self.args.only_test:
-                if self.args.run_mcts:
-                    iteration_train_examples = self.gather_data(
-                        metrics=self.metrics_train,
-                        mcts=self.mcts,
-                        game=self.game,
-                        logger=self.logger,
-                        num_selfplay_iterations=self.args.num_selfplay_iterations
-                    )
-                    self.trainExamplesHistory.append(iteration_train_examples)
-                    wandb.log(
-                        {f"average_reward_iteration_{self.metrics_train['mode']}":
-                             self.metrics_train['rewards_mean'].result()}
-                    )
-                    wandb.log(
-                        {f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
-                             self.metrics_train['done_rollout_ratio'].result()}
-                    )
-                    self.saveTrainExamples(int(self.checkpoint.step))
-                if self.args.prior_source in 'neural_net':
-                    if self.checkpoint.step > self.args.cold_start_iterations:
-                        self.update_network()
-                    save_path = self.checkpoint_manager.save()
-                    self.logger.debug(
-                        f"Saved checkpoint for epoch {int(self.checkpoint.step)}: {save_path}"
-                    )
-                else:
-                    save_path = self.checkpoint_manager.save()
-            if self.args.test_network and \
-                    self.checkpoint.step % self.args.test_every_n_steps == 0:
-                self.test_epoche(save_path=save_path)
-            self.checkpoint.step.assign_add(1)
+        save_path = self.checkpoint_manager.save()
+
+        self.logger.warning(f'------------------ITER'
+                            f' {int(self.checkpoint.step)}----------------')
+        # Self-play/ Gather training data.
+        if not self.args.only_test:
+            if self.args.run_mcts:
+                iteration_train_examples = self.gather_data(
+                    metrics=self.metrics_train,
+                    mcts=self.mcts,
+                    game=self.game,
+                    logger=self.logger,
+                    num_selfplay_iterations=self.args.num_selfplay_iterations
+                )
+                self.trainExamplesHistory.append(iteration_train_examples)
+                wandb.log(
+                    {f"average_reward_iteration_{self.metrics_train['mode']}":
+                         self.metrics_train['rewards_mean'].result()}
+                )
+                wandb.log(
+                    {f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
+                         self.metrics_train['done_rollout_ratio'].result()}
+                )
+                self.saveTrainExamples(int(self.checkpoint.step))
+            if self.args.prior_source in 'neural_net':
+                if self.checkpoint.step > self.args.cold_start_iterations:
+                    self.update_network()
+                self.checkpoint.step.assign_add(1)
+                save_path = self.checkpoint_manager.save()
+                self.logger.debug(
+                    f"Saved checkpoint for epoch {int(self.checkpoint.step)}: {save_path}"
+                )
+            else:
+                self.checkpoint.step.assign_add(1)
+                save_path = self.checkpoint_manager.save()
+        if self.args.test_network and \
+                self.checkpoint.step % self.args.test_every_n_steps == 0:
+            self.test_epoche(save_path=save_path)
 
     def update_network(self):
         # Flatten examples over self-play episodes and sample a training batch.
