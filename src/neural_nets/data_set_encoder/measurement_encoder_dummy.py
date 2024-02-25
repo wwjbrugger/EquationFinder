@@ -5,57 +5,77 @@ import sklearn.preprocessing as sk_prepros
 from src.utils.error import NonFiniteError
 
 
+
 class MeasurementEncoderDummy(tf.keras.Model):
     def __init__(self, *args, **kwargs):
         super(MeasurementEncoderDummy, self).__init__()
         self.output_dim = 0
         self.column_names = []
         self.kwargs = kwargs
+        self.norm_abs_max_y ="abs_max_y" in kwargs['normalize_approach']
+        self.norm_lin_transform = "lin_transform" in kwargs['normalize_approach']
 
     def prepare_data(self, data):
-        batch_size = tf.shape(data['formula']).numpy()[0]
-        return tf.zeros([batch_size, 0])
+        batch_size = tf.shape(data['data_frame']).numpy()
+        output_size = [1] + list(batch_size)
+        return tf.zeros(output_size)
 
-    def normalize(self, data_frame, approach=''):
+    def normalize(self, data_frame):
         data_frame = data_frame.sample(
             min(data_frame.shape[0], self.kwargs['max_len_datasets'])
         )
+        if not (self.norm_lin_transform or self.norm_abs_max_y):
+            return data_frame
         try:
-            if approach == "abs_max_value":
-                array = data_frame.to_numpy()
-                max_value = np.abs(array.max())
-                min_value = np.abs(array.min())
-                abs_value = max(max_value, min_value)
-                norm_array = np.divide(array, abs_value, dtype=np.float32)
-            elif approach == "row_wise":
-                measurements_64 = data_frame.to_numpy(dtype='float64', copy=True)
-                norm_measurements_64 = sk_prepros.normalize(measurements_64, axis=1)
-                norm_array = np.array(norm_measurements_64, dtype='float32')
-            elif approach == "abs_max_y":
-                array = data_frame.to_numpy(dtype='float32', copy=True)
+            output_columns = self.get_output_columns(data_frame)
+            array = data_frame.to_numpy(dtype='float32', copy=True)
+            if self.norm_abs_max_y:
                 y = array[:, -1]
                 max_value = np.abs(y.max())
                 min_value = np.abs(y.min())
                 abs_value = max(max_value, min_value, 1)
                 y_norm = y / abs_value
                 array[:, -1] = y_norm
-                norm_array = array
-            elif approach == "clip":
-                array = data_frame.to_numpy(dtype='float32', copy=True)
-                norm_array = np.clip(array, a_min=-1, a_max=1)
-            else:
-                return data_frame
+            if self.norm_lin_transform:
+                input_variables = array[:, :-1]
+                x_max = input_variables.max()
+                x_min = input_variables.min()
+                data_range = max(x_max - x_min, 10e-6)
+                a = 2 / data_range
+                b = -2 * x_min / data_range - 1
+                norm_input_variables = a * input_variables + b
+                array[:, :-1] = norm_input_variables
+                a_array = np.full((array.shape[0], 1), a)
+                b_array = np.full((array.shape[0], 1), b)
+                array = np.concatenate([a_array, b_array, array], axis=1)
+
         except FloatingPointError:
             print(f'FloatingPointError happened in normalizing {array}')
-            norm_array = np.zeros(shape=array.shape)
+            output_shape = self.get_output_shape(data_frame)
+            array = np.zeros(shape=output_shape)
 
-        if not np.all(np.isfinite(norm_array)):
+        if not np.all(np.isfinite(array)):
+            print(f"Before error handling the array is \n {array}")
             print('On of the Elements after the normalization is not an number. All of them are set to 0')
-            norm_array = np.nan_to_num(norm_array, nan=np.float32(0.0), posinf=np.float32(3.4028235e+38), neginf=np.float32(-3.4028235e+38))
-            print(f"After error handling the array is f{norm_array}")
-        norm_dataframe = pd.DataFrame(norm_array, columns=data_frame.columns, dtype=np.float32)
+            array = np.nan_to_num(array, nan=np.float32(0.0), posinf=np.float32(3.4028235e+38), neginf=np.float32(-3.4028235e+38))
+            print(f"After error handling the array is \n {array}")
+        norm_dataframe = pd.DataFrame(array, columns=output_columns, dtype=np.float32)
 
         return norm_dataframe
+
+    def get_output_shape(self, data_frame):
+        input_shape = data_frame.shape
+        if self.norm_lin_transform:
+            return (input_shape[0], input_shape[1] +2 )
+        else:
+            return (input_shape[0], input_shape[1])
+
+    def get_output_columns(self, data_frame):
+        input_columns = list(data_frame.columns)
+        if self.norm_lin_transform:
+            return ['a','b'] + input_columns
+        else:
+            return input_columns
 
     def reshape_measurements(self, data):
         tensor_with_row = reshape_measurements(

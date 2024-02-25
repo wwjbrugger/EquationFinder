@@ -1,0 +1,64 @@
+def get_grammars(args):
+    if args.grammar_to_use == 1:
+        grammar_string = \
+            """  
+            S -> '+' S S [0.3]
+            S -> '-' S S [0.05]
+            S -> '*' S S [0.1]
+    
+            S -> '**' '6' 'x_0'[0.02]
+            S -> '**' '5' 'x_0'[0.03]
+            S -> '**' '4' 'x_0'[0.05]
+            S -> '**' '3' 'x_0'[0.05]
+            S -> '**' '2' 'x_0'[0.05]
+            S -> '**' 'x_1' 'x_0'[0.01]
+            S -> 'x_0'      [0.1]
+            S -> 'x_1'      [0.1]
+            S -> 'c'        [0.05]
+    
+    
+            S -> 'sin' Inner_Function [0.03] 
+            S -> 'cos' Inner_Function [0.03] 
+            S -> 'log' Inner_Function [0.03]  
+    
+            Inner_Function -> '+' I I [0.3]
+            Inner_Function -> '*' I I [0.3]
+            Inner_Function ->  I    [0.4]
+    
+            I -> 'x_0'          [0.2]
+            I -> 'x_1'          [0.2]
+            I -> 'c'            [0.2]
+            I -> '**' '2' 'x_0'     [0.2]
+            I -> '**' '2' 'x_1'     [0.2]
+            Variable -> 'x_0'[0.5] | 'x_1' [0.5]
+               """
+    elif args.grammar_to_use ==2:
+        grammar_string = \
+            """  
+            S -> '+' S S [0.15]
+            S -> '-' S S [0.1]
+            S -> '*' S S [0.15]
+            S -> '/' S S [0.1]
+            S -> '**' S S     [0.025]
+            S -> '**' 2 'x_0'      [0.05]
+            S -> '**' 2 'x_1'      [0.05]
+            S -> 'x_0'   [0.1]
+            S -> 'x_1'   [0.1]
+            S -> 'c'     [0.1]
+    
+    
+            S -> 'sin' I      [0.025] 
+            S -> 'cos' I      [0.025]
+            S -> 'log' I      [0.025]
+    
+            I -> '+' I I [0.1]
+            I -> '*' I I [0.1]
+            I -> '/' I I [0.05]
+            I ->  'x_0'      [0.25]
+            I ->  'x_1'      [0.25]
+            I ->  'c'      [0.25]
+            Variable -> 'x_0'[0.5] | 'x_1' [0.5]
+               """
+    else:
+        raise AssertionError('grammar you want to use does not exist')
+    return grammar_string

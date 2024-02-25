@@ -3,13 +3,13 @@ from bisect import bisect_left
 
 class MaxList():
     def __init__(self, args):
-        self.max_elements_in_list = args.max_elements_in_list
+        self.max_elements_in_best_list = args.max_elements_in_best_list
         self.max_list_keys = []  # smallest element is left
         self.max_list_state = []
         self.args = args
 
     def add(self, state, key):
-        if len(self.max_list_keys) >= self.max_elements_in_list:
+        if len(self.max_list_keys) >= self.max_elements_in_best_list:
             if self.max_list_keys[0] >= key:
                 return
             else:

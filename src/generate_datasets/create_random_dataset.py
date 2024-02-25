@@ -4,6 +4,7 @@ from pcfg import PCFG
 import random
 import numpy as np
 from src.generate_datasets.save_dataset import save_panda_dataframes
+from src.generate_datasets.grammars import get_grammars
 from src.generate_datasets.save_grammar_files import save_grammar_to_file
 from pathlib import Path
 from src.utils.parse_args import str2bool
@@ -11,31 +12,41 @@ from src.utils.files import create_file_path
 from src.generate_datasets.dataset_generator import DatasetGenerator
 from src.generate_datasets.split_dataset import split_dataset
 from definitions import ROOT_DIR
+from src.generate_datasets.save_buffer_for_supervised_learning import save_buffer_for_supervised_learning
+
+
+
+
 
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument("--save_folder", help="where to save data_ set",
                         required=True, type=str)
-    parser.add_argument("--number_equations", default=10,
+    parser.add_argument("--grammar_to_use", default=True, type=int)
+    parser.add_argument("--number_equations", default=10000,
                         help="how many trees to generate", required=False,
                         type=int)
     parser.add_argument("--seed", default=42,
-                        help="paths per tree", required=False, type=int)
-    parser.add_argument("--max_depth_of_tree", default=6,
+                        help="seed to generate trees", required=False, type=int)
+    parser.add_argument("--max_depth_of_tree", default=10,
                         help="how many recursions a formula is allowed to have"
                         , required=False, type=int)
-    parser.add_argument("--num_calls_sampling", default=50,
+    parser.add_argument('--max_num_nodes_in_syntax_tree', type=int,
+                        help='Maximum depth of generated equations', default=30)
+    parser.add_argument("--num_calls_sampling", default=20,
                         help="How often the sampling procedure is called per example",
                         required=False, type=int)
-    parser.add_argument("--how_to_select_node_to_delete", type=str,
+    parser.add_argument("--how_to_select_node_to_delete", default=0,
+                        type=str,
                         help="Choose int to delete this node id in all generated trees. "
                              "Choose 'all' to delete one node after each other"
                              "Choose random to delete one random node from each tree nodes "
                         )
-    parser.add_argument("--sample_with_noise", type=str2bool,
+    parser.add_argument("--sample_with_noise", default=False,
+                        type=str2bool,
                         help="Noise on x values "
                         )
-    parser.add_argument("--logging_level", type=int, default=10,
+    parser.add_argument("--logging_level", type=int, default=30,
                         help="CRITICAL = 50, ERROR = 40, "
                              "WARNING = 30, INFO = 20, "
                              "DEBUG = 10, NOTSET = 0")
@@ -52,52 +63,18 @@ if __name__ == '__main__':
                              'afterwards equation will be invalid')
 
     args = parser.parse_args()
-
     random.seed(args.seed)
     np.random.seed(args.seed)
-    grammar_string = \
-        """  
-        S -> '+' S S [0.1]
-        S -> '-' S S [0.1]
-        S -> '*' S S [0.1]
-        S -> 'sin' Inner_Function [0.1] 
-        S -> 'cos' Inner_Function [0.1] 
-        S -> 'log' Inner_Function [0.1]  
-        S -> 'x_0' [0.05] 
-        S -> 'x_1' [0.05]
-        S -> '**' Exponent Variable [0.1]
-        S -> '1' [0.05]
-        S -> '0.5' [0.05]
-        S -> '2' [0.1]
-        Exponent -> '6' [0.1]
-        Exponent -> '5' [0.1] 
-        Exponent -> '4' [0.1] 
-        Exponent -> '3' [0.1] 
-        Exponent -> '2' [0.2] 
-        Exponent -> '0.5' [0.2] 
-        Exponent -> 'x_1' [0.2]
-        Inner_Function -> '**' Exponent Variable [0.3] 
-        Inner_Function -> 'x_0' [0.2] 
-        Inner_Function -> 'x_1' [0.2] 
-        Inner_Function -> '+' SUM SUM [0.3]  
-        SUM -> '**' Exponent Variable [0.5] 
-        SUM -> '1' [0.2] 
-        SUM -> 'x_0' [0.15] 
-        SUM -> 'x_1' [0.15]
-        Variable -> 'x_0' [0.5] | 'x_1' [0.5]
-           """
-
-
-    grammar = PCFG.fromstring(grammar_string)
     experiment_dataset_dic = {
         'num_calls_sampling': args.num_calls_sampling,
         'x_0': {
             'distribution': np.random.uniform,
             'distribution_args': {
-                'low': 0,
-                'high': 10,
+                'low': -1,
+                'high': 4,
                 'size': args.num_calls_sampling
             },
+            'min_variable_range': 2,
             'generate_all_values_with_one_call': True,
             'sample_with_noise': args.sample_with_noise,
             'noise_std': 0.1
@@ -105,16 +82,28 @@ if __name__ == '__main__':
         'x_1': {
             'distribution': np.random.uniform,
             'distribution_args': {
-                'low': 0,
-                'high': 10,
+                'low': -1,
+                'high': 4,
                 'size': args.num_calls_sampling
             },
+            'min_variable_range': 2,
             'generate_all_values_with_one_call': True,
             'sample_with_noise': args.sample_with_noise,
             'noise_std': 0.1
+        },
+        'c': {
+            'distribution': np.random.uniform,
+            'distribution_args': {
+                'low': 0.5,
+                'high': 5,
+            }
         }
     }
-    save_folder = Path(args.save_folder)
+
+
+    grammar = PCFG.fromstring(get_grammars(args))
+
+    save_folder = ROOT_DIR / Path(args.save_folder)
     save_folder.mkdir(exist_ok=True, parents=True)
     save_path = create_file_path(save_folder=save_folder, stem='run')
 
@@ -137,4 +126,11 @@ if __name__ == '__main__':
         args=args
     )
 
-    split_dataset(path=Path(f'{ROOT_DIR}/data_sets/{save_path.name}'))
+    split_dataset(path=Path(f'{ROOT_DIR}/{save_path.parent.name}/{save_path.name}'))
+    print(f"Datasets are saved to  {ROOT_DIR}/{save_path.parent.name}/{save_path.name}")
+
+    save_buffer_for_supervised_learning(
+        args=args,
+        save_path = save_path,
+        dic_measurements=dic_measurements
+    )

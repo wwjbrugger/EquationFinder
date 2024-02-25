@@ -38,7 +38,7 @@ class RulePredictorSkeleton(tf.keras.Model):
         self.steps = 0
         self.logger = get_log_obj(args=args, name='AlphaZeroRulePredictor')
         if self.args.contrastive_loss:
-            self.contrastive_loss = NT_Xent(tau=1)
+            self.contrastive_loss = NT_Xent(args=self.args)
 
     def train(self, examples: typing.List):
         """
@@ -103,7 +103,7 @@ class RulePredictorSkeleton(tf.keras.Model):
         )
         return measurement_representation, target_pis, target_vs, tree_representation
 
-    #@tf.function
+    @tf.function
     def train_step(self, i, measurement_representation, target_pis,
                    target_vs, tree_representation, target_dataset_encoding=None):
         with tf.GradientTape(persistent=True) as tape:
@@ -128,7 +128,7 @@ class RulePredictorSkeleton(tf.keras.Model):
                 real=target_vs,
                 pred=v
             )
-        if self.args.path_to_pretrained_dataset_encoder == 'None':
+        if self.args.path_to_pretrained_dataset_encoder is None:
             variables_encoder_measurements = [resourceVariable for resourceVariable in
                                               self.net.encoder_measurement.trainable_variables]
             if self.args.contrastive_loss:
@@ -213,7 +213,7 @@ class RulePredictorSkeleton(tf.keras.Model):
         tree_representation = \
             network_input['current_tree_representation_int']
         if self.args.use_position_encoding:
-            node_to_expand = tf.cast(network_input['id_last_node'], self.args.precision)
+            node_to_expand = tf.cast(network_input['id_last_node'], np.float32)
             node_to_expand = expand_tensor_to_same_size(
                 to_change=node_to_expand,
                 reference=tree_representation

@@ -2,13 +2,13 @@ from src.syntax_tree.syntax_tree import SyntaxTree
 from src.game.game import Game, GameState
 import typing
 import numpy as np
-from src.equation_classes.pandas_preprocess import PandasPreprocess
+from src.preprocess_data.pandas_preprocess import PandasPreprocess
 from copy import deepcopy
 from src.utils.logging import get_log_obj
 from src.constant_fitting.contant_fitting import refit_all_constants
 import hashlib
 import math
-from src.game.rewards import ReMSe, Mse
+from src.game.rewards import Mse
 from src.utils.error import NonFiniteError
 from src.equation_classes.max_list import MaxList
 import re
@@ -54,7 +54,7 @@ class FindEquationGame(Game):
         observations['last_symbol'] = \
             syntax_tree.dict_of_nodes[syntax_tree.nodes_to_expand[0]].node_symbol
         observations['true_equation'] =batch_data['formula']
-        pattern = r'c_0_|___'
+        pattern = r'c_0_|___|__'
         matches = re.split(pattern, observations['true_equation'])
         observations['true_equation_hash'] = matches[0].strip()
         next_state = GameState(syntax_tree=syntax_tree, observation=observations)
@@ -75,8 +75,11 @@ class FindEquationGame(Game):
         )
         next_observation = deepcopy(state.observation)
         next_observation['current_tree_representation_str'] = equation
+        current_tree_representation_int = self.reader.map_tree_representation_to_int(
+            symbol_list=equation.split())
+        next_observation['current_tree_representation_int'] = current_tree_representation_int
         done = next_tree.complete or next_tree.max_depth_reached or \
-            next_tree.max_constants_reached
+            next_tree.max_constants_reached or next_tree.max_nodes_reached
 
         if done:
             next_observation['id_last_node'] = []
@@ -86,11 +89,17 @@ class FindEquationGame(Game):
             next_observation['last_symbol'] = \
                 next_tree.dict_of_nodes[next_tree.nodes_to_expand[0]].node_symbol
 
-        next_state = GameState(syntax_tree=next_tree, observation=next_observation, done=done, production_action=action, previous_state=state)
+        next_state = GameState(
+            syntax_tree=next_tree,
+            observation=next_observation,
+            done=done,
+            production_action=action,
+            previous_state=state
+        )
 
         reward = self.reward(state=next_state)
-        next_state.reward = round(reward, 2)
-        return next_state, round(reward, 2)
+        next_state.reward = reward
+        return next_state, reward
 
     def reward(self, state):
         dataset = state.observation['data_frame']
@@ -99,8 +108,11 @@ class FindEquationGame(Game):
         if syntax_tree.max_depth_reached:
             self.logger.debug('done max depth')
             r = self.args.minimum_reward
-        if syntax_tree.max_constants_reached:
+        elif syntax_tree.max_constants_reached:
             self.logger.debug('done max constant')
+            r = self.args.minimum_reward
+        elif syntax_tree.max_nodes_reached:
+            self.logger.debug('done max number nodes')
             r = self.args.minimum_reward
         elif syntax_tree.complete:
             try:
@@ -143,6 +155,8 @@ class FindEquationGame(Game):
                 r = float(self.args.minimum_reward)
             except NonFiniteError as e:
                 r = float(self.args.minimum_reward)
+        if r < 0.999:
+            r = 0
         return r
 
     def getHash(self, state):

@@ -4,6 +4,7 @@ import numpy as np
 
 class Exp(AbstractOperator):
     def __init__(self, node):
+        super().__init__(node)
         self.num_child = 1
         self.node = node
         self.invertible = True

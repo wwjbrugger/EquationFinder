@@ -75,7 +75,7 @@ class Coach(ABC):
         if run_name is None:
             run_name = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        self.log_dir = f"{ROOT_DIR}/out/logs/AlphaZero/{run_name}"
+        self.log_dir = f"{ROOT_DIR}/out/logs/{run_name}"
         self.file_writer = tf.summary.create_file_writer(
             self.log_dir + "/metrics")
         self.file_writer.set_as_default()
@@ -117,7 +117,7 @@ class Coach(ABC):
         examples = [
             {
                 'observation': histories[h_i].stackObservations(
-                    self.rule_predictor.args.observation_length, t=i),
+                    length=1, t=i),
                 'probabilities_actor': histories[h_i].probabilities[i],
                 'observed_return': histories[h_i].observed_returns[i],
                 'loss_scale': loss_scale,
@@ -147,8 +147,14 @@ class Coach(ABC):
         formula_started_from = state.observation['current_tree_representation_str']
         # Update MCTS visit count temperature according to an episode or weight update schedule.
         temp = self.get_temperature(game)
-        wandb.log({f"temperature": temp})
+        if game == self.game_test:
+            mode = 'test'
+        else:
+            mode = 'train'
+        wandb.log({f"temperature_{mode}": temp})
         num_MCTS_sims = self.args.num_MCTS_sims
+        self.logger.info(f"")
+        self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
 
         while not state.done:
             # Compute the move probability vector and state value using MCTS for the current state of the environment.
@@ -158,16 +164,12 @@ class Coach(ABC):
                 num_mcts_sims=int(num_MCTS_sims),
                 temperature=temp
             )
-            if mcts.states_explored_till_perfect_fit > -1:
-                num_MCTS_sims = 5
-            # visualize_mcts(mcts)
 
             # Take a step in the environment and observe the transition and store necessary statistics.
             state.action = np.random.choice(len(pi), p=pi)
             next_state, r = game.getNextState(
                 state=state,
                 action=state.action,
-                encoder_measurement=self.rule_predictor.net.encoder_measurement
             )
             complete_state.syntax_tree.expand_node_with_action(
                 node_id=complete_state.syntax_tree.nodes_to_expand[0],
@@ -182,10 +184,28 @@ class Coach(ABC):
             )
             # Update state of control
             state = next_state
-            num_MCTS_sims = max(1, int(num_MCTS_sims/2))
+            num_MCTS_sims = max(1, int(num_MCTS_sims / 2))
 
         # Cleanup environment and GameHistory
-        wandb.log({f"states_explored_till_perfect_fit": mcts.states_explored_till_perfect_fit})
+        if mcts.states_explored_till_perfect_fit > 0:
+            wandb.log(
+                {
+                    f"num_states_to_perfect_fit_{mode}":
+                        mcts.states_explored_till_perfect_fit,
+                    f"{next_state.observation['true_equation_hash']}"
+                    f"_num_states_to_perfect_fit_{mode}":
+                        mcts.states_explored_till_perfect_fit
+                }
+            )
+        else:
+            wandb.log(
+                {
+                    f"equation_not_found_{next_state.observation['true_equation_hash']}_{mode}": 1,
+                    f"equation_not_found_{mode}": 1,
+
+                }
+            )
+
         game.close(state)
         history.terminate(
             formula_started_from=formula_started_from,
@@ -229,59 +249,43 @@ class Coach(ABC):
             'done_rollout_ratio': tf.keras.metrics.Mean(dtype=tf.float32)
         }
         self.loadTrainExamples(int(self.checkpoint.step))
-        while time.time() < t_end:
+        while time.time() < t_end and self.checkpoint.step < self.args.max_iteration_to_run:
             self.logger.warning(f'------------------ITER'
                                 f' {int(self.checkpoint.step)}----------------')
             # Self-play/ Gather training data.
-            iteration_train_examples = self.gather_data(
-                metrics=self.metrics_train,
-                mcts=self.mcts,
-                game=self.game,
-                logger=self.logger,
-                num_selfplay_iterations=self.args.num_selfplay_iterations
-            )
-            # for history in iteration_train_examples:
-            #     for observation in history.observations:
-            #         if not np.all(np.isfinite(observation['data_frame'])):
-            #             print('In dataframe an no infinite value happen ')
-            #             print(observation['data_frame'])
-            #     if not np.all(np.isfinite(history.observed_returns)):
-            #         print('In observed_returns an no infinite value happen ')
-            #         print(history.observed_returns)
-            #     for prob in history.probabilities:
-            #         if not np.all(np.isfinite(prob)):
-            #             print('In probabilities an no infinite value happen ')
-            #             print(prob)
-            #             print()
-            self.trainExamplesHistory.append(iteration_train_examples)
-            self.log_wandb_metric(metric=self.metrics_train)
-
-            if self.args.prior_source in 'neural_net':
-                self.saveTrainExamples(int(self.checkpoint.step))
-                if self.checkpoint.step > self.args.cold_start_iterations:
-                    self.update_network()
-                self.checkpoint.step.assign_add(1)
-                save_path = self.checkpoint_manager.save()
-                self.logger.debug(
-                    f"Saved checkpoint for epoch {int(self.checkpoint.step)}: {save_path}"
-                )
-            else:
-                self.saveTrainExamples(int(self.checkpoint.step))
-                self.checkpoint.step.assign_add(1)
-                save_path = self.checkpoint_manager.save()
+            if not self.args.only_test:
+                if self.args.run_mcts:
+                    iteration_train_examples = self.gather_data(
+                        metrics=self.metrics_train,
+                        mcts=self.mcts,
+                        game=self.game,
+                        logger=self.logger,
+                        num_selfplay_iterations=self.args.num_selfplay_iterations
+                    )
+                    self.trainExamplesHistory.append(iteration_train_examples)
+                    wandb.log(
+                        {f"average_reward_iteration_{self.metrics_train['mode']}":
+                             self.metrics_train['rewards_mean'].result()}
+                    )
+                    wandb.log(
+                        {f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
+                             self.metrics_train['done_rollout_ratio'].result()}
+                    )
+                    self.saveTrainExamples(int(self.checkpoint.step))
+                if self.args.prior_source in 'neural_net':
+                    if self.checkpoint.step > self.args.cold_start_iterations:
+                        self.update_network()
+                    self.checkpoint.step.assign_add(1)
+                    save_path = self.checkpoint_manager.save()
+                    self.logger.debug(
+                        f"Saved checkpoint for epoch {int(self.checkpoint.step)}: {save_path}"
+                    )
+                else:
+                    self.checkpoint.step.assign_add(1)
+                    save_path = self.checkpoint_manager.save()
             if self.args.test_network and \
-                    self.checkpoint.step % self.args.test_every_n_steps == 1:
+                    self.checkpoint.step % self.args.test_every_n_steps == 0:
                 self.test_epoche(save_path=save_path)
-
-    def log_wandb_metric(self, metric):
-        wandb.log(
-            {f"average_reward_{metric['mode']}":
-                 metric['rewards_mean'].result()}
-        )
-        wandb.log(
-            {f"average_done_rollout_ratio_{metric['mode']}":
-                 metric['done_rollout_ratio'].result()}
-        )
 
     def update_network(self):
         # Flatten examples over self-play episodes and sample a training batch.
@@ -298,37 +302,26 @@ class Coach(ABC):
                 self.rule_predictor.train(batch)
             train_pi_loss += pi_batch_loss
             train_v_loss += v_batch_loss
-        wandb.log({f"Train pi loss": pi_batch_loss})
-        wandb.log({f"Train v loss": v_batch_loss})
-        if self.args.contrastive_loss:
-            wandb.log({f"Contrastive loss": contrastive_loss})
+            wandb.log({f"Train pi loss": pi_batch_loss})
+            wandb.log({f"Train v loss": v_batch_loss})
+            if self.args.contrastive_loss:
+                wandb.log({f"Contrastive loss": contrastive_loss})
 
     def gather_data(self, metrics, mcts, game, logger, num_selfplay_iterations):
-        iteration_train_examples = list()
+        iteration_examples = list()
         metrics['rewards_mean'].reset_state()
         metrics['done_rollout_ratio'].reset_state()
         minimal_reward_runs = 0
         for i in range(num_selfplay_iterations):
             mcts.clear_tree()
-            if self.checkpoint.step % 5 == 1:
-                logger.warning('________________________________________')
-                logger.warning(
-                    f"{i}: {self.args.num_selfplay_iterations},"
-                )
             result_episode = self.execute_one_game(
                 game=game,
                 mcts=mcts
             )
             if result_episode.observed_returns[0] == self.args.minimum_reward:
                 minimal_reward_runs += 1
-            iteration_train_examples.append(result_episode)
-            if self.checkpoint.step % 5 == 1:
-                logger.warning('________________________________________')
-            for i in range(len(game.max_list.max_list_state)):
-                logger.info(f"found equation: {game.max_list.max_list_state[i].complete_discovered_equation:<80}"
-                            f" r={round(game.max_list.max_list_keys[i], 3)}"
-                            )
-                logger.info(game.max_list.max_list_state[i].syntax_tree.constants_in_tree)
+            iteration_examples.append(result_episode)
+            self.log_best_list(game, logger)
 
             metrics['rewards_mean'].update_state(
                 np.sum(result_episode.rewards, dtype=np.float32)
@@ -337,40 +330,48 @@ class Coach(ABC):
                 mcts.visits_done_state / mcts.visits_roll_out
             )
 
-        iteration_train_examples = self.augment_buffer(
-            iteration_train_examples,
+        iteration_examples = self.augment_buffer(
+            iteration_examples,
             metrics,
             minimal_reward_runs,
             num_selfplay_iterations
         )
-        return iteration_train_examples
+        return iteration_examples
 
-    def augment_buffer(self, iteration_train_examples, metrics, minimal_reward_runs, num_selfplay_iterations):
+    def log_best_list(self, game, logger):
+        logger.info(f"Best equations found:")
+        for i in range(len(game.max_list.max_list_state)-1, 0,-1):
+            logger.info(f"{i}: found equation: {game.max_list.max_list_state[i].complete_discovered_equation:<80}"
+                        f" r={round(game.max_list.max_list_keys[i], 3)}"
+                        )
+            logger.info(game.max_list.max_list_state[i].syntax_tree.constants_in_tree)
+
+    def augment_buffer(self, iteration_examples, metrics, minimal_reward_runs, num_selfplay_iterations):
         if metrics['mode'] == 'train':
             if self.args.balance_buffer:
-                iteration_train_examples = self.balance_buffer(
-                    iteration_train_examples=iteration_train_examples,
+                iteration_examples = self.balance_buffer(
+                    iteration_examples=iteration_examples,
                     minimal_reward_runs=minimal_reward_runs,
                     num_selfplay_iterations=num_selfplay_iterations
                 )
-        return iteration_train_examples
+        return iteration_examples
 
-    def balance_buffer(self, iteration_train_examples, minimal_reward_runs, num_selfplay_iterations):
+    def balance_buffer(self, iteration_examples, minimal_reward_runs, num_selfplay_iterations):
         allowed_minimal_runs = int(num_selfplay_iterations * self.args.max_percent_of_minimal_reward_runs_in_buffer)
         if allowed_minimal_runs < minimal_reward_runs:
-            balanced_iteration_train_examples = []
+            balanced_iteration_examples = []
             allowed_minimal_runs_to_add = allowed_minimal_runs
-            for example in iteration_train_examples:
+            for example in iteration_examples:
                 if example.observed_returns[0] > self.args.minimum_reward:
-                    balanced_iteration_train_examples.append(example)
+                    balanced_iteration_examples.append(example)
                 elif allowed_minimal_runs_to_add > 0:
-                    balanced_iteration_train_examples.append(example)
+                    balanced_iteration_examples.append(example)
                     allowed_minimal_runs_to_add -= 1
                 else:
                     pass
-            return balanced_iteration_train_examples
+            return balanced_iteration_examples
         else:
-            return iteration_train_examples
+            return iteration_examples
 
     def test_epoche(self, save_path):
         self.logger.warning(f'------------------ Test ----------------')
@@ -381,7 +382,14 @@ class Coach(ABC):
                              logger=self.logger_test,
                              num_selfplay_iterations=self.args.num_selfplay_iterations_test
                              )
-        self.log_wandb_metric(metric=self.metrics_test)
+        wandb.log(
+            {f"average_reward_{self.metrics_test['mode']}":
+                 self.metrics_test['rewards_mean'].result()}
+        )
+        wandb.log(
+            {f"average_done_rollout_ratio_{self.metrics_test['mode']}":
+                 self.metrics_test['done_rollout_ratio'].result()}
+        )
 
     def saveTrainExamples(self, iteration: int) -> None:
         """
@@ -391,7 +399,7 @@ class Coach(ABC):
         :param iteration: int Current iteration of the self-play. Used as indexing value for the data filename.
         """
         folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                 'AlphaZero' / self.args.experiment_name / str(self.args.seed)
+                  self.args.experiment_name / str(self.args.seed)
 
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -409,14 +417,22 @@ class Coach(ABC):
         """
         Load in a previously generated replay buffer from the path specified in the .json arguments.
         """
-        folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                 'AlphaZero' / self.args.experiment_name / str(self.args.seed)
-        buffer_number = highest_number_in_files(path=folder, stem='buffer_')
-        filename = folder / f"buffer_{buffer_number}.examples"
-
-        if os.path.isfile(filename):
-            with open(filename, "rb") as f:
-                self.logger.info(f"Replay buffer {buffer_number}  found. Read it.")
-                self.trainExamplesHistory = Unpickler(f).load()
+        if len(self.args.replay_buffer_path) >= 1:
+            if os.path.isfile(self.args.replay_buffer_path):
+                with open(self.args.replay_buffer_path, "rb") as f:
+                    self.logger.info(f"Replay buffer {self.args.replay_buffer_path}  found. Read it.")
+                    self.trainExamplesHistory = Unpickler(f).load()
+            else:
+                self.logger.info(f"No replay buffer found. Use empty one.")
         else:
-            self.logger.info(f"No replay buffer found. Use empty one.")
+            folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
+                      self.args.experiment_name / str(self.args.seed)
+            buffer_number = highest_number_in_files(path=folder, stem='buffer_')
+            filename = folder / f"buffer_{buffer_number}.examples"
+
+            if os.path.isfile(filename):
+                with open(filename, "rb") as f:
+                    self.logger.info(f"Replay buffer {buffer_number}  found. Read it.")
+                    self.trainExamplesHistory = Unpickler(f).load()
+            else:
+                self.logger.info(f"No replay buffer found. Use empty one.")

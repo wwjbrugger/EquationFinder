@@ -56,7 +56,7 @@ class DatasetTransformer(MeasurementEncoderDummy):
                 wandb config
                 device: Optional[int].
         """
-        super(MeasurementEncoderDummy, self).__init__()
+        super(DatasetTransformer, self).__init__(*args, **kwargs)
         self.kwargs = kwargs
         # * Dataset Metadata *
         # HOw many dimension each feature has
@@ -241,10 +241,7 @@ class DatasetTransformer(MeasurementEncoderDummy):
         return enc
 
     def prepare_data(self, data):
-        norm_frame = self.normalize(
-            data_frame=data['data_frame'],
-            approach=self.kwargs['normalize_approach']
-        )
+        norm_frame = self.normalize(data_frame=data['data_frame'])
         norm_frame_T = norm_frame.transpose().to_numpy()
         # Dataset transformer expect each cell in table to be encoded.
         # we are not doing so we add an extra dimension at the end

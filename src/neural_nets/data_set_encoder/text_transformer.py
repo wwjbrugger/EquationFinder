@@ -12,10 +12,7 @@ class  TextTransformer(MeasurementEncoderDummy):
 
 
     def prepare_data(self, data):
-        norm_frame = self.normalize(
-            data_frame=data['data_frame'],
-            approach=self.kwargs['normalize_approach']
-        )
+        norm_frame = self.normalize(data_frame=data['data_frame'])
         # tokenizer here
         tensor_one_row = tf.reshape(tf.convert_to_tensor(norm_frame, dtype=tf.float32), -1)
         #add batch dimension

@@ -4,6 +4,7 @@ from src.equation_classes.math_class.abstract_operator import AbstractOperator
 
 class Constants(AbstractOperator):
     def __init__(self, node):
+        super(Constants, self).__init__(node)
         self.num_child = 0
         self.node = node
         self.invertible = True
@@ -16,10 +17,10 @@ class Constants(AbstractOperator):
         if self.node.tree.num_constants_in_complete_tree > self.node.tree.args.max_constants_in_tree:
             self.node.tree.max_constants_reached = True
 
-    def prefix_notation(self, call_node_id):
+    def prefix_notation(self, call_node_id, kwargs):
         if call_node_id == self.node.node_id:
             return self.node.parent_node.math_class.prefix_notation(
-                call_node_id=self.node.node_id)
+                call_node_id=self.node.node_id, kwargs=kwargs)
         else:
             return 'c'
 
