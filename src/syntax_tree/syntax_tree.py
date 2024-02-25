@@ -46,7 +46,8 @@ class SyntaxTree():
             'cos': Cosine,
             'y': Y,
             '**': Power,
-            'log': Logarithm_naturalis,
+            'ln': Logarithm_naturalis,
+            'log': Logarithm,
             'c': Constants,
             'exp': Exp
         }

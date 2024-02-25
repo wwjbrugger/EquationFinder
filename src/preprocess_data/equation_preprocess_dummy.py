@@ -22,6 +22,7 @@ class EquationPreprocessDummy():
             symbols = content[0].split(sep=',')
             symbols = [symbol.strip() for symbol in symbols]
             symbols = [symbol for symbol in symbols if len(symbol)>0]
+            symbols.sort()
             for i, symbol in enumerate(symbols):
                 symbol_hash_dic[symbol.strip()] = np.float32(i + 1)
         self.vocab_size = len(symbols) + 1
@@ -63,9 +64,6 @@ class EquationPreprocessDummy():
                        'If you want to use the dummy object ignore this warning ')
         return dataset
 
-    def cast_string_symbol_to_integer(self, tensor):
-        output_tensor = self.symbol_lookup.lookup(tensor)
-        return output_tensor
 
     def map_tree_representation_to_int(self, symbol_list):
         current_tree_representation = self.symbol_lookup.lookup(
