@@ -341,7 +341,7 @@ class Coach(ABC):
 
     def log_best_list(self, game, logger):
         logger.info(f"Best equations found:")
-        for i in range(len(game.max_list.max_list_state)-1, 0,-1):
+        for i in range(len(game.max_list.max_list_state) - 1, 0, -1):
             logger.info(f"{i}: found equation: {game.max_list.max_list_state[i].complete_discovered_equation:<80}"
                         f" r={round(game.max_list.max_list_keys[i], 3)}"
                         )
@@ -377,12 +377,13 @@ class Coach(ABC):
     def test_epoche(self, save_path):
         self.logger.warning(f'------------------ Test ----------------')
         self.checkpoint_test.restore(save_path)
-        iteration_test_examples = self.gather_data(metrics=self.metrics_test,
-                             mcts=self.mcts_test,
-                             game=self.game_test,
-                             logger=self.logger_test,
-                             num_selfplay_iterations=self.args.num_selfplay_iterations_test
-                             )
+        iteration_test_examples = self.gather_data(
+            metrics=self.metrics_test,
+            mcts=self.mcts_test,
+            game=self.game_test,
+            logger=self.logger_test,
+            num_selfplay_iterations=self.args.num_selfplay_iterations_test
+        )
         self.testExamplesHistory.append(iteration_test_examples)
         if self.checkpoint.step > self.args.cold_start_iterations:
             """ Same as in update_network"""
@@ -394,16 +395,11 @@ class Coach(ABC):
             wandb.log({
                 f"iteration": self.checkpoint.step,
                 f"Test pi loss": pi_batch_loss,
-                       "Test v loss": v_batch_loss,
-                       "Test Contrastive loss": contrastive_loss})
-            print(f"Test Contrastive loss: {contrastive_loss}")
-            wandb.log(
-                {f"average_reward_{self.metrics_test['mode']}":
-                     self.metrics_test['rewards_mean'].result()}
-            )
-            wandb.log(
-                {f"average_done_rollout_ratio_{self.metrics_test['mode']}":
-                     self.metrics_test['done_rollout_ratio'].result()}
+                "Test v loss": v_batch_loss,
+                "Test Contrastive loss": contrastive_loss,
+                f"average_reward_{self.metrics_test['mode']}":
+                    self.metrics_test['rewards_mean'].result()
+            }
             )
 
     def saveTrainExamples(self, iteration: int) -> None:
@@ -414,7 +410,7 @@ class Coach(ABC):
         :param iteration: int Current iteration of the self-play. Used as indexing value for the data filename.
         """
         folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                  self.args.experiment_name / str(self.args.seed)
+                 self.args.experiment_name / str(self.args.seed)
 
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -441,7 +437,7 @@ class Coach(ABC):
                 self.logger.info(f"No replay buffer found. Use empty one.")
         else:
             folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                      self.args.experiment_name / str(self.args.seed)
+                     self.args.experiment_name / str(self.args.seed)
             buffer_number = highest_number_in_files(path=folder, stem='buffer_')
             filename = folder / f"buffer_{buffer_number}.examples"
 
