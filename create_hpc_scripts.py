@@ -7,7 +7,7 @@ def run():
         # paprameter to change
         'experiment_name': ['test_dataset_encoder'],
         'minutes_to_run': ['600'],
-        'max_iteration_to_run': [200],
+        'max_iteration_to_run': [400],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
         'replay_buffer_path': [''],
@@ -58,7 +58,7 @@ def run():
         'num_selfplay_iterations': ['10'],
         'num_selfplay_iterations_test': ['2'],
         'test_network': ['True'],
-        'test_every_n_steps': [10],
+        'test_every_n_steps': [1],
         ## Infos about Tree
         'minimum_reward': ['-1'],
         'maximum_reward': ['1'],
