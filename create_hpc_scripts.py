@@ -5,14 +5,14 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['train_pretrained_dataset_encoder'],
+        'experiment_name': ['train_pretrained_supervised'],
         'minutes_to_run': ['600'],
         'max_iteration_to_run': [400],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
         'path_to_pretrained_dataset_encoder': ['saved_models/run_1/test_dataset_encoder__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform/5/tf_ckpts/ckpt-399'],
-        'replay_buffer_path': [''],
-        'run_mcts': [True],
+        'replay_buffer_path': ['saved_models/data_grammar_1/run_1/supervised_buffer/supervised.examples'],
+        'run_mcts': [False],
         'only_test': [False],
         'data': [
             'data_grammar_1/run_1',
@@ -49,7 +49,8 @@ def run():
             'abs_max_y__lin_transform',
             #'abs_max_y',
         ],
-        'num_MCTS_sims': ['5','50','500','1000'],
+        'num_MCTS_sims': ['1'],
+        'test_network': ['False'],
         ## General
 
         'logging_level': ['30'],
