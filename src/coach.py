@@ -75,7 +75,7 @@ class Coach(ABC):
         if run_name is None:
             run_name = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        self.log_dir = f"{ROOT_DIR}/out/logs/AlphaZero/{run_name}"
+        self.log_dir = f"{ROOT_DIR}/out/logs/{run_name}"
         self.file_writer = tf.summary.create_file_writer(
             self.log_dir + "/metrics")
         self.file_writer.set_as_default()
@@ -399,7 +399,7 @@ class Coach(ABC):
         :param iteration: int Current iteration of the self-play. Used as indexing value for the data filename.
         """
         folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                 'AlphaZero' / self.args.experiment_name / str(self.args.seed)
+                  self.args.experiment_name / str(self.args.seed)
 
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -426,7 +426,7 @@ class Coach(ABC):
                 self.logger.info(f"No replay buffer found. Use empty one.")
         else:
             folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                     'AlphaZero' / self.args.experiment_name / str(self.args.seed)
+                      self.args.experiment_name / str(self.args.seed)
             buffer_number = highest_number_in_files(path=folder, stem='buffer_')
             filename = folder / f"buffer_{buffer_number}.examples"
 

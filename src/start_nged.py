@@ -23,7 +23,7 @@ def run():
     args.ROOT_DIR = ROOT_DIR
     time_string = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
     unique_dir = f"{time_string}_{args.seed}"
-    wandb_path = ROOT_DIR / '.wandb' / 'AlphaZero' / args.experiment_name / \
+    wandb_path = ROOT_DIR / '.wandb' /  args.experiment_name / \
                  f"{unique_dir}"
     wandb_path.mkdir(parents=True, exist_ok=True)
     wandb.init(entity="wwjbrugger", config=args.__dict__,
@@ -86,12 +86,12 @@ def learnA0(g, args, run_name: str, game_test) -> None:
         args=args,
         reader_train=game_test.reader
     )
-    checkpoint_AlphaZero, manager_AlphaZero = load_pretrained_net(
+    checkpoint_train, manager_train = load_pretrained_net(
         args = args,
         rule_predictor=rule_predictor_train,
         game = g
     )
-    checkpoint_AlphaZero_test, _ = load_pretrained_net(
+    checkpoint_test, _ = load_pretrained_net(
         args=args,
         rule_predictor=rule_predictor_test,
         game=g
@@ -111,9 +111,9 @@ def learnA0(g, args, run_name: str, game_test) -> None:
         args=args,
         search_engine=search_engine,
         run_name=run_name,
-        checkpoint_train=checkpoint_AlphaZero,
-        checkpoint_manager=manager_AlphaZero,
-        checkpoint_test=checkpoint_AlphaZero_test
+        checkpoint_train=checkpoint_train,
+        checkpoint_manager=manager_train,
+        checkpoint_test=checkpoint_test
     )
 
     c.learn()
@@ -124,14 +124,14 @@ def load_pretrained_net(args, rule_predictor, game):
     experiment_name = f"{args.experiment_name}/{args.seed}"
     net = rule_predictor.net
     checkpoint_path_current_model = ROOT_DIR / 'saved_models' / dataset_number / \
-                                'AlphaZero' / experiment_name
+                                 experiment_name
     print(f"Model will be saved at {checkpoint_path_current_model}")
 
     checkpoint_current_model = tf.train.Checkpoint(
         step=tf.Variable(1),
         net=net
     )
-    manager_AlphaZero = tf.train.CheckpointManager(
+    manager_train = tf.train.CheckpointManager(
         checkpoint=checkpoint_current_model,
         directory=str(checkpoint_path_current_model / 'tf_ckpts'),
         max_to_keep=3
@@ -141,11 +141,11 @@ def load_pretrained_net(args, rule_predictor, game):
         checkpoint_current_model.restore(f"{ROOT_DIR / args.path_to_complete_model }")
         print("Restored from {}".format(f"{ROOT_DIR / args.path_to_complete_model }"))
 
-    elif manager_AlphaZero.latest_checkpoint:
-        checkpoint_current_model.restore(manager_AlphaZero.latest_checkpoint)
-        print("Restored from {}".format(manager_AlphaZero.latest_checkpoint))
+    elif manager_train.latest_checkpoint:
+        checkpoint_current_model.restore(manager_train.latest_checkpoint)
+        print("Restored from {}".format(manager_train.latest_checkpoint))
     else:
-        checkpoint_current_model.restore(manager_AlphaZero.latest_checkpoint)
+        checkpoint_current_model.restore(manager_train.latest_checkpoint)
         print("Initializing from scratch.")
 
     initialize_net(args, checkpoint_current_model, game)
@@ -156,7 +156,7 @@ def load_pretrained_net(args, rule_predictor, game):
         game=game
     )
 
-    return checkpoint_current_model, manager_AlphaZero
+    return checkpoint_current_model, manager_train
 
 
 def initialize_net(args, checkpoint_current_model, game):
