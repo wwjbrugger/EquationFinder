@@ -9,3 +9,6 @@ tensorflow_text==2.8.2
 tqdm==4.64.1
 wandb==0.13.6
 pandas==2.0.0
+cython<3.0.0
+pyyaml==5.4.1
+tf-models-official==2.8
