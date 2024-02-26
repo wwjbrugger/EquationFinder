@@ -9,7 +9,8 @@ def run():
         'minutes_to_run': ['600'],
         'max_iteration_to_run': [400],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
-        'path_to_complete_model': ['saved_models/run_1/test_dataset_encoder__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform/5/tf_ckpts/ckpt-399'],
+        'path_to_complete_model': [''],
+        'path_to_pretrained_dataset_encoder': ['saved_models/run_1/test_dataset_encoder__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform/5/tf_ckpts/ckpt-399'],
         'replay_buffer_path': [''],
         'run_mcts': [True],
         'only_test': [False],
@@ -125,7 +126,6 @@ def run():
         'encoder_intermediate_expansion_factor_text_transformer': [4.0],
         'intermediate_dropout_rate_text_transformer': [0.2],
         'attention_dropout_rate_text_transformer': [0.1],
-        # 'path_to_pretrained_dataset_encoder': ['']
         ## Actor Decoder
         'actor_decoder_class': ['mlp_decoder'],
         'actor_decoder_normalize_way': ['soft_max'],
@@ -255,6 +255,9 @@ def write_python_call(settings_one_script, file1):
     ## General
     if len(settings_one_script['path_to_complete_model']) > 5:
         file1.writelines(f"--path_to_complete_model {settings_one_script['path_to_complete_model']} \\\n")
+    if len(settings_one_script['path_to_pretrained_dataset_encoder']) > 5:
+        file1.writelines(f"--path_to_pretrained_dataset_encoder {settings_one_script['path_to_pretrained_dataset_encoder']} \\\n")
+
     file1.writelines(f"--experiment_name $SLURM_JOB_NAME \\\n")
     file1.writelines(f"--job_id $SLURM_JOB_ID \\\n")
     file1.writelines(f"--minutes_to_run {settings_one_script['minutes_to_run']} \\\n")
