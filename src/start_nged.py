@@ -31,6 +31,7 @@ def run():
                sync_tensorboard=True, tensorboard=True,
                dir=wandb_path, mode=args.wandb,
                name=args.experiment_name)
+    wandb.log({'Job_ID': args.job_id})
 
     np.random.seed(args.seed)
     tf.random.set_seed(args.seed)
@@ -64,6 +65,11 @@ def run():
             run_name=args.experiment_name,
             game_test=game_test
             )
+    wandb.log(
+        {
+            f"sucessful": True
+        }
+    )
 
 
 def learnA0(g, args, run_name: str, game_test) -> None:

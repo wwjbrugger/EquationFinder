@@ -10,6 +10,7 @@ def run():
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
+        'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
         'run_mcts': [True],
         'only_test': [True],
@@ -126,7 +127,18 @@ def run():
         'bit_embedding_dataset_transformer': ['False'],
         'use_feature_index_embedding_dataset_transformer': [False],
         'dataset_transformer_use_latent_vector': ['True'],
-        # 'path_to_pretrained_dataset_encoder': ['']
+        ######### Encoder Measurement TextTransformer
+        'float_precision_text_transformer':[3],
+        'mantissa_len_text_transformer': [1],
+        'max_exponent_text_transformer': [100],
+        'num_dimensions_text_transformer': [3],
+        'embedding_dim_text_transformer': [512],
+        'embedder_intermediate_expansion_factor_text_transformer': [1.0],
+        'num_encoder_layers_text_transformer': [4],
+        'num_attention_heads_text_transformer': [8],
+        'encoder_intermediate_expansion_factor_text_transformer': [4.0],
+        'intermediate_dropout_rate_text_transformer': [0.2],
+        'attention_dropout_rate_text_transformer': [0.1],
         ## Actor Decoder
         'actor_decoder_class': ['mlp_decoder'],
         'actor_decoder_normalize_way': ['soft_max'],
@@ -183,24 +195,9 @@ def create_experiment_name(settings_one_script):
                       f"{settings_one_script['prior_source']}__" \
                       f"{settings_one_script['data'].replace('/','_')}__" \
                       f"{settings_one_script['class_measurement_encoder']}__" \
-                      f"{settings_one_script['normalize_approach']}"
-
-    # f"{settings_one_script['class_measurement_encoder']}"\
-    #                   f"norm_{settings_one_script['normalize_approach']}"\
-    #                   f"_{settings_one_script['MCTS_engine']}"
-    # f"bbuffer_" \
-    # f"{settings_one_script['balance_buffer']}__" \
-    #  f"{settings_one_script['prior_source']}__" \
-    # f"num_gradient_steps" \
-    # f"{settings_one_script['num_gradient_steps']}__"
-    # f"risk_seeking_" \
-    # f"{settings_one_script['risk_seeking']}__" \
-    # f"prior_" \
-    # f"{settings_one_script['prior_source']}__"
-    # f"MCTS_s_" \
-    # f"{settings_one_script['num_MCTS_sims']}__" \
-    # f"prior_" \
-    # f"{settings_one_script['prior_source']}__" \
+                      f"{settings_one_script['normalize_approach']}__" \
+                      f"{settings_one_script['MCTS_engine']}__" \
+                      f"{settings_one_script['num_MCTS_sims']}"
 
     return experiment_name
 
@@ -271,7 +268,11 @@ def write_python_call(settings_one_script, file1):
     ## General
     if len(settings_one_script['path_to_complete_model']) > 5:
         file1.writelines(f"--path_to_complete_model {settings_one_script['path_to_complete_model']} \\\n")
+    if len(settings_one_script['path_to_pretrained_dataset_encoder']) > 5:
+        file1.writelines(f"--path_to_pretrained_dataset_encoder {settings_one_script['path_to_pretrained_dataset_encoder']} \\\n")
+
     file1.writelines(f"--experiment_name $SLURM_JOB_NAME \\\n")
+    file1.writelines(f"--job_id $SLURM_JOB_ID \\\n")
     file1.writelines(f"--minutes_to_run {settings_one_script['minutes_to_run']} \\\n")
     file1.writelines(f"--max_iteration_to_run {settings_one_script['max_iteration_to_run']} \\\n")
 
@@ -389,6 +390,29 @@ def write_python_call(settings_one_script, file1):
         f"--dataset_transformer_use_latent_vector {settings_one_script['dataset_transformer_use_latent_vector']} \\\n")
     file1.writelines(
         f"--use_feature_index_embedding_dataset_transformer {settings_one_script['use_feature_index_embedding_dataset_transformer']} \\\n")
+    ####### Encoder Measurement TextTransformer
+    file1.writelines(
+        f"--float_precision_text_transformer {settings_one_script['float_precision_text_transformer']} \\\n")
+    file1.writelines(
+        f"--mantissa_len_text_transformer {settings_one_script['mantissa_len_text_transformer']} \\\n")
+    file1.writelines(
+        f"--max_exponent_text_transformer {settings_one_script['max_exponent_text_transformer']} \\\n")
+    file1.writelines(
+        f"--num_dimensions_text_transformer {settings_one_script['num_dimensions_text_transformer']} \\\n")
+    file1.writelines(
+        f"--embedding_dim_text_transformer {settings_one_script['embedding_dim_text_transformer']} \\\n")
+    file1.writelines(
+        f"--embedder_intermediate_expansion_factor_text_transformer {settings_one_script['embedder_intermediate_expansion_factor_text_transformer']} \\\n")
+    file1.writelines(
+        f"--num_encoder_layers_text_transformer {settings_one_script['num_encoder_layers_text_transformer']} \\\n")
+    file1.writelines(
+        f"--num_attention_heads_text_transformer {settings_one_script['num_attention_heads_text_transformer']} \\\n")
+    file1.writelines(
+        f"--encoder_intermediate_expansion_factor_text_transformer {settings_one_script['encoder_intermediate_expansion_factor_text_transformer']} \\\n")
+    file1.writelines(
+        f"--intermediate_dropout_rate_text_transformer {settings_one_script['intermediate_dropout_rate_text_transformer']} \\\n")
+    file1.writelines(
+        f"--attention_dropout_rate_text_transformer {settings_one_script['attention_dropout_rate_text_transformer']} \\\n")
 
     ## Actor Decoder
     file1.writelines(
