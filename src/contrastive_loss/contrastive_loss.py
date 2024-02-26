@@ -34,7 +34,7 @@ def postprocess_contrastive_loss( output_encoder_measurement):
     :param output_encoder_measurement:
     :return:
     """
-    old_shape = np.array(output_encoder_measurement.shape)
+    old_shape = tf.shape(output_encoder_measurement)
     new_shape = [int(old_shape[0]//2), 2,old_shape[1] ]
 
     reshaped_tensor = tf.reshape(output_encoder_measurement, new_shape)

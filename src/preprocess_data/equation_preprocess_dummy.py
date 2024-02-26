@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 from definitions import ROOT_DIR
 import numpy as np
+from src.utils.get_grammar import read_grammar_file
 class EquationPreprocessDummy():
     """
     Class to read data dynamically to transformer model
@@ -21,6 +22,7 @@ class EquationPreprocessDummy():
             symbols = content[0].split(sep=',')
             symbols = [symbol.strip() for symbol in symbols]
             symbols = [symbol for symbol in symbols if len(symbol)>0]
+            symbols.sort()
             for i, symbol in enumerate(symbols):
                 symbol_hash_dic[symbol.strip()] = np.float32(i + 1)
         self.vocab_size = len(symbols) + 1
@@ -54,19 +56,14 @@ class EquationPreprocessDummy():
         return iterator
 
     def get_num_production_rules(self):
-        with open(ROOT_DIR / self.args.data_path / 'production_rules.txt') as f:
-            content = f.read().splitlines()
-        num_production_rules = len(content)
-        return num_production_rules
+        grammar = read_grammar_file(self.args)
+        return len(grammar._productions)
 
     def preprocess(self, dataset):
         RuntimeWarning('This method should be overwritten by a child class.'
                        'If you want to use the dummy object ignore this warning ')
         return dataset
 
-    def cast_string_symbol_to_integer(self, tensor):
-        output_tensor = self.symbol_lookup.lookup(tensor)
-        return output_tensor
 
     def map_tree_representation_to_int(self, symbol_list):
         current_tree_representation = self.symbol_lookup.lookup(
