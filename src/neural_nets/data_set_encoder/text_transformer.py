@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Generator
 
 import numpy as np
@@ -82,10 +84,16 @@ class TextTransformer(MeasurementEncoderDummy):
         Propagate the input data forward through the model to compute a single embedding for the measurements.
         :param x: Input data tensor
         """
-        tokens = self.encode(x)
+        tokens = tf.numpy_function(func=self.encode, inp=[x], Tout=tf.string)
+        # self.encode(x)
         indices = self.lookup(tokens, **kwargs)
         embeddings = self.embedding(indices, **kwargs)
-        embeddings_concatenated = tf.reshape(embeddings, [*embeddings.shape[0:-2], -1])
+        batch_size = tf.shape(embeddings)[0]
+        num_rows = tf.shape(embeddings)[1]
+        embeddings_concatenated = tf.reshape(
+            embeddings,
+            (batch_size, num_rows, -1))
+
         projected_down_1 = self.dense_1(embeddings_concatenated, **kwargs)
         projected_down_2 = self.dense_2(projected_down_1, **kwargs)
         y = self.encoder(projected_down_2, **kwargs)
@@ -112,13 +120,13 @@ class TextTransformer(MeasurementEncoderDummy):
                     tokens = ["0" * self.base] * self.mantissa_len
                     expon = int(0)
                 seq.extend([sign, *["N" + token for token in tokens], "E" + str(expon)])
-            return seq
+            return tf.convert_to_tensor(seq)
         else:
             seqs = [self.encode(values[0])]
             N = values.shape[0]
             for n in range(1, N):
                 seqs += [self.encode(values[n])]
-        return seqs
+        return tf.convert_to_tensor(seqs)
 
     def decode(self, lst: list[str]) -> None | float | list[float]:
         """
