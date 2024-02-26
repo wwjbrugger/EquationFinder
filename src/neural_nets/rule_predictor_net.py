@@ -18,7 +18,7 @@ class RulePredictorNet(tf.keras.Model):
 
         self.training = None
         self.args = args
-        self.logger_net = get_log_obj(args=args, name='AlphaZeroNet')
+        self.logger_net = get_log_obj(args=args, name='RulePredictorNet')
         if self.args.contrastive_loss:
             # For contrastive loss the rows of the dataset has to be split in two parts.
             # when using the DatasetTransformer the shape of a sample is [batch, column, row, encoding ]

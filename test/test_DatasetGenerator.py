@@ -86,7 +86,7 @@ class TestEquationGenerator(unittest.TestCase):
 
     # def test_save_dataset(self):
     #     random.seed(42)
-    #     dict_measurements = self.generator.prepare_datasets()
+    #     dict_measurements = self.generator.prepare_random_datasets()
     #     with open(ROOT_DIR / 'test_case' / 'own_grammar_parser' / 'saved_object' / 'generated_dataset.obj', 'wb') as handle:
     #         pkl.dump(dict_measurements, handle, protocol=pkl.HIGHEST_PROTOCOL)
 

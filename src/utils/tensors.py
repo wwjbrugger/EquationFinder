@@ -12,7 +12,7 @@ def check_for_non_numeric_and_replace_by_0(logger, tensor, name):
     try:
         tf.debugging.check_numerics(tensor, message=f'Checking {name}]')
     except Exception as e:
-        logger.error(f'Checking {name}: {tensor.numpy()}')
+        logger.error(f'Checking {name}: {tensor}')
         tensor = tf.where(
             tf.math.is_finite(tensor),
             x=tensor,

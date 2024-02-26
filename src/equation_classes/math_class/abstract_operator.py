@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+import numpy as np 
 
 class AbstractOperator(ABC):
 
@@ -8,7 +8,8 @@ class AbstractOperator(ABC):
         self.num_child = None   # number of child nodes for the operator
         self.node = node
         self.invertible = None  # is the operation invertible
-        self.node.node_symbol = '' # str representation of node
+        self.valid_min_value = -np.inf
+        self.valid_max_value = np.inf
 
     @abstractmethod
     def prefix_notation(self, call_node_id, kwargs):
@@ -50,3 +51,25 @@ class AbstractOperator(ABC):
          the syntax tree.
         :return:
         """
+        
+    def operator_data_range(self, variable):
+        """
+        Specifies the node-level behavior for deleting
+         the syntax tree.
+        :return:
+        """
+        min_value = self.valid_min_value
+        max_value = self.valid_max_value
+        depends_on_variable = False
+        for i in range(self.num_child):
+            c_min_value, c_max_value, depends_on_variable =\
+                self.node.list_children[i].math_class.operator_data_range(variable)
+            if depends_on_variable:
+                if c_min_value > min_value:
+                    min_value = c_min_value
+                if c_max_value < max_value:
+                    max_value = c_max_value
+        return min_value, max_value, depends_on_variable
+            
+
+    

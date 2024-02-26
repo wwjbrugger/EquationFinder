@@ -59,6 +59,8 @@ def get_rule_predictor(args, reader_data):
     vocab_size = int(max(reader_data.vocab_size,
                      args.max_branching_factor ** (args.max_depth_of_tree + 2 )))
 
+    input_feature_dims = get_input_feature_dim_for_DatasetTransformer(args, reader_data)
+
     rule_predictor = RulePredictorNet(
         encoder_tree_class=encoder_tree_class,
         encoder_tree_args=
@@ -83,7 +85,7 @@ def get_rule_predictor(args, reader_data):
             'dropout_rate': args.dropout_rate,
             #------ DatasetTransformer
             # input_feature_dims states for every entry in the data how big is the encoding.
-            'input_feature_dims': [32 if args.bit_embedding_dataset_transformer else 1 for i in range(len(reader_data.dataset_columns))],
+            'input_feature_dims': input_feature_dims,
             'stacking_depth': args.model_stacking_depth_dataset_transformer,
             'num_heads': args.model_num_heads_dataset_transformer,
             'model_dim_hidden': args.model_dim_hidden_dataset_transformer,
@@ -98,7 +100,7 @@ def get_rule_predictor(args, reader_data):
             'model_att_score_dropout_prob': args.model_att_score_dropout_prob_dataset_transformer,
             'model_mix_heads': args.model_mix_heads_dataset_transformer,
             'model_embedding_layer_norm': args.model_embedding_layer_norm_dataset_transformer,
-            'use_latent_vector': args.use_latent_vector_dataset_transformer_dataset_transformer,
+            'use_latent_vector': args.dataset_transformer_use_latent_vector,
             'bit_embedding': args.bit_embedding_dataset_transformer,
             'use_feature_index_embedding': args.use_feature_index_embedding_dataset_transformer,
             'max_len_datasets': args.max_len_datasets,
@@ -118,20 +120,27 @@ def get_rule_predictor(args, reader_data):
         actor_decoder_class=actor_decoder_class,
         actor_decoder_args={
             'out_dim': reader_data.num_production_rules,
-            'batch_sz': args.batch_size_loading,
+            'batch_sz': 1,
             'normalize_way': args.actor_decoder_normalize_way,
             'name': 'actor'
         },
         critic_decoder_class=critic_decoder_class,
         critic_decoder_args={
             'out_dim': 1,
-            'batch_sz': args.batch_size_loading,
+            'batch_sz': 1,
             'normalize_way': args.critic_decoder_normalize_way,
             'name': 'critic'
         },
         args= args
     )
     return rule_predictor
+
+
+def get_input_feature_dim_for_DatasetTransformer(args, reader_data):
+    input_feature_dims = []
+    for i in range(len(reader_data.dataset_columns) + 2 if "lin_transform" in args.normalize_approach else len(reader_data.dataset_columns) ):
+        input_feature_dims.append( 32 if args.bit_embedding_dataset_transformer else 1)
+    return input_feature_dims
 
 
 def get_measurement_keys(column_names):

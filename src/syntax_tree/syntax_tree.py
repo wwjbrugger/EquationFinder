@@ -14,6 +14,7 @@ from src.equation_classes.math_class.y import Y
 from src.equation_classes.math_class.power import Power
 from src.equation_classes.math_class.logarithm import Logarithm
 from src.equation_classes.math_class.constants import Constants
+from src.equation_classes.math_class.logarithmus_naturalis import Logarithm_naturalis
 from src.utils.logging import get_log_obj
 import numpy as np
 import bisect
@@ -24,6 +25,7 @@ from scipy.optimize import OptimizeWarning
 from src.equation_classes.math_class.exp import Exp
 from src.utils.error import NonFiniteError
 import copy
+
 
 
 class SyntaxTree():
@@ -44,6 +46,7 @@ class SyntaxTree():
             'cos': Cosine,
             'y': Y,
             '**': Power,
+            'ln': Logarithm_naturalis,
             'log': Logarithm,
             'c': Constants,
             'exp': Exp
@@ -58,6 +61,8 @@ class SyntaxTree():
         self.complete = False
         self.max_depth_reached = False
         self.max_constants_reached = False
+        self.max_nodes_reached = False
+        self.max_nodes_allowed = self.args.max_num_nodes_in_syntax_tree
         self.non_terminals = []
         self.max_branching_factor = args.max_branching_factor
         self.add_start_node()
@@ -355,6 +360,12 @@ class SyntaxTree():
         for j in range(len(popt)):
             self.constants_in_tree[f"c_{i + j}"]['value'] = np.float32(popt[j])
             self.constants_in_tree['num_fitted_constants'] += 1
+
+    def operators_data_range(self, variable):
+        node_to_evaluate = self.dict_of_nodes[0]
+        min_value, max_value, depends_on_variable = node_to_evaluate.math_class.operator_data_range(variable)
+        return min_value, max_value
+
 
 
     def __str__(self):

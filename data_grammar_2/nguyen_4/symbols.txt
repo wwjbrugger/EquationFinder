@@ -1,0 +1,1 @@
+*, **, +, -, /, I, S, Variable, c, cos, ln, sin, x_0, x_1,

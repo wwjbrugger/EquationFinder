@@ -4,6 +4,7 @@ import numpy as np
 
 class Plus(AbstractOperator):
     def __init__(self, node):
+        super().__init__(node)
         self.num_child = 2
         self.node = node
         self.invertible = True

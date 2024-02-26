@@ -281,7 +281,7 @@ class AmEx_MCTS(ClassicMCTS):
             self.not_completely_explored_moves_for_s[next_state_hash] = [False] * self.action_size
             self.not_completely_explored_moves_for_s[state_hash][a] = False
             self.times_s_was_visited[next_state_hash] += 1  # debug value
-            if reward >= 0.98:
+            if reward >= 0.999:
                 self.states_explored_till_perfect_fit = len(self.times_s_was_visited)
         return value
 
@@ -324,5 +324,12 @@ class AmEx_MCTS(ClassicMCTS):
         a_max = tie_breaking_argmax(np.where(self.valid_moves_for_s[state_hash],
                                     confidence_bounds,
                                     -np.inf))  # never choose these actions!
+        # for the unlikely event that a and a_max should be the same,
+        # but because of the tie_breaking_argmax are not we have to ckeck if
+        # a_max really already exist
+        if not (state_hash, a_max) in self.Qsa:
+            a = a_max
+
+
 
         return a, a_max

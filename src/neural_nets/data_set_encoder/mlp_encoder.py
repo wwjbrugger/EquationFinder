@@ -23,10 +23,7 @@ class  MlpMeasurementEncoder(MeasurementEncoderDummy):
             )
 
     def prepare_data(self, data):
-        norm_frame = self.normalize(
-            data_frame=data['data_frame'],
-            approach=self.kwargs['normalize_approach']
-        )
+        norm_frame = self.normalize(data_frame=data['data_frame'])
         tensor_one_row = tf.reshape(tf.convert_to_tensor(norm_frame, dtype=tf.float32), -1)
         tensor_one_row = tf.expand_dims(tensor_one_row, axis=0)
         return tensor_one_row
@@ -35,4 +32,7 @@ class  MlpMeasurementEncoder(MeasurementEncoderDummy):
         output = x
         for layer in self.class_layers:
             output = layer(output, training= kwargs['training'])
-        return output
+        norm = tf.linalg.norm(output, ord='euclidean', name=None, keepdims=True, axis=-1)
+        out_norm = output / norm
+        return out_norm
+
