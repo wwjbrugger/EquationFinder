@@ -12,6 +12,7 @@ class Config:
         parser = ArgumentParser(description="A MuZero and AlphaZero implementation in Tensorflow.")
 
         parser.add_argument("--experiment_name", type=str, default='delete_me')
+        parser.add_argument("job_id", type=int,default=0)
         parser.add_argument("--path_to_complete_model", type=str,
                             default='', help="Path to a complete model  which should be loaded")
         parser.add_argument("--path_to_pretrained_dataset_encoder",
