@@ -63,6 +63,7 @@ def run():
             # 'abs_max_y',
         ],
         'num_MCTS_sims': ['300_000'],
+        'MCTS_engine': ['Normal'],
         ## General
 
         'logging_level': ['30'],
@@ -146,7 +147,7 @@ def run():
         'critic_decoder_class': ['mlp_decoder'],
         'critic_decoder_normalize_way': ['tanh'],
         ## MCTS
-        'MCTS_engine': ['Endgame'],
+
         'max_elements_in_list': [10],
         'use_puct': [True],
         'temp_0': [0.1],
