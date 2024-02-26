@@ -5,11 +5,11 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['test_dataset_encoder'],
+        'experiment_name': ['train_pretrained_dataset_encoder'],
         'minutes_to_run': ['600'],
         'max_iteration_to_run': [400],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
-        'path_to_complete_model': [''],
+        'path_to_complete_model': ['saved_models/run_1/test_dataset_encoder__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform/5/tf_ckpts/ckpt-399'],
         'replay_buffer_path': [''],
         'run_mcts': [True],
         'only_test': [False],
@@ -37,18 +37,18 @@ def run():
              #'LSTM_Measurement_Encoder',
              #'Bi_LSTM_Measurement_Encoder',
              #'MLP_Measurement_Encoder',
-             #'DatasetTransformer',
+             'DatasetTransformer',
              #'MeasurementEncoderPicture',
-             'TextTransformer'
+             #'TextTransformer'
         ],
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
             # 'abs_max_y',
             # 'row_wise',
             'abs_max_y__lin_transform',
-            'abs_max_y',
+            #'abs_max_y',
         ],
-        'num_MCTS_sims': ['1'],
+        'num_MCTS_sims': ['5','50','500','1000'],
         ## General
 
         'logging_level': ['30'],
@@ -183,7 +183,8 @@ def create_experiment_name(settings_one_script):
                       f"{settings_one_script['data'].replace('/','_')}__" \
                       f"{settings_one_script['class_measurement_encoder']}__" \
                       f"{settings_one_script['normalize_approach']}__" \
-                      f"{settings_one_script['MCTS_engine']}"
+                      f"{settings_one_script['MCTS_engine']}__" \
+                      f"{settings_one_script['num_MCTS_sims']}"
 
     return experiment_name
 
@@ -218,7 +219,7 @@ def write_SBATCH_commants(settings_one_script, file1):
     file1.writelines("#SBATCH --nodes=1 \n")
     file1.writelines("#SBATCH --cpus-per-task=4 \n")
     file1.writelines("#SBATCH --mem=20GB \n")
-    file1.writelines("#SBATCH --array=1-20 \n")
+    file1.writelines("#SBATCH --array=1-1 \n")
     file1.writelines("\n")
     file1.writelines("#SBATCH -o \%x_\%j_profile.out \n")
     file1.writelines("#SBATCH -C anyarch \n")
