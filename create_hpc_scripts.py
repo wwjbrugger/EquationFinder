@@ -255,6 +255,7 @@ def write_python_call(settings_one_script, file1):
     if len(settings_one_script['path_to_complete_model']) > 5:
         file1.writelines(f"--path_to_complete_model {settings_one_script['path_to_complete_model']} \\\n")
     file1.writelines(f"--experiment_name $SLURM_JOB_NAME \\\n")
+    file1.writelines(f"--job_id $SLURM_JOB_ID \\\n")
     file1.writelines(f"--minutes_to_run {settings_one_script['minutes_to_run']} \\\n")
     file1.writelines(f"--max_iteration_to_run {settings_one_script['max_iteration_to_run']} \\\n")
 
