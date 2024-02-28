@@ -248,7 +248,7 @@ class Coach(ABC):
             'done_rollout_ratio': tf.keras.metrics.Mean(dtype=tf.float32)
         }
         self.loadTrainExamples(int(self.checkpoint.step))
-        while time.time() < t_end and self.checkpoint.step < self.args.max_iteration_to_run:
+        while self.checkpoint.step < self.args.max_iteration_to_run:
             self.logger.warning(f'------------------ITER'
                                 f' {int(self.checkpoint.step)}----------------')
             # Self-play/ Gather training data.
