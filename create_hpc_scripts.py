@@ -6,7 +6,7 @@ def run():
     parameter_list_dict = {
         # paprameter to change
         'experiment_name': ['train_pretrained_net'],
-        'minutes_to_run': ['600'],
+        'minutes_to_run': ['4320'],
         'max_iteration_to_run': [200],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
@@ -65,7 +65,7 @@ def run():
             # 'abs_max_y',
         ],
         'num_MCTS_sims': [-1],
-        'sec_per_simulation': [30],
+        'sec_per_simulation': [1,5,15,30,45,60,120],
         'MCTS_engine': ['Endgame'],
         ## General
 
