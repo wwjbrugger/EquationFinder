@@ -17,7 +17,7 @@ from src.game.game import GameState
 from src.utils.logging import get_log_obj
 from src.utils.utils import tie_breaking_argmax
 import random
-
+import time
 
 class ClassicMCTS:
     """
@@ -86,7 +86,14 @@ class ClassicMCTS:
 
         # Aggregate root state value over MCTS back-propagated values
         mct_return_list = []
-        for num_sim in range(num_mcts_sims):
+        start_time = time.time()
+        # -2 for y node and startnode
+        sec_per_simulation = max(1,
+                                 self.args.sec_per_simulation *
+                                 2 ** (- (len(state.syntax_tree.dict_of_nodes) - 2)))
+        num_mcts_sims = 0
+        while time.time() < start_time + sec_per_simulation or num_mcts_sims == 0:
+            num_mcts_sims += 1
             mct_return = self._search(
                 state=state
             )

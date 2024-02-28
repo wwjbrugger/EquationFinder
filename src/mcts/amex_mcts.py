@@ -15,6 +15,7 @@ import numpy as np
 from src.game.game import GameState
 from src.utils.utils import tie_breaking_argmax
 from src.mcts.classic_mcts import ClassicMCTS
+import time
 
 
 class AmEx_MCTS(ClassicMCTS):
@@ -68,7 +69,14 @@ class AmEx_MCTS(ClassicMCTS):
         # Aggregate root state value over MCTS back-propagated values
         mct_return_list = []
         not_completely_explored = np.any(self.not_completely_explored_moves_for_s[state.hash])
-        for num_sim in range(num_mcts_sims):
+        start_time = time.time()
+        # -2 for y node and startnode
+        sec_per_simulation = max(1,
+            self.args.sec_per_simulation *
+                                 2**(  - (len(state.syntax_tree.dict_of_nodes)-2)))
+        num_mcts_sims = 0
+        while time.time() < start_time + sec_per_simulation or num_mcts_sims == 0:
+            num_mcts_sims += 1
             if not_completely_explored:
                 mct_return, not_completely_explored = self._search(
                     state=state

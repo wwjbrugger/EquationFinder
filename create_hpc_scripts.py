@@ -5,14 +5,16 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['train_pretrained_supervised'],
+        'experiment_name': ['train_pretrained_net'],
         'minutes_to_run': ['600'],
-        'max_iteration_to_run': [400],
+        'max_iteration_to_run': [200],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
-        'path_to_pretrained_dataset_encoder': ['saved_models/run_1/test_dataset_encoder__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform/5/tf_ckpts/ckpt-399'],
-        'replay_buffer_path': ['saved_models/data_grammar_1/run_1/supervised_buffer/supervised.examples'],
-        'run_mcts': [False],
+        'path_to_pretrained_dataset_encoder': [
+           'saved_models/run_1/test_dataset_encoder__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform/5/tf_ckpts/ckpt-399'
+    ],
+        'replay_buffer_path': [''],
+        'run_mcts': [True],
         'only_test': [False],
         'data': [
             'data_grammar_1/run_1',
@@ -27,7 +29,19 @@ def run():
             # 'data_grammar_1/nguyen_9',
             # 'data_grammar_1/nguyen_10',
             # 'data_grammar_1/nguyen_11',
-            # 'data_grammar_1/nguyen_12'
+            # 'data_grammar_1/nguyen_12',
+            # 'data_grammar_2/nguyen_1',
+            # 'data_grammar_2/nguyen_2',
+            # 'data_grammar_2/nguyen_3',
+            # 'data_grammar_2/nguyen_4',
+            # 'data_grammar_2/nguyen_5',
+            # 'data_grammar_2/nguyen_6',
+            # 'data_grammar_2/nguyen_7',
+            # 'data_grammar_2/nguyen_8',
+            # 'data_grammar_2/nguyen_9',
+            # 'data_grammar_2/nguyen_10',
+            # 'data_grammar_2/nguyen_11',
+            # 'data_grammar_2/nguyen_12'
         ],
 
         'script_folder': ['scripts_final'],
@@ -35,22 +49,24 @@ def run():
         'cold_start_iterations': [20],
         'class_measurement_encoder': [
             # 'MeasurementEncoderDummy',
-             #'LSTM_Measurement_Encoder',
-             #'Bi_LSTM_Measurement_Encoder',
-             #'MLP_Measurement_Encoder',
-             'DatasetTransformer',
-             #'MeasurementEncoderPicture',
-             #'TextTransformer'
+            # 'LSTM_Measurement_Encoder',
+            # 'Bi_LSTM_Measurement_Encoder',
+            # 'MLP_Measurement_Encoder',
+              'DatasetTransformer',
+            # 'MeasurementEncoderPicture',
+            # 'TextTransformer'
         ],
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
+            # 'None'
             # 'abs_max_y',
             # 'row_wise',
-            'abs_max_y__lin_transform',
-            #'abs_max_y',
+             'abs_max_y__lin_transform',
+            # 'abs_max_y',
         ],
-        'num_MCTS_sims': ['1'],
-        'test_network': ['False'],
+        'num_MCTS_sims': [-1],
+        'sec_per_simulation': [30],
+        'MCTS_engine': ['Endgame'],
         ## General
 
         'logging_level': ['30'],
@@ -134,7 +150,7 @@ def run():
         'critic_decoder_class': ['mlp_decoder'],
         'critic_decoder_normalize_way': ['tanh'],
         ## MCTS
-        'MCTS_engine': ['Endgame'],
+
         'max_elements_in_list': [10],
         'use_puct': [True],
         'temp_0': [0.1],
@@ -185,7 +201,7 @@ def create_experiment_name(settings_one_script):
                       f"{settings_one_script['class_measurement_encoder']}__" \
                       f"{settings_one_script['normalize_approach']}__" \
                       f"{settings_one_script['MCTS_engine']}__" \
-                      f"{settings_one_script['num_MCTS_sims']}"
+                      f"{settings_one_script['sec_per_simulation']}"
 
     return experiment_name
 
@@ -263,6 +279,7 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(f"--job_id $SLURM_JOB_ID \\\n")
     file1.writelines(f"--minutes_to_run {settings_one_script['minutes_to_run']} \\\n")
     file1.writelines(f"--max_iteration_to_run {settings_one_script['max_iteration_to_run']} \\\n")
+    file1.writelines(f"--sec_per_simulation {settings_one_script['sec_per_simulation']} \\\n")
 
     file1.writelines(
         f"--max_num_nodes_in_syntax_tree {settings_one_script['max_num_nodes_in_syntax_tree']} \\\n")
