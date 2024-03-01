@@ -5,17 +5,22 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['no_net'],
+        'experiment_name': ['net'],
         'minutes_to_run': ['180'],
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
-        'path_to_complete_model': [''],
+        'path_to_complete_model': [
+            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__1/1/tf_ckpts/ckpt-199.index',
+            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__5/1/tf_ckpts/ckpt-199.index',
+            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__15/1/tf_ckpts/ckpt-199.index',
+            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__30/1/tf_ckpts/ckpt-199.index',
+            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__45/1/tf_ckpts/ckpt-199.index'
+        ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
         'run_mcts': [True],
         'only_test': [True],
         'data': [
-            #'data_grammar_1/run_1',
             'data_grammar_1/nguyen_1',
             'data_grammar_1/nguyen_2',
             'data_grammar_1/nguyen_3',
@@ -28,42 +33,41 @@ def run():
             'data_grammar_1/nguyen_10',
             'data_grammar_1/nguyen_11',
             'data_grammar_1/nguyen_12',
-            'data_grammar_2/nguyen_1',
-            'data_grammar_2/nguyen_2',
-            'data_grammar_2/nguyen_3',
-            'data_grammar_2/nguyen_4',
-            'data_grammar_2/nguyen_5',
-            'data_grammar_2/nguyen_6',
-            'data_grammar_2/nguyen_7',
-            'data_grammar_2/nguyen_8',
-            'data_grammar_2/nguyen_9',
-            'data_grammar_2/nguyen_10',
-            'data_grammar_2/nguyen_11',
-            'data_grammar_2/nguyen_12'
+            'data_grammar_1/self_0',
+            'data_grammar_1/self_1',
+            'data_grammar_1/self_2',
+            'data_grammar_1/self_3',
+            'data_grammar_1/self_4',
+            'data_grammar_1/self_5',
+            'data_grammar_1/self_6',
+            'data_grammar_1/self_7',
+            'data_grammar_1/self_8',
+            'data_grammar_1/self_9',
+
         ],
 
-        'script_folder': ['scripts_final'],
+        'script_folder': ['scripts_final_nn'],
         'output_folder': ['output'],
         'cold_start_iterations': [0],
         'class_measurement_encoder': [
-             'MeasurementEncoderDummy',
+            # 'MeasurementEncoderDummy',
             # 'LSTM_Measurement_Encoder',
             # 'Bi_LSTM_Measurement_Encoder',
             # 'MLP_Measurement_Encoder',
-            # 'DatasetTransformer',
+            'DatasetTransformer',
             # 'MeasurementEncoderPicture',
             # 'TextTransformer'
         ],
-        'prior_source': ['grammar', 'uniform'],  # 'neural_net''grammar', 'uniform'
+        'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
-            'None'
+            # 'None'
             # 'abs_max_y',
             # 'row_wise',
-            # 'abs_max_y__lin_transform',
+            'abs_max_y__lin_transform',
             # 'abs_max_y',
         ],
         'num_MCTS_sims': ['300_000'],
-        'MCTS_engine': ['Normal'],
+        'MCTS_engine': ['Endgame'],
         ## General
 
         'logging_level': ['30'],
@@ -192,13 +196,15 @@ def run():
 
 def create_experiment_name(settings_one_script):
     basic_experiment_name = settings_one_script['experiment_name']
+    path_to_complete_model = settings_one_script['path_to_complete_model']
+    num_mcts_steps_in_training = path_to_complete_model.split('/')[2].split('__')[7]
     experiment_name = f"{basic_experiment_name}__" \
                       f"{settings_one_script['prior_source']}__" \
                       f"{settings_one_script['data'].replace('/','_')}__" \
                       f"{settings_one_script['class_measurement_encoder']}__" \
                       f"{settings_one_script['normalize_approach']}__" \
                       f"{settings_one_script['MCTS_engine']}__" \
-                      f"{settings_one_script['num_MCTS_sims']}"
+                      f"{num_mcts_steps_in_training}"
 
     return experiment_name
 
@@ -233,7 +239,7 @@ def write_SBATCH_commants(settings_one_script, file1):
     file1.writelines("#SBATCH --nodes=1 \n")
     file1.writelines("#SBATCH --cpus-per-task=4 \n")
     file1.writelines("#SBATCH --mem=20GB \n")
-    file1.writelines("#SBATCH --array=1-5 \n")
+    file1.writelines("#SBATCH --array=1-1 \n")
     file1.writelines("\n")
     file1.writelines("#SBATCH -o \%x_\%j_profile.out \n")
     file1.writelines("#SBATCH -C anyarch \n")
