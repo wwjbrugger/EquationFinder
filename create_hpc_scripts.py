@@ -14,7 +14,8 @@ def run():
             'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__5/1/tf_ckpts/ckpt-199.index',
             'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__15/1/tf_ckpts/ckpt-199.index',
             'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__30/1/tf_ckpts/ckpt-199.index',
-            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__45/1/tf_ckpts/ckpt-199.index'
+            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__45/1/tf_ckpts/ckpt-199.index',
+            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__60/1/tf_ckpts/ckpt-199.index'
         ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
@@ -239,7 +240,7 @@ def write_SBATCH_commants(settings_one_script, file1):
     file1.writelines("#SBATCH --nodes=1 \n")
     file1.writelines("#SBATCH --cpus-per-task=4 \n")
     file1.writelines("#SBATCH --mem=20GB \n")
-    file1.writelines("#SBATCH --array=1-1 \n")
+    file1.writelines("#SBATCH --array=2-5 \n")
     file1.writelines("\n")
     file1.writelines("#SBATCH -o \%x_\%j_profile.out \n")
     file1.writelines("#SBATCH -C anyarch \n")
