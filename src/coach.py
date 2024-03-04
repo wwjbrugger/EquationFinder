@@ -209,6 +209,13 @@ class Coach(ABC):
 
                 }
             )
+            productions = []
+            for node in game.max_list.max_list_state[-1].syntax_tree.dict_of_nodes.values():
+                if len(node.selected_production) > 0:
+                    productions = productions + node.selected_production
+            print(f"num productions: {len(productions)} : {productions} ")
+            pass
+
         else:
             wandb.log(
                 {
@@ -402,7 +409,6 @@ class Coach(ABC):
              }
         )
 
-
     def saveTrainExamples(self, iteration: int) -> None:
         """
         Store the current accumulated data to a compressed file using pickle. Note that for highly dimensional
@@ -411,7 +417,7 @@ class Coach(ABC):
         :param iteration: int Current iteration of the self-play. Used as indexing value for the data filename.
         """
         folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                  self.args.experiment_name / str(self.args.seed)
+                 self.args.experiment_name / str(self.args.seed)
 
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -438,7 +444,7 @@ class Coach(ABC):
                 self.logger.info(f"No replay buffer found. Use empty one.")
         else:
             folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                      self.args.experiment_name / str(self.args.seed)
+                     self.args.experiment_name / str(self.args.seed)
             buffer_number = highest_number_in_files(path=folder, stem='buffer_')
             filename = folder / f"buffer_{buffer_number}.examples"
 
