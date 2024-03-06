@@ -142,19 +142,28 @@ def load_pretrained_net(args, rule_predictor, game):
         directory=str(checkpoint_path_current_model / 'tf_ckpts'),
         max_to_keep=3
     )
+    initialize_net(args, checkpoint_current_model, game)
 
     if len(args.path_to_complete_model) > 0:
-        checkpoint_current_model.restore(f"{ROOT_DIR / args.path_to_complete_model }")
+        restore_path = ROOT_DIR / args.path_to_complete_model
+        if restore_path.suffix != '':
+            raise RuntimeError(f"Your path to the complete model has an suffix: {restore_path.suffix} \n "
+                                 f"the restore operation wants to have the path in the form *path_to_checkpoint/tf_chpts/ckpt-x* \n"
+                                 f" Most likely you add the path to the index file \n"
+                                 f"Your path is: {restore_path}" )
+
+        checkpoint_current_model.restore(f"{restore_path}")
         print("Restored from {}".format(f"{ROOT_DIR / args.path_to_complete_model }"))
 
     elif manager_train.latest_checkpoint:
-        checkpoint_current_model.restore(manager_train.latest_checkpoint)
+        checkpoint_current_model.restore(manager_train.latest_checkpoint).assert_consumed()
+
         print("Restored from {}".format(manager_train.latest_checkpoint))
     else:
         checkpoint_current_model.restore(manager_train.latest_checkpoint)
         print("Initializing from scratch.")
 
-    initialize_net(args, checkpoint_current_model, game)
+
 
     copy_dataset_encoder_weights_from_pretrained_agent(
         args=args,

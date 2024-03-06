@@ -5,9 +5,15 @@ import numpy as np
 
 def copy_dataset_encoder_weights_from_pretrained_agent(args, checkpoint_current_model, game):
     if args.path_to_pretrained_dataset_encoder:
-        checkpoint_path_dataset_encoder = f"{ROOT_DIR / args.path_to_pretrained_dataset_encoder }"
+        checkpoint_path_dataset_encoder =  ROOT_DIR / args.path_to_pretrained_dataset_encoder
+        if checkpoint_path_dataset_encoder.suffix != '':
+            raise RuntimeError(f"Your path to the complete model has an suffix: {checkpoint_path_dataset_encoder.suffix} \n "
+                               f"the restore operation wants to have the path in the form *path_to_checkpoint/tf_chpts/ckpt-x* \n"
+                               f" Most likely you add the path to the index file \n"
+                               f"Your path is: {checkpoint_path_dataset_encoder}")
+
         chkpoint_reader_dataset_encoder = tf.train.load_checkpoint(
-            checkpoint_path_dataset_encoder
+            f"{checkpoint_path_dataset_encoder}"
         )
         print(f"Copy weights of DatasetEncoder from {checkpoint_path_dataset_encoder}")
         selected_path = []
