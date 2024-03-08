@@ -25,6 +25,7 @@ class RulePredictorNet(tf.keras.Model):
             # in all other cases it is [batch, row,  column, encoding ]
             self.axis_to_split = 2 if self.args.class_measurement_encoder == 'DatasetTransformer' else 1
 
+    @tf.function
     def __call__(self, input_encoder_tree, input_encoder_measurement):
         input_encoder_tree = check_for_non_numeric_and_replace_by_0(
             logger=self.logger_net,
