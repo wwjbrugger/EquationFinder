@@ -5,9 +5,9 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['train_pretrained_net'],
+        'experiment_name': ['train_net'],
         'minutes_to_run': ['4320'],
-        'max_iteration_to_run': [200],
+        'max_iteration_to_run': [400],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
         'path_to_pretrained_dataset_encoder': [''],
@@ -15,7 +15,7 @@ def run():
         'run_mcts': [True],
         'only_test': [False],
         'data': [
-            'data_grammar_1/run_1',
+            'data_grammar_1/run_2',
             # 'data_grammar_1/nguyen_1',
             # 'data_grammar_1/nguyen_2',
             # 'data_grammar_1/nguyen_3',
@@ -51,7 +51,7 @@ def run():
             'abs_max_y',
         ],
         'num_MCTS_sims': [-1],
-        'sec_per_simulation': [1,5,15,30,45,60,120],
+        'sec_per_simulation': [30,60],
         'MCTS_engine': ['Endgame'],
         ## General
 
@@ -72,7 +72,7 @@ def run():
         'max_constants_in_tree': [3],
         ## Training neural net
         'batch_size_training': ['16'],
-        'num_gradient_steps': ['200'],
+        'num_gradient_steps': ['100'],
         'average_policy_if_wrong': [False],
 
         ## Preprocess
