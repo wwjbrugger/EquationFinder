@@ -14,12 +14,29 @@ class DatasetGenerator():
         self.equation_generator = EquationGenerator(grammar=self.grammar,
                                                     args=self.args)
         self.experiment_dataset_dic = experiment_dataset_dic
+        self.how_often_equation_generated = {}
 
     def save_production_rules_to_file(self, save_folder):
         save_folder.mkdir(exist_ok=True, parents=True)
         with open(save_folder / 'production_rules.txt', "a") as file:
             file.writelines(str(production) + '\n' for production in
                             self.grammar._productions)
+
+    def update_how_often_equation_generated(self,new_equation):
+        if not new_equation.__str__() in self.how_often_equation_generated:
+            self.how_often_equation_generated[new_equation.__str__()] = 1
+        else:
+            self.how_often_equation_generated[new_equation.__str__()] += 1
+
+    def equation_type_over_limit(self, new_equation):
+        if not new_equation.__str__() in self.how_often_equation_generated:
+            return False
+
+        if  (self.how_often_equation_generated[new_equation.__str__()]
+                < self.args.max_number_equation_of_one_type):
+            return False
+        else:
+            return True
 
     def save_grammar_to_file(self, save_folder):
         save_folder.mkdir(exist_ok=True, parents=True)
@@ -33,7 +50,8 @@ class DatasetGenerator():
         while num_sampled_equations < self.args.number_equations:
             new_equation, action_sequence = self.equation_generator.create_new_equation()
             i = 0
-            while not new_equation.complete:
+            while ((not new_equation.complete)
+                   or self.equation_type_over_limit(new_equation)):
                 new_equation, action_sequence = self.equation_generator.create_new_equation()
                 i += 1
 
@@ -48,6 +66,7 @@ class DatasetGenerator():
                     'action_sequence': action_sequence
                 }
                 num_sampled_equations += 1
+                self.update_how_often_equation_generated(new_equation)
             except OverflowError as e:
                 print(f'Tree was not successfully created : {e}')
             except ZeroDivisionError as e:

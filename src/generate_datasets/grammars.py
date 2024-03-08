@@ -2,7 +2,7 @@ def get_grammars(args):
     if args.grammar_to_use == 1:
         grammar_string = \
             """  
-            S -> '+' S S [0.3]
+            S -> '+' S S [0.25]
             S -> '-' S S [0.05]
             S -> '*' S S [0.1]
     
@@ -14,7 +14,7 @@ def get_grammars(args):
             S -> '**' 'x_1' 'x_0'[0.01]
             S -> 'x_0'      [0.1]
             S -> 'x_1'      [0.1]
-            S -> 'c'        [0.05]
+            S -> 'c'        [0.1]
     
     
             S -> 'sin' Inner_Function [0.03] 

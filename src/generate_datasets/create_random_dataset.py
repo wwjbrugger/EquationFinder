@@ -23,8 +23,12 @@ if __name__ == '__main__':
     parser.add_argument("--save_folder", help="where to save data_ set",
                         required=True, type=str)
     parser.add_argument("--grammar_to_use", default=True, type=int)
-    parser.add_argument("--number_equations", default=10000,
+    parser.add_argument("--number_equations", default=2000,
                         help="how many trees to generate", required=False,
+                        type=int)
+    parser.add_argument("--max_number_equation_of_one_type", default=5,
+                        help="For each syntax tree multiple constants and x values can be sampled. "
+                             "This argument gives an upper bound on how often a syntax tree can be in the dataset.", required=False,
                         type=int)
     parser.add_argument("--seed", default=42,
                         help="seed to generate trees", required=False, type=int)
