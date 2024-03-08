@@ -60,7 +60,7 @@ class Config:
                             default=10,
                             help='Maximum depth of generated equations')
         parser.add_argument('--max_num_nodes_in_syntax_tree', type=int,
-                            help='Maximum depth of generated equations', default=30)
+                            help='Maximum nodes of generated equations', default=25)
         parser.add_argument('--max_branching_factor', type=np.float32,
                             default=2,
                             help='Estimate how many children a node will have at average')

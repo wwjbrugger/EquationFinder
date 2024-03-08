@@ -32,7 +32,7 @@ if __name__ == '__main__':
                         help="how many recursions a formula is allowed to have"
                         , required=False, type=int)
     parser.add_argument('--max_num_nodes_in_syntax_tree', type=int,
-                        help='Maximum depth of generated equations', default=30)
+                        help='Maximum nodes of generated equations', default=25)
     parser.add_argument("--num_calls_sampling", default=20,
                         help="How often the sampling procedure is called per example",
                         required=False, type=int)

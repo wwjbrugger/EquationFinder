@@ -81,7 +81,7 @@ def run():
         'minimum_reward': ['-1'],
         'maximum_reward': ['1'],
         'max_depth_of_tree': ['10'],
-        'max_num_nodes_in_syntax_tree': ['30'],
+        'max_num_nodes_in_syntax_tree': ['25'],
         'max_branching_factor': [2],
         'max_constants_in_tree': [3],
         ## Training neural net
