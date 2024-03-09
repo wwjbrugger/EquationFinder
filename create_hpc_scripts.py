@@ -53,6 +53,7 @@ def run():
         'num_MCTS_sims': [-1],
         'sec_per_simulation': [30,60],
         'MCTS_engine': ['Endgame'],
+        'c1': ['5'],
         ## General
 
         'logging_level': ['30'],
@@ -141,7 +142,6 @@ def run():
         'use_puct': [True],
         'temp_0': [0.1],
         'temperature_decay': ['-0.01'],
-        'c1': ['1.25'],
         'gamma': ['0.98'],
         'n_steps': ['100'],
         'risk_seeking': [True],
