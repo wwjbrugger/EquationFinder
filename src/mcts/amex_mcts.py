@@ -313,7 +313,10 @@ class AmEx_MCTS(ClassicMCTS):
         else:
             self.Qsa[(state_hash, a)] = mct_return
             self.times_edge_s_a_was_visited[(state_hash, a)] = 0  # initialize
-            self.times_edge_s_a_was_visited[(state_hash, a_max)] = 1
+            if (state_hash, a_max) in self.times_edge_s_a_was_visited:
+                self.times_edge_s_a_was_visited[(state_hash, a_max)] += 1
+            else:
+                self.times_edge_s_a_was_visited[(state_hash, a_max)] = 1
         self.times_s_was_visited[state_hash] += 1
         return mct_return
 
