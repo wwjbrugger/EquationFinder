@@ -17,6 +17,7 @@ from src.utils.utils import tie_breaking_argmax
 from src.mcts.classic_mcts import ClassicMCTS
 
 
+
 class AmEx_MCTS(ClassicMCTS):
     """
     This class handles the MCTS tree while having access to the environment
@@ -313,16 +314,23 @@ class AmEx_MCTS(ClassicMCTS):
         else:
             self.Qsa[(state_hash, a)] = mct_return
             self.times_edge_s_a_was_visited[(state_hash, a)] = 0  # initialize
-            self.times_edge_s_a_was_visited[(state_hash, a_max)] = 1
+            if (state_hash, a_max) in self.times_edge_s_a_was_visited:
+                self.times_edge_s_a_was_visited[(state_hash, a_max)] += 1
+            else:
+                self.times_edge_s_a_was_visited[(state_hash, a_max)] = 1
         self.times_s_was_visited[state_hash] += 1
         return mct_return
 
     def select_action_with_highest_upper_confidence_bound(self, state_hash):
-        confidence_bounds = []
+        q_values =[]
+        explorations = []
         for a in range(self.action_size):
-            ucb = self.compute_ucb(state_hash, a)
-            confidence_bounds.append(ucb)
-        confidence_bounds = np.asarray(confidence_bounds)
+            q_value, exploration = self.compute_ucb(state_hash, a)
+            q_values.append(q_value)
+            explorations.append(exploration)
+        q_values = np.array(q_values).round(2)
+        explorations = np.array(explorations).round(2)
+        confidence_bounds = q_values + explorations
 
         # Get masked argmax.
         a = tie_breaking_argmax(np.where(self.not_completely_explored_moves_for_s[state_hash],

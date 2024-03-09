@@ -69,6 +69,7 @@ def run():
         ],
         'num_MCTS_sims': ['300_000'],
         'MCTS_engine': ['Endgame'],
+        'c1': ['5'],
         ## General
 
         'logging_level': ['30'],
@@ -88,7 +89,7 @@ def run():
         'max_constants_in_tree': [3],
         ## Training neural net
         'batch_size_training': ['16'],
-        'num_gradient_steps': ['200'],
+        'num_gradient_steps': ['100'],
         'average_policy_if_wrong': [False],
 
         ## Preprocess
@@ -157,7 +158,6 @@ def run():
         'use_puct': [True],
         'temp_0': [0.1],
         'temperature_decay': ['-0.01'],
-        'c1': ['1.25'],
         'gamma': ['0.98'],
         'n_steps': ['100'],
         'risk_seeking': [True],

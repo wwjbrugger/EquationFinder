@@ -348,7 +348,7 @@ class ClassicMCTS:
         :return: float Upper confidence bound with neural network prior
         """
         if state_hash in self.valid_moves_for_s and not self.valid_moves_for_s[state_hash][a]:
-            return 0.0  # todo handle transpositions
+            return 0.0, 0.0  # todo handle transpositions
 
         if (state_hash, a) in self.Qsa:
             times_s_a_visited = self.times_edge_s_a_was_visited[(state_hash, a)]
@@ -373,6 +373,6 @@ class ClassicMCTS:
 
             exploration = self.args.c1 * np.sqrt(denominator / times_s_a_visited)
 
-        return q_value + exploration
+        return q_value , exploration
     
 
