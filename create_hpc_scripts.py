@@ -56,7 +56,7 @@ def run():
         'c1': ['5'],
         ## General
 
-        'logging_level': ['30'],
+        'logging_level': ['20'],
         'wandb': ['offline'],
         'gpu': ['0'],
 
