@@ -188,6 +188,7 @@ class Coach(ABC):
             state = next_state
 
         # Cleanup environment and GameHistory
+        self.logger.info(f"{' '*10}equation add to buffer: r={state.reward:.2} {complete_state.syntax_tree.__str__()}")
         if mcts.states_explored_till_perfect_fit > 0:
             wandb.log(
                 {
