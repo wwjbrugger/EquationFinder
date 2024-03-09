@@ -15,7 +15,6 @@ class Config:
         parser.add_argument("--job_id", type=int,default=0)
         parser.add_argument("--path_to_complete_model", type=str,
                             default='', help="Path to a complete model  which should be loaded")
-        parser.add_argument('--sec_per_simulation', type=int,default=1)
         parser.add_argument("--path_to_pretrained_dataset_encoder",
                             help='Path to a pretrained model where the dataset encoder is copied from.',
                              type=str)
