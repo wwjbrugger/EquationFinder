@@ -321,11 +321,15 @@ class AmEx_MCTS(ClassicMCTS):
         return mct_return
 
     def select_action_with_highest_upper_confidence_bound(self, state_hash):
-        confidence_bounds = []
+        q_values =[]
+        explorations = []
         for a in range(self.action_size):
-            ucb = self.compute_ucb(state_hash, a)
-            confidence_bounds.append(ucb)
-        confidence_bounds = np.asarray(confidence_bounds)
+            q_value, exploration = self.compute_ucb(state_hash, a)
+            q_values.append(q_value)
+            explorations.append(exploration)
+        q_values = np.array(q_values).round(2)
+        explorations = np.array(explorations).round(2)
+        confidence_bounds = q_values + explorations
 
         # Get masked argmax.
         a = tie_breaking_argmax(np.where(self.not_completely_explored_moves_for_s[state_hash],
