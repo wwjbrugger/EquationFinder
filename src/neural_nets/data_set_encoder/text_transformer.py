@@ -86,6 +86,7 @@ class TextTransformer(MeasurementEncoderDummy):
         """
         tokens = tf.numpy_function(func=self.encode, inp=[x], Tout=tf.string)
         # self.encode(x)
+        tokens.set_shape([x.shape[0],x.shape[1],x.shape[2]*3])
         indices = self.lookup(tokens, **kwargs)
         embeddings = self.embedding(indices, **kwargs)
         batch_size = tf.shape(embeddings)[0]
