@@ -6,6 +6,7 @@ import src.neural_nets.loss as loss
 from src.utils.tensors import expand_tensor_to_same_size
 from src.utils.logging import get_log_obj
 from src.utils.tensors import check_for_non_numeric_and_replace_by_0
+from src.utils.tensors import tf_save_cast_to_float_32
 import tensorboard
 import time
 from src.neural_nets.loss import NT_Xent
@@ -91,17 +92,24 @@ class RulePredictorSkeleton(tf.keras.Model):
             measurement_representation_list,
             axis=0
         )
-        target_pis = np.asarray(target_pis, dtype=np.float32)
-        target_vs = np.asarray(target_vs, dtype=np.float32)
-        tree_representation = tf.cast(tree_representation, dtype=tf.float32)
-        measurement_representation = tf.cast(measurement_representation, dtype=tf.float32)
-        target_pis = check_for_non_numeric_and_replace_by_0(
-            logger=self.logger, tensor=target_pis, name='target_pis'
+        target_pis = tf_save_cast_to_float_32(
+            x=target_pis,
+            logger=self.logger ,
+            name= 'target_pis'
         )
-        target_vs = check_for_non_numeric_and_replace_by_0(
-            logger=self.logger, tensor=target_vs, name='target_vs'
+        target_vs = tf_save_cast_to_float_32(
+            x=target_vs,
+            logger=self.logger,
+            name='target_vs'
         )
+        tree_representation = tf_save_cast_to_float_32(
+            x=tree_representation,
+            logger=self.logger,
+            name='tree_representation'
+        )
+
         return measurement_representation, target_pis, target_vs, tree_representation
+
 
     @tf.function
     def train_step(self, i, measurement_representation, target_pis,

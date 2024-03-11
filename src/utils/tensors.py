@@ -8,6 +8,27 @@ def expand_tensor_to_same_size(to_change, reference):
             to_change = tf.expand_dims(to_change, axis=0)
     return to_change
 
+def tf_save_cast_to_float_32(x,logger,name):
+    """
+    Casting Floats from the 64 to 32 bit is a surprisingly, annoying and hard to prevent
+    source for errors.
+    This method tries to catch all exception and handel them in a way the
+    script can proceed and the weights of the network stay well defined after
+    updating them.
+    :param array:
+    :return:
+    """
+    try:
+        x_tf = tf.convert_to_tensor(x, dtype=tf.float32, name=name )
+
+    except RuntimeError:
+        logger.error(f'Runtime error happened in converting {x_tf}')
+        x_tf = tf.zeros(shape= np.array(x).shape, dtype=tf.dtypes.float32)
+    x_tf = check_for_non_numeric_and_replace_by_0(
+        logger=logger, tensor=x_tf, name=name
+    )
+    return x_tf
+
 def check_for_non_numeric_and_replace_by_0(logger, tensor, name):
     try:
         tf.debugging.check_numerics(tensor, message=f'Checking {name}]')
