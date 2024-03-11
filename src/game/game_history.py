@@ -59,7 +59,7 @@ class GameHistory:
         for t in range(len(self.rewards)):
             discounted_rewards = [np.power(gamma, k - t) * self.rewards[k] for k in range(t, horizon)]
             observed_return = sum(discounted_rewards) #+ bootstrap
-            if args.average_policy_if_wrong and observed_return < args.maximum_reward - 0.99 :
+            if args.average_policy_if_wrong and self.rewards[-1] < args.minimum_reward + 0.1 :
                 self.probabilities[t][self.probabilities[t] > 0] = 1/np.count_nonzero(self.probabilities[t])
             self.observed_returns.append(observed_return)
         return
