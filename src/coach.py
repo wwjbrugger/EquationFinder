@@ -163,7 +163,6 @@ class Coach(ABC):
 
             pi, v = mcts.run_mcts(
                 state=state,
-                num_mcts_sims=int(num_MCTS_sims),
                 temperature=temp
             )
 
@@ -188,6 +187,8 @@ class Coach(ABC):
             state = next_state
 
         # Cleanup environment and GameHistory
+        self.logger.info(f"Initial guess of NN: "
+                         f"{np.around(self.mcts.Ps[list(self.mcts.Ps.keys())[0]][:15], 2)}")
         self.logger.info(f"{' '*10}equation add to buffer: r={state.reward:.2} {complete_state.syntax_tree.__str__()}")
         if mcts.states_explored_till_perfect_fit > 0:
             wandb.log(
@@ -266,12 +267,12 @@ class Coach(ABC):
                     )
                     self.trainExamplesHistory.append(iteration_train_examples)
                     wandb.log(
-                        {f"average_reward_iteration_{self.metrics_train['mode']}":
-                             self.metrics_train['rewards_mean'].result()}
-                    )
-                    wandb.log(
-                        {f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
-                             self.metrics_train['done_rollout_ratio'].result()}
+                        {f"iteration": self.checkpoint.step,
+                         f"average_reward_iteration_{self.metrics_train['mode']}":
+                             self.metrics_train['rewards_mean'].result(),
+                         f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
+                             self.metrics_train['done_rollout_ratio'].result()
+                         }
                     )
                     self.saveTrainExamples(int(self.checkpoint.step))
                 if self.args.prior_source in 'neural_net':
@@ -295,6 +296,7 @@ class Coach(ABC):
         # Backpropagation
         train_pi_loss = 0
         train_v_loss = 0
+        train_contrastive_loss = 0
         for _ in trange(self.args.num_gradient_steps,
                         desc="Backpropagation",
                         file=sys.stdout):
@@ -303,10 +305,15 @@ class Coach(ABC):
                 self.rule_predictor.train(batch)
             train_pi_loss += pi_batch_loss
             train_v_loss += v_batch_loss
-            wandb.log({f"Train pi loss": pi_batch_loss})
-            wandb.log({f"Train v loss": v_batch_loss})
-            if self.args.contrastive_loss:
-                wandb.log({f"Contrastive loss": contrastive_loss})
+            train_contrastive_loss += contrastive_loss
+        wandb.log({
+            f"iteration": self.checkpoint.step,
+            f"Pi loss": pi_batch_loss / self.args.num_gradient_steps,
+            "V loss": v_batch_loss / self.args.num_gradient_steps,
+            "Contrastive loss": contrastive_loss / self.args.num_gradient_steps
+        }
+        )
+
 
     def gather_data(self, metrics, mcts, game, logger, num_selfplay_iterations):
         iteration_examples = list()

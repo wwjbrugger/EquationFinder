@@ -110,6 +110,7 @@ class ClassicMCTS:
         for i, a in enumerate(possible_actions):
             if (s_0, a) in source_dict:
                 action_utilities[i] = source_dict[(s_0, a)]
+        self.logger.info(f"{s_0} visit counts: {action_utilities}")
 
         move_probabilities = np.zeros(self.action_size)
 
