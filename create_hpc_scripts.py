@@ -32,15 +32,15 @@ def run():
 
         'script_folder': ['scripts_final'],
         'output_folder': ['output'],
-        'cold_start_iterations': [20],
+        'cold_start_iterations': [10],
         'class_measurement_encoder': [
             # 'MeasurementEncoderDummy',
-             'LSTM_Measurement_Encoder',
+            # 'LSTM_Measurement_Encoder',
              'Bi_LSTM_Measurement_Encoder',
-             'MLP_Measurement_Encoder',
-             'DatasetTransformer',
-             'MeasurementEncoderPicture',
-             'TextTransformer'
+             # 'MLP_Measurement_Encoder',
+             # 'DatasetTransformer',
+             # 'MeasurementEncoderPicture',
+             # 'TextTransformer'
         ],
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
@@ -48,12 +48,13 @@ def run():
             # 'abs_max_y',
             # 'row_wise',
             'abs_max_y__lin_transform',
-            'abs_max_y',
+            #'abs_max_y',
         ],
-        'num_MCTS_sims': [-1],
-        'sec_per_simulation': [30,60],
+        'num_MCTS_sims': [1_000,5_000,10_000],
+        'sec_per_simulation': [-1],
         'MCTS_engine': ['Endgame'],
-        'c1': ['5'],
+        'c1': ['5','20'],
+        'average_policy_if_wrong': [True],
         ## General
 
         'logging_level': ['20'],
@@ -74,7 +75,6 @@ def run():
         ## Training neural net
         'batch_size_training': ['16'],
         'num_gradient_steps': ['100'],
-        'average_policy_if_wrong': [False],
 
         ## Preprocess
         'equation_preprocess_class': [
@@ -187,7 +187,8 @@ def create_experiment_name(settings_one_script):
                       f"{settings_one_script['class_measurement_encoder']}__" \
                       f"{settings_one_script['normalize_approach']}__" \
                       f"{settings_one_script['MCTS_engine']}__" \
-                      f"{settings_one_script['sec_per_simulation']}"
+                      f"{settings_one_script['num_MCTS_sims']}__" \
+                      f"{settings_one_script['c1']}"
 
     return experiment_name
 
