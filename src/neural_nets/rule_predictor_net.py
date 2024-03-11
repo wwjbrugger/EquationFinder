@@ -27,16 +27,6 @@ class RulePredictorNet(tf.keras.Model):
 
     @tf.function
     def __call__(self, input_encoder_tree, input_encoder_measurement):
-        input_encoder_tree = check_for_non_numeric_and_replace_by_0(
-            logger=self.logger_net,
-            tensor=input_encoder_tree,
-            name='tree_representation'
-        )
-        input_encoder_measurement = check_for_non_numeric_and_replace_by_0(
-            logger=self.logger_net,
-            tensor=input_encoder_measurement,
-            name='measurement_representation'
-        )
         encoding_tree = self.encoder_tree(
             x=input_encoder_tree,
             training=self.training
@@ -62,12 +52,6 @@ class RulePredictorNet(tf.keras.Model):
             encoding_measurement_contrastive = None
 
         output_encoder = tf.concat([encoding_tree, encoding_measurement], axis=1)
-        # if self.i % 50 == 0:
-        #     self.logger_net.info(f"Sum Output encoding_measurement: {np.sum(np.abs(encoding_measurement.numpy()))}")
-        #     self.logger_net.info(f"Sum Output Norm encoding_measurement: {np.sum(np.abs(encoding_measurement_norm.numpy()))}")
-        #
-        #     self.logger_net.info(f"Encoding_tree sum: {np.sum(np.abs(encoding_tree.numpy()))}")
-        #     self.logger_net.info(f"Encoding_tree Norm sum: {np.sum(np.abs(encoding_tree_norm.numpy()))}")
 
         action_uncliped = self.actor(
             x=output_encoder,
