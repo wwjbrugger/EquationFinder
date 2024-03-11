@@ -53,8 +53,7 @@ class ClassicMCTS:
         self.temperature = None # exponentiation factor
         self.states_explored_till_perfect_fit = -1
 
-    def run_mcts(self, state: GameState, num_mcts_sims,
-                 temperature: float) -> typing.Tuple[np.ndarray, float]:
+    def run_mcts(self, state: GameState, temperature: float) -> typing.Tuple[np.ndarray, float]:
         """
         This function performs 'num_MCTS_sims' simulations of MCTS starting
         from the provided root GameState.
@@ -72,7 +71,6 @@ class ClassicMCTS:
 
         :param state: GameState Data structure containing the current state of
         the environment.
-        :param num_mcts_sims: The number of simulations to perform
         :param temperature: float Visit count exponentiation factor. A value of
         0 = Greedy, +infinity = uniformly random.
         :return: tuple (pi, v) The move probabilities of MCTS and the estimated
@@ -88,12 +86,11 @@ class ClassicMCTS:
         mct_return_list = []
         start_time = time.time()
         # -2 for y node and startnode
-        sec_per_simulation = max(1,
-                                 self.args.sec_per_simulation *
-                                 2 ** (- (len(state.syntax_tree.dict_of_nodes) - 2)))
-        num_mcts_sims = 0
-        while time.time() < start_time + sec_per_simulation or num_mcts_sims == 0:
-            num_mcts_sims += 1
+        num_mcts_sims = int(max(10,
+                                 self.args.num_MCTS_sims *
+                                 4 ** (- (len(state.syntax_tree.dict_of_nodes) - 2))))
+
+        for num_sim in range(num_mcts_sims):
             mct_return = self._search(
                 state=state
             )
