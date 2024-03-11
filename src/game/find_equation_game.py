@@ -8,7 +8,7 @@ from src.utils.logging import get_log_obj
 from src.constant_fitting.contant_fitting import refit_all_constants
 import hashlib
 import math
-from src.game.rewards import Mse
+from src.game.rewards import Mse, ReMSe
 from src.utils.error import NonFiniteError
 from src.equation_classes.max_list import MaxList
 import re
@@ -127,7 +127,9 @@ class FindEquationGame(Game):
                     dataset=dataset,
                 )
                 y_true = dataset.loc[:, 'y'].to_numpy()
-                error = Mse(y_pred=y_calc, y_true=y_true)
+                error_MSe = ReMSe(y_pred=y_calc, y_true=y_true)
+                error = (error_MSe + (0.2 * len(complete_syntax_tree.dict_of_nodes))
+                         / self.args.max_num_nodes_in_syntax_tree)
                 #returns error in the range -1 to 1
                 r = 1 + np.maximum(self.args.minimum_reward -1, - error, dtype=np.float32)
                 self.logger.debug(f"r = {r}  {syntax_tree.rearrange_equation_prefix_notation(new_start_node_id=-1)[1]} \n")
