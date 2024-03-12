@@ -328,8 +328,8 @@ class AmEx_MCTS(ClassicMCTS):
             q_value, exploration = self.compute_ucb(state_hash, a)
             q_values.append(q_value)
             explorations.append(exploration)
-        q_values = np.array(q_values).round(2)
-        explorations = np.array(explorations).round(2)
+        q_values = np.array(q_values)
+        explorations = np.array(explorations)
         confidence_bounds = q_values + explorations
 
         # Get masked argmax.
