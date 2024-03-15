@@ -7,7 +7,8 @@ mogon:/home/bruggerj \
 --exclude=delete_me.txt  --exclude=usefull_ssh_comments.txt \
 --exclude=data --exclude=out  --exclude=saved_models \
 --exclude=.wandb --exclude=old --exclude=create_hpc_scripts.py\
---exclude=upload_wandb.py --exclude=data_grammar_2 --exclude=out
+--exclude=upload_wandb.py --exclude=data_grammar_2 --exclude=out \
+--exclude=old_data --exclude=old_saved_data
 
 ## Load sbatch scripts to Mogon
 rsync -a --verbose  \
