@@ -15,6 +15,12 @@ rsync -a --verbose  \
 /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/scripts_final_nn \
 mogon:/home/bruggerj/NeuralGuidedEquationDiscovery/ \
 
+## Load output folder to computer
+rsync -a --verbose  \
+mogon:/home/bruggerj/NeuralGuidedEquationDiscovery/scripts_final/output/ \
+/home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/scripts_final/output 
+
+
 ## Load saved models from mogon to computer 
 rsync -a  -L --verbose    mogon:/home/bruggerj/NeuralGuidedEquationDiscovery/\
 saved_models/  /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/saved_models
