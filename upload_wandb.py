@@ -8,9 +8,9 @@ import fnmatch
 def run():
 
     wandb_entity_name = 'wwjbrugger'#'jgu-wandb'
-    wandb_project = "neural_guided_symbolic_regression_13_03"
+    wandb_project = "test_neural_guided_symbolic_regression_13_03"
     Path_to_experiments = Path(
-        "/home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/.wandb"
+        "/home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/.wandb_test"
     )
 
 
