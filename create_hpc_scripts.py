@@ -10,12 +10,7 @@ def run():
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [
-            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__1/1/tf_ckpts/ckpt-199',
-            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__5/1/tf_ckpts/ckpt-199',
-            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__15/1/tf_ckpts/ckpt-199',
-            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__30/1/tf_ckpts/ckpt-199',
-            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__45/1/tf_ckpts/ckpt-199',
-            'saved_models/run_1/train_pretrained_net__neural_net__data_grammar_1_run_1__DatasetTransformer__abs_max_y__lin_transform__Endgame__60/1/tf_ckpts/ckpt-199'
+            'saved_models/run_2/train_net__neural_net__data_grammar_1_run_2__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-181'
         ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
@@ -47,17 +42,17 @@ def run():
 
         ],
 
-        'script_folder': ['scripts_final_nn'],
+        'script_folder': ['scripts_test'],
         'output_folder': ['output'],
         'cold_start_iterations': [0],
         'class_measurement_encoder': [
             # 'MeasurementEncoderDummy',
             # 'LSTM_Measurement_Encoder',
-            # 'Bi_LSTM_Measurement_Encoder',
-            # 'MLP_Measurement_Encoder',
-            'DatasetTransformer',
-            # 'MeasurementEncoderPicture',
-            # 'TextTransformer'
+             'Bi_LSTM_Measurement_Encoder',
+             # 'MLP_Measurement_Encoder',
+             # 'DatasetTransformer',
+             # 'MeasurementEncoderPicture',
+             # 'TextTransformer'
         ],
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
@@ -69,10 +64,10 @@ def run():
         ],
         'num_MCTS_sims': ['300_000'],
         'MCTS_engine': ['Endgame'],
-        'c1': ['5'],
+        'c1': ['20'],
         ## General
 
-        'logging_level': ['30'],
+        'logging_level': ['20'],
         'wandb': ['offline'],
         'gpu': ['0'],
 
