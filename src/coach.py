@@ -332,7 +332,7 @@ class Coach(ABC):
             self.log_best_list(game, logger)
 
             metrics['best_reward_found'].update_state(
-                game.max_list.max_list_state[-1].rewards
+                game.max_list.max_list_state[-1].reward if len(game.max_list.max_list_state)>0 else -1
             )
             metrics['done_rollout_ratio'].update_state(
                 mcts.visits_done_state / mcts.visits_roll_out
