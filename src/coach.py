@@ -308,9 +308,9 @@ class Coach(ABC):
             train_contrastive_loss += contrastive_loss
         wandb.log({
             f"iteration": self.checkpoint.step,
-            f"Pi loss": pi_batch_loss / self.args.num_gradient_steps,
-            "V loss": v_batch_loss / self.args.num_gradient_steps,
-            "Contrastive loss": contrastive_loss / self.args.num_gradient_steps
+            f"Pi loss": train_pi_loss / self.args.num_gradient_steps,
+            "V loss": train_v_loss / self.args.num_gradient_steps,
+            "Contrastive loss": train_contrastive_loss / self.args.num_gradient_steps
         }
         )
 
@@ -395,15 +395,22 @@ class Coach(ABC):
         if self.checkpoint.step > self.args.cold_start_iterations:
             """ Same as in update_network"""
             complete_history = GameHistory.flatten(self.testExamplesHistory)
-            batch = self.sampleBatch(complete_history)
-            action_prediction, v, pi_batch_loss, v_batch_loss, contrastive_loss = \
-                self.rule_predictor.predict_with_loss(batch)
+            test_pi_loss = 0
+            test_v_loss = 0
+            test_contrastive_loss = 0
+            for i in range(10):
+                batch = self.sampleBatch(complete_history)
+                action_prediction, v, pi_batch_loss, v_batch_loss, contrastive_loss = \
+                    self.rule_predictor.predict_with_loss(batch)
+                test_pi_loss += pi_batch_loss
+                test_v_loss += v_batch_loss
+                test_contrastive_loss += contrastive_loss
 
             wandb.log({
                 f"iteration": self.checkpoint.step,
-                f"Test pi loss": pi_batch_loss,
-                "Test v loss": v_batch_loss,
-                "Test Contrastive loss": contrastive_loss,
+                f"Test pi loss": test_pi_loss /10,
+                "Test v loss": test_v_loss /10,
+                "Test Contrastive loss": test_contrastive_loss/10,
                 f"avg_best_reward_found_{self.metrics_test['mode']}":
                     self.metrics_test['best_reward_found'].result()
             }
