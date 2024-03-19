@@ -10,7 +10,7 @@ def run():
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [
-            'saved_models/run_2/train_net__neural_net__data_grammar_1_run_2__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-181'
+            'saved_models/run_2/train_net__neural_net__data_grammar_1_run_2__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-231'
         ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
@@ -235,7 +235,7 @@ def write_SBATCH_commants(settings_one_script, file1):
     file1.writelines("#SBATCH --nodes=1 \n")
     file1.writelines("#SBATCH --cpus-per-task=4 \n")
     file1.writelines("#SBATCH --mem=20GB \n")
-    file1.writelines("#SBATCH --array=1-6 \n")
+    file1.writelines("#SBATCH --array=1-20 \n")
     file1.writelines("\n")
     file1.writelines("#SBATCH -o \%x_\%j_profile.out \n")
     file1.writelines("#SBATCH -C anyarch \n")
@@ -259,7 +259,7 @@ def write_prepare_enviroment(file1):
         "export http_proxy=http://webproxy.zdv.uni-mainz.de:8888 \n")
     file1.writelines(
         "export https_proxy=https://webproxy.zdv.uni-mainz.de:8888 \n")
-    file1.writelines("source venv/bin/activate\n")
+    file1.writelines("source ~/NeuralGuidedEquationDiscovery/venv/bin/activate\n")
     file1.writelines("wandb offline \n")
     file1.writelines("\n")
     file1.writelines("\n")
