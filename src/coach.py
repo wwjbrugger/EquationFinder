@@ -278,12 +278,12 @@ class Coach(ABC):
                 if self.args.prior_source in 'neural_net':
                     if self.checkpoint.step > self.args.cold_start_iterations:
                         self.update_network()
-                    save_path = self.checkpoint_manager.save()
+                    save_path = self.checkpoint_manager.save(check_interval=True)
                     self.logger.debug(
                         f"Saved checkpoint for epoch {int(self.checkpoint.step)}: {save_path}"
                     )
                 else:
-                    save_path = self.checkpoint_manager.save()
+                    save_path = self.checkpoint_manager.save(check_interval=True)
             if self.args.test_network and \
                     self.checkpoint.step % self.args.test_every_n_steps == 0:
                 self.test_epoche(save_path=save_path)

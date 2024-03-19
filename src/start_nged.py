@@ -138,6 +138,8 @@ def load_pretrained_net(args, rule_predictor, game):
         net=net
     )
     manager_train = tf.train.CheckpointManager(
+        max_to_keep = 3,
+        step_counter=checkpoint_current_model.step,
         checkpoint=checkpoint_current_model,
         directory=str(checkpoint_path_current_model / 'tf_ckpts'),
         checkpoint_interval=10
