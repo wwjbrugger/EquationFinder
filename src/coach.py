@@ -243,12 +243,12 @@ class Coach(ABC):
         t_end = time.time() + 60 * self.args.minutes_to_run
         self.metrics_train = {
             'mode': 'train',
-            'rewards_mean': tf.keras.metrics.Mean(dtype=tf.float32),
+            'best_reward_found': tf.keras.metrics.Mean(dtype=tf.float32),
             'done_rollout_ratio': tf.keras.metrics.Mean(dtype=tf.float32)
         }
         self.metrics_test = {
             'mode': 'test',
-            'rewards_mean': tf.keras.metrics.Mean(dtype=tf.float32),
+            'best_reward_found': tf.keras.metrics.Mean(dtype=tf.float32),
             'done_rollout_ratio': tf.keras.metrics.Mean(dtype=tf.float32)
         }
         self.loadTrainExamples(int(self.checkpoint.step))
@@ -269,7 +269,7 @@ class Coach(ABC):
                     wandb.log(
                         {f"iteration": self.checkpoint.step,
                          f"average_reward_iteration_{self.metrics_train['mode']}":
-                             self.metrics_train['rewards_mean'].result(),
+                             self.metrics_train['best_reward_found'].result(),
                          f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
                              self.metrics_train['done_rollout_ratio'].result()
                          }
@@ -317,7 +317,7 @@ class Coach(ABC):
 
     def gather_data(self, metrics, mcts, game, logger, num_selfplay_iterations):
         iteration_examples = list()
-        metrics['rewards_mean'].reset_state()
+        metrics['best_reward_found'].reset_state()
         metrics['done_rollout_ratio'].reset_state()
         minimal_reward_runs = 0
         for i in range(num_selfplay_iterations):
@@ -331,8 +331,8 @@ class Coach(ABC):
             iteration_examples.append(result_episode)
             self.log_best_list(game, logger)
 
-            metrics['rewards_mean'].update_state(
-                np.sum(result_episode.rewards, dtype=np.float32)
+            metrics['best_reward_found'].update_state(
+                game.max_list.max_list_state[-1].rewards
             )
             metrics['done_rollout_ratio'].update_state(
                 mcts.visits_done_state / mcts.visits_roll_out
@@ -404,8 +404,8 @@ class Coach(ABC):
                 f"Test pi loss": pi_batch_loss,
                 "Test v loss": v_batch_loss,
                 "Test Contrastive loss": contrastive_loss,
-                f"average_reward_{self.metrics_test['mode']}":
-                    self.metrics_test['rewards_mean'].result()
+                f"avg_best_reward_found_{self.metrics_test['mode']}":
+                    self.metrics_test['best_reward_found'].result()
             }
             )
 
