@@ -8,7 +8,8 @@ mogon:/home/bruggerj \
 --exclude=data --exclude=out  --exclude=saved_models \
 --exclude=.wandb --exclude=old --exclude=create_hpc_scripts.py\
 --exclude=upload_wandb.py --exclude=data_grammar_2 --exclude=out \
---exclude=old_data --exclude=old_saved_data
+--exclude=data_grammar_1/run_1  --exclude=data_grammar_1/run_2 \
+--exclude=data_grammar_2 --exclude=old_wandb --exclude=.wandb_test
 
 ## Load sbatch scripts to Mogon
 rsync -a --verbose  \
