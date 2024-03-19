@@ -187,6 +187,11 @@ class Coach(ABC):
         print(f"Equation found after {mcts.states_explored_till_perfect_fit} states: {game.max_list.max_list_state[-1].syntax_tree.rearrange_equation_infix_notation(-1)[1]:<80} ")
         print(f"{print(game.max_list.max_list_state[-1].syntax_tree.constants_in_tree)}")
         end = time.time()
+        productions = []
+        for node in game.max_list.max_list_state[-1].syntax_tree.dict_of_nodes.values():
+            if len(node.selected_production) > 0:
+                productions = productions + node.selected_production
+        print(f"num productions: {len(productions)} : {productions} ")
 
 
         # Cleanup environment and GameHistory
@@ -205,15 +210,12 @@ class Coach(ABC):
                     f"num simulation to perfect fit {next_state.observation['true_equation_hash']}":
                         mcts.num_simulation_till_perfect_fit,
                     f"num simulation to perfect fit":
-                        mcts.num_simulation_till_perfect_fit
+                        mcts.num_simulation_till_perfect_fit,
+                    f"num_productions": len(productions)
 
                 }
             )
-            productions = []
-            for node in game.max_list.max_list_state[-1].syntax_tree.dict_of_nodes.values():
-                if len(node.selected_production) > 0:
-                    productions = productions + node.selected_production
-            print(f"num productions: {len(productions)} : {productions} ")
+
             pass
 
         else:
