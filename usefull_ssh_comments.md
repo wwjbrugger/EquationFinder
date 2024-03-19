@@ -1,5 +1,5 @@
 ## Load scripts and data to mogon
-rsync -a -n --verbose  \
+rsync -a --verbose  \
 /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/ \
 mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest \
 --exclude=.idea --exclude=venv --exclude=.git \
@@ -9,7 +9,7 @@ mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest \
 --exclude=.wandb --exclude=old_data --exclude=create_hpc_scripts.py\
 --exclude=upload_wandb.py --exclude=data_grammar_2 --exclude=out \
 --exclude=data_grammar_1/run_1  --exclude=data_grammar_1/run_2 \
---exclude=data_grammar_2 --exclude=old_wandb
+--exclude=data_grammar_2 --exclude=old_wandb --exclude=.wandb_test
 
 ## Load sbatch scripts to Mogon
 rsync -a --verbose  \
