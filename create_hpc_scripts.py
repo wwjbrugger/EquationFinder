@@ -10,12 +10,17 @@ def run():
         'max_iteration_to_run': [200],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
-        'path_to_pretrained_dataset_encoder': ['saved_models/run_3/only_dataset_encoder__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__10__20/1/tf_ckpts/ckpt-30'],
+        'path_to_pretrained_dataset_encoder': [
+            #'',
+            # 'saved_models/run_3/only_dataset_encoder__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__10__20/1/tf_ckpts'
+            # '/ckpt-30',
+            'saved_models/run_3/only_dataset_encoder__neural_net__data_grammar_1_run_3__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__10__20/2/tf_ckpts/ckpt-30.index'
+        ],
         'replay_buffer_path': [''],
         'run_mcts': [True],
         'only_test': [False],
         'data': [
-              'data_grammar_1/run_3',
+            'data_grammar_1/run_3',
             # 'data_grammar_1/nguyen_1',
             # 'data_grammar_1/nguyen_2',
             # 'data_grammar_1/nguyen_3',
@@ -34,13 +39,13 @@ def run():
         'output_folder': ['output'],
         'cold_start_iterations': [10],
         'class_measurement_encoder': [
-             # 'MeasurementEncoderDummy',
-             # 'LSTM_Measurement_Encoder',
-             # 'Bi_LSTM_Measurement_Encoder',
-             # 'MLP_Measurement_Encoder',
-             'DatasetTransformer',
-             # 'MeasurementEncoderPicture',
-             # 'TextTransformer'
+            #'MeasurementEncoderDummy',
+            # 'LSTM_Measurement_Encoder',
+             'Bi_LSTM_Measurement_Encoder',
+            # 'MLP_Measurement_Encoder',
+            # 'DatasetTransformer',
+            # 'MeasurementEncoderPicture',
+            # 'TextTransformer'
         ],
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
@@ -48,13 +53,14 @@ def run():
             # 'abs_max_y',
             # 'row_wise',
             'abs_max_y__lin_transform',
-            #'abs_max_y',
+            # 'abs_max_y',
         ],
-        'num_MCTS_sims': [1000],
+        'num_MCTS_sims': [500, 1000],
         'sec_per_simulation': [-1],
         'MCTS_engine': ['Endgame'],
         'c1': ['20'],
         'average_policy_if_wrong': [True],
+        'class_equation_encoder': ['Transformer_Encoder_String'],  # EquationEncoderDummy, Transformer_Encoder_String
         ## General
 
         'logging_level': ['20'],
@@ -82,7 +88,6 @@ def run():
         ],
         'max_len_datasets': [20],
         ## Encoder Equations
-        'class_equation_encoder': ['Transformer_Encoder_String'],
         'embedding_dim_encoder_equation': ['8'],
         'max_tokens_equation': ['64'],
         'use_position_encoding': ['False'],
@@ -119,7 +124,7 @@ def run():
         'use_feature_index_embedding_dataset_transformer': [False],
         'dataset_transformer_use_latent_vector': ['True'],
         ######### Encoder Measurement TextTransformer
-        'float_precision_text_transformer':[3],
+        'float_precision_text_transformer': [3],
         'mantissa_len_text_transformer': [1],
         'max_exponent_text_transformer': [100],
         'num_dimensions_text_transformer': [3],
@@ -183,7 +188,7 @@ def create_experiment_name(settings_one_script):
     basic_experiment_name = settings_one_script['experiment_name']
     experiment_name = f"{basic_experiment_name}__" \
                       f"{settings_one_script['prior_source']}__" \
-                      f"{settings_one_script['data'].replace('/','_')}__" \
+                      f"{settings_one_script['data'].replace('/', '_')}__" \
                       f"{settings_one_script['class_measurement_encoder']}__" \
                       f"{settings_one_script['normalize_approach']}__" \
                       f"{settings_one_script['MCTS_engine']}__" \
