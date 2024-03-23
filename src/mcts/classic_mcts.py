@@ -51,8 +51,12 @@ class ClassicMCTS:
         self.logger = get_log_obj(args=args)
 
         self.temperature = None # exponentiation factor
-        self.states_explored_till_perfect_fit = -1
-        self.num_simulation_till_perfect_fit = -1
+        self.states_explored_till_0_9 = -1
+        self.states_explored_till_0_99 = -1
+        self.states_explored_till_0_999 = -1
+        self.num_simulation_till_0_9 = -1
+        self.num_simulation_till_0_99 = -1
+        self.num_simulation_till_0_999 = -1
 
     def run_mcts(self, state: GameState, num_mcts_sims,
                  temperature: float) -> typing.Tuple[np.ndarray, float]:
@@ -88,7 +92,7 @@ class ClassicMCTS:
         # Aggregate root state value over MCTS back-propagated values
         mct_return_list = []
         for num_sim in range(num_mcts_sims):
-            if self.states_explored_till_perfect_fit < 0:
+            if self.states_explored_till_0_999 < 0:
                 mct_return = self._search(
                     state=state
                 )
@@ -97,10 +101,14 @@ class ClassicMCTS:
                     print(f"number simulation: {num_sim:<8} "
                           f"current best equation: {self.game.max_list.max_list_state[-1].complete_discovered_equation:<80}"
                           f"  r:{self.game.max_list.max_list_state[-1].reward}")
+                if self.states_explored_till_0_9 > 0 and self.num_simulation_till_0_9 < 0:
+                    self.num_simulation_till_0_9 = num_sim
+                if self.states_explored_till_0_99 > 0 and self.num_simulation_till_0_99 < 0:
+                    self.num_simulation_till_0_99 = num_sim
+                if self.states_explored_till_0_999 > 0 and self.num_simulation_till_0_999 < 0:
+                    self.num_simulation_till_0_999 = num_sim
             else:
                 mct_return_list = [1]
-                if self.num_simulation_till_perfect_fit < 0 and self.states_explored_till_perfect_fit > 0:
-                    self.num_simulation_till_perfect_fit = num_sim
                 break
 
         # MCTS Visit count array for each edge 'a' from root node 's_0'.
@@ -155,8 +163,12 @@ class ClassicMCTS:
         self.valid_moves_for_s = {}  # stores game.getValidMoves for board s
         self.visits_done_state = 0
         self.visits_roll_out = 0
-        self.states_explored_till_perfect_fit = -1
-        self.num_simulation_till_perfect_fit = -1
+        self.states_explored_till_0_9 = -1
+        self.states_explored_till_0_99 = -1
+        self.states_explored_till_0_999 = -1
+        self.num_simulation_till_0_999 = -1
+        self.num_simulation_till_0_99 = -1
+        self.num_simulation_till_0_9 = -1
 
     def initialize_root(self, state: GameState) -> \
             typing.Tuple[bytes, float]:
@@ -300,8 +312,12 @@ class ClassicMCTS:
                 value = (value_search + value) / 2
         else:
             # next state is done
-            if reward >= 0.999:
-                self.states_explored_till_perfect_fit = len(self.times_s_was_visited)
+            if reward >= 0.9 and self.states_explored_till_0_9 < 0:
+                self.states_explored_till_0_9 = len(self.times_s_was_visited)
+            if reward >= 0.99 and self.states_explored_till_0_99 < 0:
+                self.states_explored_till_0_99 = len(self.times_s_was_visited)
+            if reward >= 0.999 and self.states_explored_till_0_999 < 0:
+                self.states_explored_till_0_999 = len(self.times_s_was_visited)
         return value
 
     def backup(self, a, state_hash, value):

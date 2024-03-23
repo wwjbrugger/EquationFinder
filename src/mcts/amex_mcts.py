@@ -34,7 +34,7 @@ class AmEx_MCTS(ClassicMCTS):
         super().__init__(game=game, args=args, rule_predictor=rule_predictor)
         self.not_completely_explored_moves_for_s = {}
         self.states = {}
-        self.num_simulation_till_perfect_fit = -1
+
 
     def run_mcts(self, state: GameState, num_mcts_sims,
                  temperature: float) -> typing.Tuple[np.ndarray, float]:
@@ -71,7 +71,7 @@ class AmEx_MCTS(ClassicMCTS):
         mct_return_list = []
         not_completely_explored = np.any(self.not_completely_explored_moves_for_s[state.hash])
         for num_sim in range(num_mcts_sims):
-            if not_completely_explored and self.states_explored_till_perfect_fit < 0:
+            if not_completely_explored and self.states_explored_till_0_999 < 0:
                 mct_return, not_completely_explored = self._search(
                     state=state
                 )
@@ -80,10 +80,14 @@ class AmEx_MCTS(ClassicMCTS):
                     print(f"number simulation: {num_sim:<8} "
                           f"current best equation: {self.game.max_list.max_list_state[-1].complete_discovered_equation:<80}"
                           f"  r:{self.game.max_list.max_list_state[-1].reward}")
+                if self.states_explored_till_0_9 > 0 and self.num_simulation_till_0_9 < 0:
+                    self.num_simulation_till_0_9 = num_sim
+                if self.states_explored_till_0_99 > 0 and self.num_simulation_till_0_99 < 0:
+                    self.num_simulation_till_0_99 = num_sim
+                if self.states_explored_till_0_999 > 0 and self.num_simulation_till_0_999 < 0:
+                    self.num_simulation_till_0_999 = num_sim
             else:
                 mct_return_list = [1]
-                if self.num_simulation_till_perfect_fit < 0 and self.states_explored_till_perfect_fit > 0:
-                    self.num_simulation_till_perfect_fit = num_sim
                 break
 
         if not_completely_explored:
@@ -290,8 +294,12 @@ class AmEx_MCTS(ClassicMCTS):
             self.not_completely_explored_moves_for_s[next_state_hash] = [False] * self.action_size
             self.not_completely_explored_moves_for_s[state_hash][a] = False
             self.times_s_was_visited[next_state_hash] += 1  # debug value
-            if reward >= 0.999:
-                self.states_explored_till_perfect_fit = len(self.times_s_was_visited)
+            if reward >= 0.9 and self.states_explored_till_0_9 < 0:
+                self.states_explored_till_0_9 = len(self.times_s_was_visited)
+            if reward >= 0.99 and self.states_explored_till_0_99 < 0:
+                self.states_explored_till_0_99 = len(self.times_s_was_visited)
+            if reward >= 0.999 and self.states_explored_till_0_999 <0:
+                self.states_explored_till_0_999 = len(self.times_s_was_visited)
         return value
 
     def backup(self, a, state_hash, value, a_max):
