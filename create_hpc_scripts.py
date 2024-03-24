@@ -5,12 +5,12 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['net'],
+        'experiment_name': ['test_model'],
         'minutes_to_run': ['180'],
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [
-            'saved_models/run_2/train_net__neural_net__data_grammar_1_run_2__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-231'
+         'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20'
         ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
@@ -29,16 +29,16 @@ def run():
             'data_grammar_1/nguyen_10',
             'data_grammar_1/nguyen_11',
             'data_grammar_1/nguyen_12',
-            'data_grammar_1/self_0',
-            'data_grammar_1/self_1',
-            'data_grammar_1/self_2',
-            'data_grammar_1/self_3',
-            'data_grammar_1/self_4',
-            'data_grammar_1/self_5',
-            'data_grammar_1/self_6',
-            'data_grammar_1/self_7',
-            'data_grammar_1/self_8',
-            'data_grammar_1/self_9',
+            # 'data_grammar_1/self_0',
+            # 'data_grammar_1/self_1',
+            # 'data_grammar_1/self_2',
+            # 'data_grammar_1/self_3',
+            # 'data_grammar_1/self_4',
+            # 'data_grammar_1/self_5',
+            # 'data_grammar_1/self_6',
+            # 'data_grammar_1/self_7',
+            # 'data_grammar_1/self_8',
+            # 'data_grammar_1/self_9',
 
         ],
 
@@ -46,14 +46,16 @@ def run():
         'output_folder': ['output'],
         'cold_start_iterations': [0],
         'class_measurement_encoder': [
-            # 'MeasurementEncoderDummy',
+            #'MeasurementEncoderDummy',
             # 'LSTM_Measurement_Encoder',
-             'Bi_LSTM_Measurement_Encoder',
+             # 'Bi_LSTM_Measurement_Encoder',
              # 'MLP_Measurement_Encoder',
-             # 'DatasetTransformer',
+             'DatasetTransformer',
              # 'MeasurementEncoderPicture',
              # 'TextTransformer'
         ],
+        'class_equation_encoder': ['Transformer_Encoder_String'], # EquationEncoderDummy, Transformer_Encoder_String
+
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
             # 'None'
@@ -93,7 +95,6 @@ def run():
         ],
         'max_len_datasets': [20],
         ## Encoder Equations
-        'class_equation_encoder': ['Transformer_Encoder_String'],
         'embedding_dim_encoder_equation': ['8'],
         'max_tokens_equation': ['64'],
         'use_position_encoding': ['False'],

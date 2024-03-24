@@ -9,7 +9,8 @@ mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest \
 --exclude=.wandb --exclude=old_data --exclude=create_hpc_scripts.py\
 --exclude=upload_wandb.py --exclude=data_grammar_2 --exclude=out \
 --exclude=data_grammar_1/run_1  --exclude=data_grammar_1/run_2 \
---exclude=data_grammar_2 --exclude=old_wandb --exclude=.wandb_test
+--exclude=data_grammar_2 --exclude=old_wandb --exclude=.wandb_test  \
+--exclude=saved_models/run_2 --exclude=saved_models/run_3/only*
 
 ## Load sbatch scripts to Mogon
 rsync -a --verbose  \

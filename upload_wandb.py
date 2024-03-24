@@ -8,7 +8,7 @@ import fnmatch
 def run():
 
     wandb_entity_name = 'wwjbrugger'#'jgu-wandb'
-    wandb_project = "test_neural_guided_symbolic_regression_13_03"
+    wandb_project = "23_03_test_neural_guided_symbolic_regression"
     Path_to_experiments = Path(
         "/home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/.wandb_test"
     )
@@ -22,18 +22,19 @@ def upload_experiment(Path_to_experiments, wandb_entity_name, wandb_project):
     print(f"number of all runs: {len(path_to_runs)} ")
     i = 0
     for run in path_to_runs:
-        print(f"iteration: {i}")
-        i+=1
+        if 'test_model' in run.parts[6]:
+            print(f"iteration: {i}")
+            i+=1
 
-        try:
-            command = f"wandb sync -e {wandb_entity_name} " \
-                      f"-p {wandb_project} " \
-                      f"--clean-force "\
-                      f" {run}"
-            print(command)
-            os.system(command)
-        except FileNotFoundError:
-            print(f"skiped {run}")
+            try:
+                command = f"wandb sync -e {wandb_entity_name} " \
+                          f"-p {wandb_project} " \
+                          f"--clean-force "\
+                          f" {run}"
+                print(command)
+                os.system(command)
+            except FileNotFoundError:
+                print(f"skiped {run}")
 
 
 def get_path_to_wandb_file(path_to_run_to_upload, paths = []):
