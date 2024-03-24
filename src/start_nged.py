@@ -164,8 +164,7 @@ def load_pretrained_net(args, rule_predictor, game):
     else:
         checkpoint_current_model.restore(manager_train.latest_checkpoint)
         print("Initializing from scratch.")
-
-
+    print_num_weights_of_model(net)
 
     copy_dataset_encoder_weights_from_pretrained_agent(
         args=args,
@@ -174,6 +173,21 @@ def load_pretrained_net(args, rule_predictor, game):
     )
 
     return checkpoint_current_model, manager_train
+
+
+def print_num_weights_of_model(net):
+    num_actor = np.sum([np.prod(v.get_shape().as_list()) for v in net.actor.trainable_variables])
+    num_critic = np.sum([np.prod(v.get_shape().as_list()) for v in net.critic.trainable_variables])
+    num_encoder_measurement = np.sum([np.prod(v.get_shape().as_list()) for v in net.encoder_measurement.trainable_variables])
+    num_encoder_tree = np.sum([np.prod(v.get_shape().as_list()) for v in net.encoder_tree.trainable_variables])
+    num_total = num_actor + num_critic + num_encoder_measurement + num_encoder_tree
+    print(f"Parameter: \n "
+          f"   measurement: {num_encoder_measurement} \n"
+          f"   syntax tree: {num_encoder_tree} \n"
+          f"   actor: {num_actor} \n"
+          f"   critic: {num_critic} \n"
+          f"   total: {num_total} \n"
+          )
 
 
 def initialize_net(args, checkpoint_current_model, game):
