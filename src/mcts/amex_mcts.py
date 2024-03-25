@@ -82,10 +82,13 @@ class AmEx_MCTS(ClassicMCTS):
                           f"  r:{self.game.max_list.max_list_state[-1].reward}")
                 if self.states_explored_till_0_9 > 0 and self.num_simulation_till_0_9 < 0:
                     self.num_simulation_till_0_9 = num_sim
+                    self.log_states_and_simulation_to_wandb(state, threshold = '0_9')
                 if self.states_explored_till_0_99 > 0 and self.num_simulation_till_0_99 < 0:
                     self.num_simulation_till_0_99 = num_sim
+                    self.log_states_and_simulation_to_wandb(state, threshold = '0_99')
                 if self.states_explored_till_0_999 > 0 and self.num_simulation_till_0_999 < 0:
                     self.num_simulation_till_0_999 = num_sim
+                    self.log_states_and_simulation_to_wandb(state, threshold='0_999')
             else:
                 mct_return_list = [1]
                 break

@@ -187,60 +187,16 @@ class Coach(ABC):
         print(f"Equation found after {mcts.states_explored_till_0_999} states: {game.max_list.max_list_state[-1].syntax_tree.rearrange_equation_infix_notation(-1)[1]:<80} ")
         print(f"{print(game.max_list.max_list_state[-1].syntax_tree.constants_in_tree)}")
         end = time.time()
-        productions = []
-        for node in game.max_list.max_list_state[-1].syntax_tree.dict_of_nodes.values():
-            if len(node.selected_production) > 0:
-                productions = productions + node.selected_production
-        print(f"num productions: {len(productions)} : {productions} ")
 
 
-        # Cleanup environment and GameHistory
-        if mcts.states_explored_till_0_9 > 0:
-            wandb.log(
-                {
-                    f"num_states_to_0.9_{mode}":
-                        mcts.states_explored_till_0_9,
-                    f"num_states_to_0_9_{mode}{next_state.observation['true_equation_hash']}":
-                        mcts.states_explored_till_0_9,
-                    f"num_states_to_0.99_{mode}":
-                        mcts.states_explored_till_0_99,
-                    f"num_states_to_0_99_{mode}{next_state.observation['true_equation_hash']}":
-                        mcts.states_explored_till_0_99,
-                    f"num_states_to_0.999_{mode}":
-                        mcts.states_explored_till_0_999,
-                    f"num_states_to_0_999_{mode}{next_state.observation['true_equation_hash']}":
-                        mcts.states_explored_till_0_999,
-                    f"time to perfect fit {next_state.observation['true_equation_hash']}":
-                        end - start,
-                    f"time to perfect fit":
-                        end - start,
-                    f"num simulation to 0_9 {next_state.observation['true_equation_hash']}":
-                        mcts.num_simulation_till_0_9,
-                    f"num simulation to 0_9":
-                        mcts.num_simulation_till_0_9,
-                    f"num simulation to 0_99 {next_state.observation['true_equation_hash']}":
-                        mcts.num_simulation_till_0_99,
-                    f"num simulation to 0_99":
-                        mcts.num_simulation_till_0_99,
-                    f"num simulation to 0_999 {next_state.observation['true_equation_hash']}":
-                        mcts.num_simulation_till_0_999,
-                    f"num simulation to 0_999":
-                        mcts.num_simulation_till_0_999,
-                    f"num_productions": len(productions)
-
-                }
-            )
-
-            pass
-
-        else:
-            wandb.log(
-                {
-                    f"equation_not_found_{next_state.observation['true_equation_hash']}_{mode}": 1,
-                    f"equation_not_found_{mode}": 1,
-
-                }
-            )
+        wandb.log(
+            {
+                f"time to perfect fit {next_state.observation['true_equation_hash']}":
+                    end - start,
+                f"time to perfect fit":
+                    end - start
+            }
+        )
 
         game.close(state)
         history.terminate(

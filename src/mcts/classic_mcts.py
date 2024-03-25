@@ -17,6 +17,7 @@ from src.game.game import GameState
 from src.utils.logging import get_log_obj
 from src.utils.utils import tie_breaking_argmax
 import random
+import wandb
 
 
 class ClassicMCTS:
@@ -46,11 +47,11 @@ class ClassicMCTS:
         self.times_s_was_visited = {}  # stores #times board s was visited
         self.Ps = {}  # stores initial policy
         self.valid_moves_for_s = {}  # stores game.getValidMoves for board s
-        self.visits_done_state = 0 # Count visits of done states.
-        self.visits_roll_out = 0 # Count how often a new state is explored
+        self.visits_done_state = 0  # Count visits of done states.
+        self.visits_roll_out = 0  # Count how often a new state is explored
         self.logger = get_log_obj(args=args)
 
-        self.temperature = None # exponentiation factor
+        self.temperature = None  # exponentiation factor
         self.states_explored_till_0_9 = -1
         self.states_explored_till_0_99 = -1
         self.states_explored_till_0_999 = -1
@@ -97,16 +98,20 @@ class ClassicMCTS:
                     state=state
                 )
                 mct_return_list.append(mct_return)
-                if num_sim % 1000 == 0 and len(self.game.max_list.max_list_state)>0:
+                if num_sim % 1000 == 0 and len(self.game.max_list.max_list_state) > 0:
                     print(f"number simulation: {num_sim:<8} "
                           f"current best equation: {self.game.max_list.max_list_state[-1].complete_discovered_equation:<80}"
                           f"  r:{self.game.max_list.max_list_state[-1].reward}")
                 if self.states_explored_till_0_9 > 0 and self.num_simulation_till_0_9 < 0:
                     self.num_simulation_till_0_9 = num_sim
+                    self.log_states_and_simulation_to_wandb(state, threshold = '0_9')
                 if self.states_explored_till_0_99 > 0 and self.num_simulation_till_0_99 < 0:
                     self.num_simulation_till_0_99 = num_sim
+                    self.log_states_and_simulation_to_wandb(state, threshold = '0_99')
+
                 if self.states_explored_till_0_999 > 0 and self.num_simulation_till_0_999 < 0:
                     self.num_simulation_till_0_999 = num_sim
+                    self.log_states_and_simulation_to_wandb(state, threshold='0_999')
             else:
                 mct_return_list = [1]
                 break
@@ -118,6 +123,31 @@ class ClassicMCTS:
         )
         v = (np.max(mct_return_list) * num_mcts_sims + v_0) / (num_mcts_sims + 1)
         return move_probabilities, v
+
+    def log_states_and_simulation_to_wandb(self, state, threshold):
+        print(
+            f"first equation with r > {threshold} :"
+            f" {self.game.max_list.max_list_state[-1].complete_discovered_equation:<80}"
+        )
+
+        productions = []
+        for node in self.game.max_list.max_list_state[-1].syntax_tree.dict_of_nodes.values():
+            if len(node.selected_production) > 0:
+                productions = productions + node.selected_production
+        print(f"num productions {threshold}: {len(productions)} : {productions} ")
+        wandb.log(
+            {
+                f"num_states_to_{threshold}":
+                    getattr(self, f"states_explored_till_{threshold}"),
+                f"num_states_to_{threshold}_{state.observation['true_equation_hash']}":
+                    getattr(self, f"states_explored_till_{threshold}"),
+                f"num simulation to {threshold} {state.observation['true_equation_hash']}":
+                    getattr(self, f"num_simulation_till_{threshold}"),
+                f"num simulation to {threshold}":
+                    getattr(self, f"num_simulation_till_{threshold}"),
+                f"num_productions {threshold}]": len(productions)
+            }
+        )
 
     def calculate_move_probabilities(self, s_0, source_dict, softmax=False):
         possible_actions = np.where(self.valid_moves_for_s[s_0])[0]
@@ -212,7 +242,6 @@ class ClassicMCTS:
                                       f"={self.args.prior_source} is not"
                                       f"defined")
         return prior, value
-
 
     def _search(self, state: GameState,
                 path: typing.Tuple[int, ...] = tuple(), ) -> (float, bool):
@@ -329,7 +358,7 @@ class ClassicMCTS:
             else:
                 self.Qsa[(state_hash, a)] = (self.times_edge_s_a_was_visited[(state_hash, a)] *
                                              self.Qsa[(state_hash, a)] + mct_return) / \
-                                   (self.times_edge_s_a_was_visited[(state_hash, a)] + 1)
+                                            (self.times_edge_s_a_was_visited[(state_hash, a)] + 1)
             self.times_edge_s_a_was_visited[(state_hash, a)] += 1
         else:
             self.Qsa[(state_hash, a)] = mct_return
@@ -338,7 +367,7 @@ class ClassicMCTS:
         return mct_return
 
     def select_action_with_highest_upper_confidence_bound(self, state_hash):
-        q_values =[]
+        q_values = []
         explorations = []
         for a in range(self.action_size):
             q_value, exploration = self.compute_ucb(state_hash, a)
@@ -394,6 +423,4 @@ class ClassicMCTS:
 
             exploration = self.args.c1 * np.sqrt(denominator / times_s_a_visited)
 
-        return q_value , exploration
-    
-
+        return q_value, exploration
