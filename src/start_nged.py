@@ -65,11 +65,6 @@ def run():
             run_name=args.experiment_name,
             game_test=game_test
             )
-    wandb.log(
-        {
-            f"sucessful": True
-        }
-    )
 
 
 def learnA0(g, args, run_name: str, game_test) -> None:

@@ -191,10 +191,7 @@ class Coach(ABC):
 
         wandb.log(
             {
-                f"time to perfect fit {next_state.observation['true_equation_hash']}":
-                    end - start,
-                f"time to perfect fit":
-                    end - start
+                "successful": True if mcts.states_explored_till_0_999 >= 0 else False
             }
         )
 
