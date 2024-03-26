@@ -18,6 +18,7 @@ from src.utils.logging import get_log_obj
 from src.utils.utils import tie_breaking_argmax
 import random
 import wandb
+import psutil
 
 
 class ClassicMCTS:
@@ -92,22 +93,24 @@ class ClassicMCTS:
 
         # Aggregate root state value over MCTS back-propagated values
         mct_return_list = []
-        for num_sim in range(num_mcts_sims):
-            if self.states_explored_till_0_999 < 0:
+        ram_free = True
+        for num_sim in range(1, num_mcts_sims, 1):
+            if self.states_explored_till_0_999 < 0 and ram_free:
                 mct_return = self._search(
                     state=state
                 )
                 mct_return_list.append(mct_return)
                 if num_sim % 1000 == 0 and len(self.game.max_list.max_list_state) > 0:
+                    ram_free = self.enough_ram_free()
                     print(f"number simulation: {num_sim:<8} "
                           f"current best equation: {self.game.max_list.max_list_state[-1].complete_discovered_equation:<80}"
                           f"  r:{self.game.max_list.max_list_state[-1].reward}")
                 if self.states_explored_till_0_9 > 0 and self.num_simulation_till_0_9 < 0:
                     self.num_simulation_till_0_9 = num_sim
-                    self.log_states_and_simulation_to_wandb(state, threshold = '0_9')
+                    self.log_states_and_simulation_to_wandb(state, threshold='0_9')
                 if self.states_explored_till_0_99 > 0 and self.num_simulation_till_0_99 < 0:
                     self.num_simulation_till_0_99 = num_sim
-                    self.log_states_and_simulation_to_wandb(state, threshold = '0_99')
+                    self.log_states_and_simulation_to_wandb(state, threshold='0_99')
 
                 if self.states_explored_till_0_999 > 0 and self.num_simulation_till_0_999 < 0:
                     self.num_simulation_till_0_999 = num_sim
@@ -123,6 +126,17 @@ class ClassicMCTS:
         )
         v = (np.max(mct_return_list) * num_mcts_sims + v_0) / (num_mcts_sims + 1)
         return move_probabilities, v
+
+    def enough_ram_free(self):
+        try:
+            process = psutil.Process()
+            current_ram_gb = process.memory_info().rss / 1_000_000_000
+            if current_ram_gb < self.args.max_ram:
+                return True
+            else:
+                return False
+        except:
+            return True
 
     def log_states_and_simulation_to_wandb(self, state, threshold):
         print(

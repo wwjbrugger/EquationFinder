@@ -49,6 +49,11 @@ class Config:
         parser.add_argument("--test_every_n_steps", type=int, default=10,
                             help="How many training epochs there should "
                                  "before network is tested")
+        parser.add_argument(
+            "--max_ram", type=int, default=20,
+            help="Maximal allowed RAM allowed to use by process given in GB. "
+                 "Conversion from Bytes in GB by 10^9 "
+        )
 
         ### Infos about Tree
         parser.add_argument('--minimum_reward', type=np.float32,
