@@ -10,12 +10,24 @@ def run():
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [
-         'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20'
+            #''
+              # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
+              # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
+            # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
+            # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
+            # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__MeasurementEncoderDummy__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
+            # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__MeasurementEncoderDummy__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
+            # 'saved_models/run_3/train_model_no_equation__neural_net__data_grammar_1_run_3__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
+            # 'saved_models/run_3/train_model_no_equation__neural_net__data_grammar_1_run_3__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
+            'saved_models/run_3/train_model_no_equation__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
+            'saved_models/run_3/train_model_no_equation__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
+
         ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
         'run_mcts': [True],
         'only_test': [True],
+        'max_ram': [20],
         'data': [
             'data_grammar_1/nguyen_1',
             'data_grammar_1/nguyen_2',
@@ -39,24 +51,42 @@ def run():
             # 'data_grammar_1/self_7',
             # 'data_grammar_1/self_8',
             # 'data_grammar_1/self_9',
-
+            # 'data_grammar_2/nguyen_1',
+            # 'data_grammar_2/nguyen_2',
+            # 'data_grammar_2/nguyen_3',
+            # 'data_grammar_2/nguyen_4',
+            # 'data_grammar_2/nguyen_5',
+            # 'data_grammar_2/nguyen_6',
+            # 'data_grammar_2/nguyen_7',
+            # 'data_grammar_2/nguyen_8',
+            # 'data_grammar_2/nguyen_9',
+            # 'data_grammar_2/nguyen_10',
+            # 'data_grammar_2/nguyen_11',
+            # 'data_grammar_2/nguyen_12',
         ],
 
         'script_folder': ['scripts_test'],
         'output_folder': ['output'],
         'cold_start_iterations': [0],
         'class_measurement_encoder': [
-            #'MeasurementEncoderDummy',
+            # 'MeasurementEncoderDummy',
             # 'LSTM_Measurement_Encoder',
-             # 'Bi_LSTM_Measurement_Encoder',
-             # 'MLP_Measurement_Encoder',
+            # 'Bi_LSTM_Measurement_Encoder',
+            # 'MLP_Measurement_Encoder',
              'DatasetTransformer',
-             # 'MeasurementEncoderPicture',
-             # 'TextTransformer'
+            # 'MeasurementEncoderPicture',
+            # 'TextTransformer'
         ],
-        'class_equation_encoder': ['Transformer_Encoder_String'], # EquationEncoderDummy, Transformer_Encoder_String
+        'class_equation_encoder': [
+            'EquationEncoderDummy',
+            #'Transformer_Encoder_String'
+        ],
 
-        'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
+        'prior_source': [
+         #   'grammar',
+         #   'uniform',
+           'neural_net'
+        ],
         'normalize_approach': [
             # 'None'
             # 'abs_max_y',
@@ -65,7 +95,10 @@ def run():
             # 'abs_max_y',
         ],
         'num_MCTS_sims': ['300_000'],
-        'MCTS_engine': ['Endgame'],
+        'MCTS_engine': [
+            'Endgame',
+            #'Normal'
+        ],
         'c1': ['20'],
         ## General
 
@@ -131,7 +164,7 @@ def run():
         'use_feature_index_embedding_dataset_transformer': [False],
         'dataset_transformer_use_latent_vector': ['True'],
         ######### Encoder Measurement TextTransformer
-        'float_precision_text_transformer':[3],
+        'float_precision_text_transformer': [3],
         'mantissa_len_text_transformer': [1],
         'max_exponent_text_transformer': [100],
         'num_dimensions_text_transformer': [3],
@@ -194,15 +227,17 @@ def run():
 def create_experiment_name(settings_one_script):
     basic_experiment_name = settings_one_script['experiment_name']
     path_to_complete_model = settings_one_script['path_to_complete_model']
-    num_mcts_steps_in_training = path_to_complete_model.split('/')[2].split('__')[7]
+
     experiment_name = f"{basic_experiment_name}__" \
                       f"{settings_one_script['prior_source']}__" \
-                      f"{settings_one_script['data'].replace('/','_')}__" \
+                      f"{settings_one_script['data'].replace('/', '_')}__" \
                       f"{settings_one_script['class_measurement_encoder']}__" \
+                      f"{settings_one_script['class_equation_encoder']}__" \
                       f"{settings_one_script['normalize_approach']}__" \
-                      f"{settings_one_script['MCTS_engine']}__" \
-                      f"{num_mcts_steps_in_training}"
-
+                      f"{settings_one_script['MCTS_engine']}__"
+    if len(path_to_complete_model) > 10:
+        num_mcts_steps_in_training = path_to_complete_model.split('/')[2].split('__')[7]
+        experiment_name += f"{num_mcts_steps_in_training}"
     return experiment_name
 
 
@@ -231,19 +266,19 @@ def write_SBATCH_commants(settings_one_script, file1):
     file1.writelines("#SBATCH -p smp \n")
     file1.writelines("#SBATCH --account=m2_datamining \n")
     file1.writelines(
-        f"#SBATCH --time={int(settings_one_script['minutes_to_run']) + 100} \n")
+        f"#SBATCH --time={int(settings_one_script['minutes_to_run']) + 10} \n")
     file1.writelines("#SBATCH --tasks=1 \n")
     file1.writelines("#SBATCH --nodes=1 \n")
     file1.writelines("#SBATCH --cpus-per-task=4 \n")
-    file1.writelines("#SBATCH --mem=20GB \n")
-    file1.writelines("#SBATCH --array=1-20 \n")
+    file1.writelines(f"#SBATCH --mem={int(settings_one_script['max_ram']) + 4}GB \n")
+    file1.writelines("#SBATCH --array=0-0 \n")
     file1.writelines("\n")
-    file1.writelines("#SBATCH -o \%x_\%j_profile.out \n")
+    file1.writelines("#SBATCH -o \%x_\%j_\%A_\%a_profile.out \n")
     file1.writelines("#SBATCH -C anyarch \n")
     file1.writelines(f"#SBATCH -o {settings_one_script['output_folder']}"
-                     f"/\%x_\%j.out \n")
+                     f"/\%x_\%j_\%A_\%a.out \n")
     file1.writelines(f"#SBATCH -e {settings_one_script['output_folder']}"
-                     f"/\%x_\%j.err \n")
+                     f"/\%x_\%j_\%A_\%a.err \n")
     file1.writelines("#SBATCH --mail-user=bruggerj@uni-mainz.de \n")
     file1.writelines("#SBATCH --mail-type=FAIL \n")
     file1.writelines("\n")
@@ -298,6 +333,12 @@ def write_python_call(settings_one_script, file1):
         f"--test_network {settings_one_script['test_network']} \\\n")
     file1.writelines(
         f"--test_every_n_steps {settings_one_script['test_every_n_steps']} \\\n"
+    )
+    file1.writelines(
+        f"--max_ram {settings_one_script['max_ram']} \\\n"
+    )
+    file1.writelines(
+        f"--max_run_time {settings_one_script['minutes_to_run']} \\\n"
     )
     ## Infos about Tree
     file1.writelines(

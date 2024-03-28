@@ -55,6 +55,11 @@ class Config:
                  "Conversion from Bytes in GB by 10^9 "
         )
 
+        parser.add_argument(
+            "--max_run_time", type=int, default=60,
+            help="Maximal allowed run time in minutes"
+        )
+
         ### Infos about Tree
         parser.add_argument('--minimum_reward', type=np.float32,
                             default=-1)
