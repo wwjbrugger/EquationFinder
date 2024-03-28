@@ -149,16 +149,19 @@ class ClassicMCTS:
             if len(node.selected_production) > 0:
                 productions = productions + node.selected_production
         print(f"num productions {threshold}: {len(productions)} : {productions} ")
+        num_simulation = getattr(self, f"num_simulation_till_{threshold}")
+        num_states = getattr(self, f"states_explored_till_{threshold}")
+        print(f"Explored states = {num_states}  Number simulation = {num_simulation}")
         wandb.log(
             {
                 f"num_states_to_{threshold}":
-                    getattr(self, f"states_explored_till_{threshold}"),
+                    num_states,
                 f"num_states_to_{threshold}_{state.observation['true_equation_hash']}":
-                    getattr(self, f"states_explored_till_{threshold}"),
+                    num_states,
                 f"num simulation to {threshold} {state.observation['true_equation_hash']}":
-                    getattr(self, f"num_simulation_till_{threshold}"),
+                    num_simulation,
                 f"num simulation to {threshold}":
-                    getattr(self, f"num_simulation_till_{threshold}"),
+                    num_simulation,
                 f"num_productions {threshold}]": len(productions)
             }
         )
