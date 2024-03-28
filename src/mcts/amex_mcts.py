@@ -74,7 +74,7 @@ class AmEx_MCTS(ClassicMCTS):
             if (not_completely_explored
                     and self.states_explored_till_0_999 < 0
                     and ram_free
-                    and start_time + self.args.max_run_time * 60 < time.time()
+                    and start_time + self.args.max_run_time * 60 > time.time()
             ):
                 mct_return, not_completely_explored = self._search(
                     state=state
