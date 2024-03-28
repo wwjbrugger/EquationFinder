@@ -156,37 +156,36 @@ class Coach(ABC):
         self.logger.info(f"")
         self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
         start = time.time()
-        while not state.done:
-            # Compute the move probability vector and state value using MCTS for the current state of the environment.
 
-            pi, v = mcts.run_mcts(
-                state=state,
-                num_mcts_sims=int(num_MCTS_sims),
-                temperature=temp
-            )
+        # Compute the move probability vector and state value using MCTS for the current state of the environment.
 
-            # Take a step in the environment and observe the transition and store necessary statistics.
-            state.action = np.random.choice(len(pi), p=pi)
-            next_state, r = game.getNextState(
-                state=state,
-                action=state.action,
-            )
-            complete_state.syntax_tree.expand_node_with_action(
-                node_id=complete_state.syntax_tree.nodes_to_expand[0],
-                action=state.action
-            )
+        pi, v = mcts.run_mcts(
+            state=state,
+            num_mcts_sims=int(num_MCTS_sims),
+            temperature=temp
+        )
 
-            history.capture(
-                state=state,
-                pi=pi,
-                r=r,
-                v=v
-            )
-            # Update state of control
-            state = next_state
-        print(f"Equation found after {mcts.states_explored_till_0_999} states: {game.max_list.max_list_state[-1].syntax_tree.rearrange_equation_infix_notation(-1)[1]:<80} ")
-        print(f"{print(game.max_list.max_list_state[-1].syntax_tree.constants_in_tree)}")
-        end = time.time()
+        # Take a step in the environment and observe the transition and store necessary statistics.
+        state.action = np.random.choice(len(pi), p=pi)
+        next_state, r = game.getNextState(
+            state=state,
+            action=state.action,
+        )
+        complete_state.syntax_tree.expand_node_with_action(
+            node_id=complete_state.syntax_tree.nodes_to_expand[0],
+            action=state.action
+        )
+
+        history.capture(
+            state=state,
+            pi=pi,
+            r=r,
+            v=v
+        )
+        # Update state of control
+        state = next_state
+
+
 
 
         wandb.log(
