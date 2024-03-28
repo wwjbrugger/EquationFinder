@@ -15,7 +15,7 @@ import numpy as np
 from src.game.game import GameState
 from src.utils.utils import tie_breaking_argmax
 from src.mcts.classic_mcts import ClassicMCTS
-
+import time
 
 class AmEx_MCTS(ClassicMCTS):
     """
@@ -69,9 +69,13 @@ class AmEx_MCTS(ClassicMCTS):
         mct_return_list = []
         ram_free = True
         not_completely_explored = np.any(self.not_completely_explored_moves_for_s[state.hash])
+        start_time = time.time()
         for num_sim in range(1, num_mcts_sims, 1):
-            if (not_completely_explored and self.states_explored_till_0_999 < 0 and
-                    ram_free):
+            if (not_completely_explored
+                    and self.states_explored_till_0_999 < 0
+                    and ram_free
+                    and start_time + self.args.max_run_time * 60 < time.time()
+            ):
                 mct_return, not_completely_explored = self._search(
                     state=state
                 )
