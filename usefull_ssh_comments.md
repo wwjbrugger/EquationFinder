@@ -7,9 +7,9 @@ mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest \
 --exclude=delete_me.txt  --exclude=usefull_ssh_comments.txt \
 --exclude=data --exclude=out  --exclude=old_saved_models \
 --exclude=.wandb --exclude=old_data --exclude=create_hpc_scripts.py\
---exclude=upload_wandb.py --exclude=data_grammar_2 --exclude=out \
+--exclude=upload_wandb.py --exclude=out \
 --exclude=data_grammar_1/run_1  --exclude=data_grammar_1/run_2 \
---exclude=data_grammar_2 --exclude=old_wandb --exclude=.wandb_test  \
+--exclude=data_grammar_2/run_1 --exclude=old_wandb --exclude=.wandb_test  \
 --exclude=saved_models/run_2 --exclude=saved_models/run_3/only*
 
 ## Load sbatch scripts to Mogon
@@ -20,13 +20,15 @@ mogon:/home/bruggerj/NeuralGuidedEquationDiscovery/ \
 ## Load saved models from mogon to computer 
 rsync -a  -L --verbose    mogon:/home/bruggerj/NeuralGuidedEquationDiscovery/\
 saved_models/  /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/saved_models
+--exclude=saved_models/run_2
 
 ## see jobs added to slurm manager 
  squeue -u  $USER --format="%.18i %.9P %.56j %.8T %.10M %.9l %.6D %R"
 
 ##  copy wandb files from mogon to computer
-rsync -a  -L --verbose  mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest/\
-.wandb/  /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/.wandb_test
+rsync  -a  -L --verbose  mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest/\
+.wandb/  /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/.wandb_test \
+
 
 
 
