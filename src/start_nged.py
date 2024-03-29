@@ -117,7 +117,13 @@ def learnA0(g, args, run_name: str, game_test) -> None:
         checkpoint_test=checkpoint_test
     )
 
-    c.learn()
+    save_path = c.checkpoint_manager.save()
+
+    c.logger.warning(f'------------------ITER'
+                        f' {int(c.checkpoint.step)}----------------')
+    # Self-play/ Gather training data.
+
+    c.test_epoche(save_path=save_path)
 
 
 def load_pretrained_net(args, rule_predictor, game):

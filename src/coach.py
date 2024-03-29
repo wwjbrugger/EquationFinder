@@ -155,7 +155,6 @@ class Coach(ABC):
         num_MCTS_sims = self.args.num_MCTS_sims
         self.logger.info(f"")
         self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
-        start = time.time()
 
         # Compute the move probability vector and state value using MCTS for the current state of the environment.
 
@@ -176,33 +175,13 @@ class Coach(ABC):
             action=state.action
         )
 
-        history.capture(
-            state=state,
-            pi=pi,
-            r=r,
-            v=v
-        )
-        # Update state of control
-        state = next_state
-
-
-
-
         wandb.log(
             {
                 "successful": True if mcts.states_explored_till_0_999 >= 0 else False
             }
         )
 
-        game.close(state)
-        history.terminate(
-            formula_started_from=formula_started_from,
-            found_equation=complete_state.syntax_tree.rearrange_equation_infix_notation(-1)[1]
-        )
-        history.compute_returns(self.args, gamma=self.args.gamma, look_ahead=(
-            self.args.n_steps if self.game.n_players == 1 else None
-        ))
-        return history
+        return
 
     def get_temperature(self, game):
         if game == self.game_test:
@@ -225,55 +204,18 @@ class Coach(ABC):
         specified win/ lose ratio. Neural network weights and the replay buffer are stored after every iteration.
         Note that for highly granular vision based environments, that the replay buffer may grow to large sizes.
         """
-        self.metrics_train = {
-            'mode': 'train',
-            'rewards_mean': tf.keras.metrics.Mean(dtype=tf.float32),
-            'done_rollout_ratio': tf.keras.metrics.Mean(dtype=tf.float32)
-        }
         self.metrics_test = {
             'mode': 'test',
             'rewards_mean': tf.keras.metrics.Mean(dtype=tf.float32),
             'done_rollout_ratio': tf.keras.metrics.Mean(dtype=tf.float32)
         }
-        self.loadTrainExamples(int(self.checkpoint.step))
         save_path = self.checkpoint_manager.save()
 
         self.logger.warning(f'------------------ITER'
                             f' {int(self.checkpoint.step)}----------------')
         # Self-play/ Gather training data.
-        if not self.args.only_test:
-            if self.args.run_mcts:
-                iteration_train_examples = self.gather_data(
-                    metrics=self.metrics_train,
-                    mcts=self.mcts,
-                    game=self.game,
-                    logger=self.logger,
-                    num_selfplay_iterations=self.args.num_selfplay_iterations
-                )
-                self.trainExamplesHistory.append(iteration_train_examples)
-                wandb.log(
-                    {f"average_reward_iteration_{self.metrics_train['mode']}":
-                         self.metrics_train['rewards_mean'].result()}
-                )
-                wandb.log(
-                    {f"average_done_rollout_ratio_iteration_{self.metrics_train['mode']}":
-                         self.metrics_train['done_rollout_ratio'].result()}
-                )
-                self.saveTrainExamples(int(self.checkpoint.step))
-            if self.args.prior_source in 'neural_net':
-                if self.checkpoint.step > self.args.cold_start_iterations:
-                    self.update_network()
-                self.checkpoint.step.assign_add(1)
-                save_path = self.checkpoint_manager.save()
-                self.logger.debug(
-                    f"Saved checkpoint for epoch {int(self.checkpoint.step)}: {save_path}"
-                )
-            else:
-                self.checkpoint.step.assign_add(1)
-                save_path = self.checkpoint_manager.save()
-        if self.args.test_network and \
-                self.checkpoint.step % self.args.test_every_n_steps == 0:
-            self.test_epoche(save_path=save_path)
+
+        self.test_epoche(save_path=save_path)
 
     def update_network(self):
         # Flatten examples over self-play episodes and sample a training batch.
@@ -295,10 +237,7 @@ class Coach(ABC):
             if self.args.contrastive_loss:
                 wandb.log({f"Contrastive loss": contrastive_loss})
 
-    def gather_data(self, metrics, mcts, game, logger, num_selfplay_iterations):
-        iteration_examples = list()
-        metrics['rewards_mean'].reset_state()
-        metrics['done_rollout_ratio'].reset_state()
+    def gather_data(self, mcts, game, logger, num_selfplay_iterations):
         minimal_reward_runs = 0
         for i in range(num_selfplay_iterations):
             mcts.clear_tree()
@@ -306,25 +245,10 @@ class Coach(ABC):
                 game=game,
                 mcts=mcts
             )
-            if result_episode.observed_returns[0] == self.args.minimum_reward:
-                minimal_reward_runs += 1
-            iteration_examples.append(result_episode)
+
             self.log_best_list(game, logger)
 
-            metrics['rewards_mean'].update_state(
-                np.sum(result_episode.rewards, dtype=np.float32)
-            )
-            metrics['done_rollout_ratio'].update_state(
-                mcts.visits_done_state / mcts.visits_roll_out
-            )
-
-        iteration_examples = self.augment_buffer(
-            iteration_examples,
-            metrics,
-            minimal_reward_runs,
-            num_selfplay_iterations
-        )
-        return iteration_examples
+        return
 
     def log_best_list(self, game, logger):
         logger.info(f"Best equations found:")
@@ -364,19 +288,11 @@ class Coach(ABC):
     def test_epoche(self, save_path):
         self.logger.warning(f'------------------ Test ----------------')
         self.checkpoint_test.restore(save_path)
-        _ = self.gather_data(metrics=self.metrics_test,
-                             mcts=self.mcts_test,
-                             game=self.game_test,
-                             logger=self.logger_test,
-                             num_selfplay_iterations=self.args.num_selfplay_iterations_test
-                             )
-        wandb.log(
-            {f"average_reward_{self.metrics_test['mode']}":
-                 self.metrics_test['rewards_mean'].result(),
-             f"average_done_rollout_ratio_{self.metrics_test['mode']}":
-                 self.metrics_test['done_rollout_ratio'].result()
-             }
-        )
+        self.gather_data(mcts=self.mcts_test,
+                         game=self.game_test,
+                         logger=self.logger_test,
+                         num_selfplay_iterations=self.args.num_selfplay_iterations_test
+                         )
 
     def saveTrainExamples(self, iteration: int) -> None:
         """
