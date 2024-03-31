@@ -111,7 +111,7 @@ class RulePredictorSkeleton(tf.keras.Model):
         return measurement_representation, target_pis, target_vs, tree_representation
 
 
-    @tf.function
+    #@tf.function
     def train_step(self, i, measurement_representation, target_pis,
                    target_vs, tree_representation, target_dataset_encoding=None):
         with tf.GradientTape(persistent=True) as tape:

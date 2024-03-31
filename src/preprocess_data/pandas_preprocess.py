@@ -65,6 +65,7 @@ class PandasIterator:
         p = Path(f"{path_to_panda_frames}").glob('**/*')
         self.files = [x for x in p if x.is_file()]
         random.shuffle(self.files)
+        self.files.sort()
         self.num_datasets = len(self.files)
         self.map_tree_representation_to_int = map_tree_representation_to_int
 
