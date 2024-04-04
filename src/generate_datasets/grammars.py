@@ -1,5 +1,5 @@
 def get_grammars(args):
-    if args.grammar_to_use == 1:
+    if args.grammar_to_use == '1':
         grammar_string = \
             """  
             S -> '+' S S [0.25]
@@ -32,7 +32,7 @@ def get_grammars(args):
             I -> '**' '2' 'x_1'     [0.2]
             Variable -> 'x_0'[0.5] | 'x_1' [0.5]
                """
-    elif args.grammar_to_use ==2:
+    elif args.grammar_to_use == '2':
         grammar_string = \
             """  
             S -> '+' S S [0.15]
@@ -59,6 +59,26 @@ def get_grammars(args):
             I ->  'c'      [0.25]
             Variable -> 'x_0'[0.5] | 'x_1' [0.5]
                """
+    elif args.grammar_to_use == 'nguyen':
+        grammar_string = \
+            """  
+            S -> '+' '+' '**' '3'  'x_0' '**'  '2'  'x_0'  'x_0'   [0.08] 
+            S -> '+' '+' '+' '**' '4' 'x_0' '**' '3'  'x_0' '**'  '2'  'x_0'  'x_0'   [0.08]
+            S -> '+' '+' '+' '+' '**' 5 'x_0' '**' '4' 'x_0' '**' '3'  'x_0' '**'  '2'  'x_0'  'x_0'   [0.08]
+            S -> '+' '+' '+' '+' '+' '**' 6 'x_0' '**' 5 'x_0' '**' '4' 'x_0' '**' '3'  'x_0' '**'  '2'  'x_0'  'x_0'   [0.08]
+            S ->  '-' '*' 'sin' '**'  '2'  'x_0' 'cos' 'x_0' '1'    [0.08]
+            S -> '+' 'sin' 'x_0' 'sin' '+' 'x_0' '**'  '2'  'x_0'   [0.08]
+            S -> '+' log '+' 'x_0' '1'  log '+' '**'  '2'  'x_0' '1'    [0.08]
+            S -> '**' '0.5' 'x_0'  [0.12]
+            S -> '+' 'sin' 'x_0' 'sin' '**'  '2'  'x_1'   [0.08]
+            S -> '*'  '2'  '*' 'sin' 'x_0' 'cos' 'x_1'   [0.08]
+            S -> '**' 'x_1'  'x_0'[0.08]
+            S -> '-' '+'  '-' '**' '4' 'x_0' '**' '3'  'x_0'  '*' '0.5' '**'  '2'  'x_1'  'x_1' [0.08]
+            Variable -> 'x_0'[0.5] | 'x_1'  [0.5]  [0.5]
+               """
+
+
     else:
         raise AssertionError('grammar you want to use does not exist')
+
     return grammar_string

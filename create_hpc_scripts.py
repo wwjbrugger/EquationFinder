@@ -15,7 +15,7 @@ def run():
         'run_mcts': [True],
         'only_test': [False],
         'data': [
-            'data_grammar_1/run_2',
+            'data_grammar_1/run_5',
             # 'data_grammar_1/nguyen_1',
             # 'data_grammar_1/nguyen_2',
             # 'data_grammar_1/nguyen_3',
@@ -34,10 +34,10 @@ def run():
         'output_folder': ['output'],
         'cold_start_iterations': [10],
         'class_measurement_encoder': [
-             'MeasurementEncoderDummy',
-             'LSTM_Measurement_Encoder',
+             #'MeasurementEncoderDummy',
+             #'LSTM_Measurement_Encoder',
              'Bi_LSTM_Measurement_Encoder',
-             'MLP_Measurement_Encoder',
+             #'MLP_Measurement_Encoder',
              'DatasetTransformer',
              'MeasurementEncoderPicture',
              'TextTransformer'
@@ -48,9 +48,9 @@ def run():
             # 'abs_max_y',
             # 'row_wise',
             'abs_max_y__lin_transform',
-            'abs_max_y',
+            #'abs_max_y',
         ],
-        'num_MCTS_sims': [10],
+        'num_MCTS_sims': [1],
         'sec_per_simulation': [-1],
         'MCTS_engine': ['Endgame'],
         'c1': ['20'],
@@ -63,7 +63,7 @@ def run():
         'gpu': ['0'],
 
         'num_selfplay_iterations': ['10'],
-        'num_selfplay_iterations_test': ['12'],
+        'num_selfplay_iterations_test': ['10'],
         'test_network': ['True'],
         'test_every_n_steps': [10],
         ## Infos about Tree
