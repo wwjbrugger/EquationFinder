@@ -5,17 +5,21 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['only_dataset_encoder'],
+        'experiment_name': ['train_model'],
         'minutes_to_run': ['4320'],
-        'max_iteration_to_run': [300],
+        'max_iteration_to_run': [200],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
-        'path_to_pretrained_dataset_encoder': [''],
-        'replay_buffer_path': [''],
-        'run_mcts': [True],
+        'path_to_pretrained_dataset_encoder': [
+            'saved_models/run_1/saved_models/run_1/only_dataset_encoder__neural_net__data_grammar_4_run_1__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1__20/1/tf_ckpts/ckpt-30'
+        ],
+        'replay_buffer_path': [
+            'saved_models/data_grammar_4/run_2/supervised_buffer/supervised.examples'
+        ],
+        'run_mcts': [False],
         'only_test': [False],
         'data': [
-            'data_grammar_1/run_5',
+            'data_grammar_4/run_1',
             # 'data_grammar_1/nguyen_1',
             # 'data_grammar_1/nguyen_2',
             # 'data_grammar_1/nguyen_3',
@@ -30,7 +34,7 @@ def run():
             # 'data_grammar_1/nguyen_12'
         ],
 
-        'script_folder': ['scripts_only_dataset_encoder'],
+        'script_folder': ['scripts_train'],
         'output_folder': ['output'],
         'cold_start_iterations': [10],
         'class_measurement_encoder': [
@@ -38,9 +42,9 @@ def run():
              #'LSTM_Measurement_Encoder',
              'Bi_LSTM_Measurement_Encoder',
              #'MLP_Measurement_Encoder',
-             'DatasetTransformer',
-             'MeasurementEncoderPicture',
-             'TextTransformer'
+             #'DatasetTransformer',
+             #'MeasurementEncoderPicture',
+             #'TextTransformer'
         ],
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
@@ -437,7 +441,7 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(f"--depth_first_search {settings_one_script['depth_first_search']} \\\n")
     ## Replay buffer
     if len(settings_one_script['replay_buffer_path']) > 5:
-        file1.writelines(f"--replay_buffer_path {settings_one_script['path_to_complete_model']} \\\n")
+        file1.writelines(f"--replay_buffer_path {settings_one_script['replay_buffer_path']} \\\n")
     file1.writelines(f"--prioritize {settings_one_script['prioritize']} \\\n")
     file1.writelines(
         f"--prioritize_alpha {settings_one_script['prioritize_alpha']} \\\n")
