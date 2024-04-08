@@ -187,9 +187,11 @@ class Coach(ABC):
             state = next_state
 
         # Cleanup environment and GameHistory
-        self.logger.info(f"Initial guess of NN: "
-                         f"{np.around(self.mcts.Ps[list(self.mcts.Ps.keys())[0]][:15], 2)}")
-        self.logger.info(f"{' '*10}equation add to buffer: r={state.reward:.2} {complete_state.syntax_tree.__str__()}")
+        self.logger.info(f"Initial guess of NN: ")
+        for i in range(10):
+            self.logger.info(f"     {game.grammar._productions[i]._rhs},"
+                             f" {mcts.Ps[list(mcts.Ps.keys())[0]][i]:.2}")
+        #self.logger.info(f"{' '*10}equation add to buffer: r={state.reward:.2} {complete_state.syntax_tree.__str__()}")
         if mcts.states_explored_till_perfect_fit > 0:
             wandb.log(
                 {
