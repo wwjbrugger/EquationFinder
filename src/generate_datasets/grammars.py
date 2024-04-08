@@ -77,6 +77,40 @@ def get_grammars(args):
             Variable -> 'x_0'[0.5] | 'x_1'  [0.5]  [0.5]
                """
 
+    elif args.grammar_to_use == '4':
+        grammar_string = \
+            """  
+            S -> '+' S S [0.1875]
+            S -> '-' S S [0.125]
+            S -> '*' S S [0.125]
+            S -> '/' S S [0.125]
+            S -> 'sin' Inner_Function [0.0625] 
+            S -> 'cos' Inner_Function [0.0625] 
+            S -> 'log' Inner_Function [0.0625]  
+            S -> '**' Exponent Variable [0.0625]| '**' Exponent S [0.0625] 
+            S -> Variable [0.0625]| 'c'  [0.0625]
+
+            Exponent -> '6' [0.125]| '5' [0.125]| '4' [0.125]| '3' [0.125]| '2' [0.125]| '0.5' [0.125]| 'x_0' [0.125]| 'x_1' [0.125]            
+
+            Inner_Function -> '+' I I [0.3]
+            Inner_Function -> '*' I I [0.3]
+            Inner_Function ->  I    [0.4]
+
+            I -> 'x_0' [0.2]|  'x_1'[0.2]| 'c'[0.2]| '**' '2' 'x_0'[0.2]|  '**' '2' 'x_1'[0.2]
+            Variable -> 'x_0'[0.5] | 'x_1' [0.5]
+               """
+
+    elif args.grammar_to_use == '5':
+        grammar_string = \
+            """  
+            S -> '6' S[0.05]| '5' S[0.05]| '4' S[0.05]| '3' S[0.05]| '2' S[0.05]| '0.5' S[0.05]
+            S -> '+' S[0.05]| '-' S[0.05] |  '*' S[0.05]| '/' S[0.05]
+            S -> 'sin' S[0.05]| 'cos' S[0.05] |  'log' S[0.05] | '**' S[0.05] 
+            S -> S S []   
+            S -> 'x_0' [0.1]| 'x_1' [0.1] | 'c' [0.05]
+
+            Variable -> 'x_0'[0.5] | 'x_1' [0.5]
+               """
 
     else:
         raise AssertionError('grammar you want to use does not exist')
