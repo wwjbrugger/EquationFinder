@@ -126,10 +126,9 @@ def learnA0(g, args, run_name: str, game_test) -> None:
 
 
 def load_pretrained_net(args, rule_predictor, game):
-    dataset_number = args.data_path.name
     experiment_name = f"{args.experiment_name}/{args.seed}"
     net = rule_predictor.net
-    checkpoint_path_current_model = ROOT_DIR / 'saved_models' / dataset_number / \
+    checkpoint_path_current_model = ROOT_DIR / 'saved_models' / args.data_path / \
                                  experiment_name
     print(f"Model will be saved at {checkpoint_path_current_model}")
 
