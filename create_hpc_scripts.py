@@ -5,18 +5,14 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['train_model'],
+        'experiment_name': ['only_dataset_encoder'],
         'minutes_to_run': ['4320'],
-        'max_iteration_to_run': [200],
+        'max_iteration_to_run': [300],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
-        'path_to_pretrained_dataset_encoder': [
-            'saved_models/run_1/saved_models/run_1/only_dataset_encoder__neural_net__data_grammar_4_run_1__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1__20/1/tf_ckpts/ckpt-30'
-        ],
-        'replay_buffer_path': [
-            'saved_models/data_grammar_4/run_2/supervised_buffer/supervised.examples'
-        ],
-        'run_mcts': [False],
+        'path_to_pretrained_dataset_encoder': [''],
+        'replay_buffer_path': [''],
+        'run_mcts': [True],
         'only_test': [False],
         'data': [
             'data_grammar_4/run_1',
@@ -34,17 +30,17 @@ def run():
             # 'data_grammar_1/nguyen_12'
         ],
 
-        'script_folder': ['scripts_train'],
+        'script_folder': ['scripts_only_dataset_encoder'],
         'output_folder': ['output'],
         'cold_start_iterations': [10],
         'class_measurement_encoder': [
-             #'MeasurementEncoderDummy',
-             #'LSTM_Measurement_Encoder',
+             'MeasurementEncoderDummy',
+             'LSTM_Measurement_Encoder',
              'Bi_LSTM_Measurement_Encoder',
-             #'MLP_Measurement_Encoder',
-             #'DatasetTransformer',
-             #'MeasurementEncoderPicture',
-             #'TextTransformer'
+             'MLP_Measurement_Encoder',
+             'DatasetTransformer',
+             'MeasurementEncoderPicture',
+             'TextTransformer'
         ],
         'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
@@ -52,9 +48,9 @@ def run():
             # 'abs_max_y',
             # 'row_wise',
             'abs_max_y__lin_transform',
-            #'abs_max_y',
+            'abs_max_y',
         ],
-        'num_MCTS_sims': [1],
+        'num_MCTS_sims': [10],
         'sec_per_simulation': [-1],
         'MCTS_engine': ['Endgame'],
         'c1': ['20'],
@@ -227,7 +223,7 @@ def write_SBATCH_commants(settings_one_script, file1):
     file1.writelines("#SBATCH --nodes=1 \n")
     file1.writelines("#SBATCH --cpus-per-task=4 \n")
     file1.writelines("#SBATCH --mem=20GB \n")
-    file1.writelines("#SBATCH --array=1-3 \n")
+    file1.writelines("#SBATCH --array=1-1 \n")
     file1.writelines("\n")
     file1.writelines("#SBATCH -o \%x_\%j_profile.out \n")
     file1.writelines("#SBATCH -C anyarch \n")
