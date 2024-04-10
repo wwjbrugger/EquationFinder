@@ -179,16 +179,14 @@ def initialize_net(args, checkpoint_current_model, game):
     iter = game.reader.get_datasets()
     net = checkpoint_current_model.net
     data_dict = next(iter)
-    prepared_syntax_tree = np.zeros(
-        shape=(1, args.max_tokens_equation),
-        dtype=np.float32)
-    prepared_dataset = net.encoder_measurement.prepare_data(
-        data=data_dict
-    )
+    prepared_syntax_tree = [np.zeros(
+        shape=( args.max_tokens_equation),
+        dtype=np.float32)]
     net(
         input_encoder_tree=prepared_syntax_tree,
-        input_encoder_measurement=prepared_dataset
+        input_encoder_measurement=[data_dict['data_frame']]
     )
+    pass
 
 
 def get_run_name(config_name: str, architecture: str, game_name: str) -> str:

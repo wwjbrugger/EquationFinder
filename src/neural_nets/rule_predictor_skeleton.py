@@ -1,3 +1,4 @@
+import pandas as pd
 import tensorflow as tf
 import typing
 from src.neural_nets.get_rule_predictor_class import get_rule_predictor
@@ -10,6 +11,8 @@ from src.utils.tensors import tf_save_cast_to_float_32
 import tensorboard
 import time
 from src.neural_nets.loss import NT_Xent
+
+
 
 class RulePredictorSkeleton(tf.keras.Model):
 
@@ -50,25 +53,29 @@ class RulePredictorSkeleton(tf.keras.Model):
         self.net.training = True
         measurement_representation, target_pis, target_vs, tree_representation = \
             self.prepare_batch_for_NN(examples)
-
-        eq_float = tf.convert_to_tensor([example['observation']['true_equation_hash'] for example in examples])
-        expanded_floats = tf.expand_dims(eq_float, axis=1)
-        equality_matrix = tf.equal(eq_float, expanded_floats).numpy()
-        target_dataset_encoding = tf.repeat(tf.repeat(equality_matrix, 2, axis=0), 2, axis=1).numpy()
-        # target_dataset_encoding = tf.repeat(tf.repeat(tf.eye(len(examples), dtype=tf.bool), 2, axis=0), 2, axis=1).numpy()
-
-        i = 0
+        target_dataset_encoding = self.get_target_dataset_encoding(examples)
         pi_batch_loss, v_batch_loss, contrastive_loss, encoding_measurement = self.train_step(
-            i=i,
             measurement_representation=measurement_representation,
             target_pis=target_pis,
             target_vs=target_vs,
             tree_representation=tree_representation,
             target_dataset_encoding=target_dataset_encoding
         )
-        i += 1
+
         self.steps += 1
         return pi_batch_loss, v_batch_loss, contrastive_loss
+
+    def get_target_dataset_encoding(self, examples):
+        column_true_equation = np.array([example['observation']['true_equation_hash'] for example in examples])
+        row_true_equation = np.expand_dims(column_true_equation, axis=1)
+        equality_matrix = np.equal(column_true_equation, row_true_equation)
+        equality_matrix_contrastive = np.repeat(np.repeat(equality_matrix, axis=0, repeats=2), axis=1, repeats=2)
+        target_dataset_encoding = pd.DataFrame(
+            equality_matrix_contrastive,
+            index=np.repeat(column_true_equation, 2),
+            columns=np.repeat(column_true_equation, 2)
+        )
+        return target_dataset_encoding
 
     def prepare_batch_for_NN(self, examples):
         observations, loss_scale, target_pis, target_vs = [], [], [], []
@@ -79,43 +86,30 @@ class RulePredictorSkeleton(tf.keras.Model):
                 target_vs.append(example['observed_return'])
                 loss_scale.append(example['loss_scale'])
         tree_representation_list = [
-            self.get_tree_representation(observation) for observation in
+            self.get_tree_representation(observation)[0] for observation in
             observations]
-        tree_representation = tf.concat(tree_representation_list, axis=0)
+
         measurement_representation_list = [
-            self.net.encoder_measurement.prepare_data(
-                data=observation
-            )
-            for observation in observations
+            observation['data_frame'] for observation in observations
         ]
-        measurement_representation = tf.concat(
-            measurement_representation_list,
-            axis=0
-        )
         target_pis = tf_save_cast_to_float_32(
             x=target_pis,
-            logger=self.logger ,
-            name= 'target_pis'
+            logger=self.logger,
+            name='target_pis'
         )
         target_vs = tf_save_cast_to_float_32(
             x=target_vs,
             logger=self.logger,
             name='target_vs'
         )
-        tree_representation = tf_save_cast_to_float_32(
-            x=tree_representation,
-            logger=self.logger,
-            name='tree_representation'
-        )
 
-        return measurement_representation, target_pis, target_vs, tree_representation
-
+        return measurement_representation_list, target_pis, target_vs, tree_representation_list
 
     @tf.function
-    def train_step(self, i, measurement_representation, target_pis,
+    def train_step(self, measurement_representation, target_pis,
                    target_vs, tree_representation, target_dataset_encoding=None):
         with tf.GradientTape(persistent=True) as tape:
-            action_prediction, v, encoding_measurement, input_encoder_contrastive = self.net(
+            action_prediction, v, encoding_measurement, split_measurement = self.net(
                 input_encoder_tree=tree_representation,
                 input_encoder_measurement=measurement_representation
             )
@@ -149,9 +143,9 @@ class RulePredictorSkeleton(tf.keras.Model):
                     pi_batch_loss,
                     variables_encoder_measurements
                 )
-            gradients_encoder_measurements= [check_for_non_numeric_and_replace_by_0(
+            gradients_encoder_measurements = [check_for_non_numeric_and_replace_by_0(
                 logger=self.logger, tensor=x, name='target_pis'
-            )  for x in  gradients_encoder_measurements ]
+            ) for x in gradients_encoder_measurements]
             self.optimizer_encoder_measurement.apply_gradients(
                 zip(gradients_encoder_measurements, variables_encoder_measurements)
             )
@@ -190,12 +184,8 @@ class RulePredictorSkeleton(tf.keras.Model):
         self.net.training = False
         measurement_representation, target_pis, target_vs, tree_representation = \
             self.prepare_batch_for_NN(examples)
-        eq_float = tf.convert_to_tensor([example['observation']['true_equation_hash'] for example in examples])
-        expanded_floats = tf.expand_dims(eq_float, axis=1)
-        equality_matrix = tf.equal(eq_float, expanded_floats).numpy()
-        target_dataset_encoding = tf.repeat(tf.repeat(equality_matrix, 2, axis=0), 2, axis=1).numpy()
-
-        action_prediction, v, encoding_measurement, input_encoder_contrastive = self.net(
+        target_dataset_encoding = self.get_target_dataset_encoding(examples)
+        action_prediction, v, encoding_measurement, split_measurement = self.net(
             input_encoder_tree=tree_representation,
             input_encoder_measurement=measurement_representation
         )

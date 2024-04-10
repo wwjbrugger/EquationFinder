@@ -6,6 +6,7 @@ import numpy as np
 from src.neural_nets.data_set_encoder.measurement_encoder_dummy import MeasurementEncoderDummy
 from src.neural_nets.data_set_encoder.reshape import ReshapeToFlat, ReshapeToNested
 
+
 # based on  https://github.com/OATML/non-parametric-transformers Kossen et al., “Self-Attention Between Datapoints.” and
 # https://github.com/arrigonialberto86/set_transformer a tensorflow implementation of Zaheer et al., “Deep Sets.”
 class DatasetTransformer(MeasurementEncoderDummy):
@@ -73,7 +74,7 @@ class DatasetTransformer(MeasurementEncoderDummy):
 
         if self.use_feature_index_embedding:
             self.feature_indices = tf.range(
-                start = 0,
+                start=0,
                 limit=self.num_input_features,
                 delta=1
             )
@@ -84,12 +85,7 @@ class DatasetTransformer(MeasurementEncoderDummy):
         else:
             self.feature_index_embedding = None
 
-
-
-
         self.build_model()
-
-
 
     def build_model(self):
         # We immediately embed each element
@@ -108,7 +104,6 @@ class DatasetTransformer(MeasurementEncoderDummy):
             )
             if self.kwargs['model_hidden_dropout_prob'] else None)
 
-
         # *** Input In/Out Embeddings ***
         # Don't use for Image Patching - those are handled by the respective
         # init_image_patching
@@ -124,7 +119,7 @@ class DatasetTransformer(MeasurementEncoderDummy):
         # See docstring of NPTModel for further context.
 
         self.in_embedding = [
-            tf.keras.layers.Dense(units=self.model_dim_hidden, name = f'Embedding_Dense_{i}')
+            tf.keras.layers.Dense(units=self.model_dim_hidden, name=f'Embedding_Dense_{i}')
             for i, dim_feature_encoding in enumerate(self.input_feature_dims)]
 
         # Out embedding.
@@ -139,7 +134,7 @@ class DatasetTransformer(MeasurementEncoderDummy):
             self.last_layer_2 = tf.keras.layers.Dense(units=14, name='Dense_Latent_vector_2')
         else:
             self.out_embedding = [
-                tf.keras.layers.Dense(dim_feature_encoding)#, activation='relu')
+                tf.keras.layers.Dense(dim_feature_encoding)  # , activation='relu')
                 for dim_feature_encoding in self.input_feature_dims]
 
     def get_npt(self):
@@ -240,21 +235,12 @@ class DatasetTransformer(MeasurementEncoderDummy):
 
         return enc
 
-    def prepare_data(self, data):
-        norm_frame = self.normalize(data_frame=data['data_frame'])
-        norm_frame_T = norm_frame.transpose().to_numpy()
+    def prepare_data(self, x):
+        x_old = x
+        x = tf.transpose(x, perm=[0, 2, 1])
         # Dataset transformer expect each cell in table to be encoded.
-        # we are not doing so we add an extra dimension at the end
-
-        tensor = tf.expand_dims(
-            tf.convert_to_tensor(
-                norm_frame_T,
-                dtype=tf.float32
-            ),
-            axis=-1
-        )
-        # add batch dimension
-        tensor = tf.expand_dims(tensor, axis=0)
+        # we are not doing so. so we add an extra dimension at the end
+        tensor = tf.expand_dims(x, axis=-1)
         return tensor
 
     def call(self, x, *args, **kwargs):
@@ -262,8 +248,9 @@ class DatasetTransformer(MeasurementEncoderDummy):
         # Each List has # samples elements
         # Each Element has categorical data [one hot, maskeddim], floating [value, masking ]
         # if masked set value to 0 and mask set to 1
-        in_dims = [x.shape[0], x.shape[2], x.shape[1], -1]
 
+        in_dims = [x.shape[0], x.shape[2], x.shape[1], -1]
+        x = self.prepare_data(x)
         # encode ragged input array D x {(NxH_j)}_j to NxDxE)
         #  D number features in dataset
         # N number input samples
@@ -273,7 +260,7 @@ class DatasetTransformer(MeasurementEncoderDummy):
         for i, embed in enumerate(self.in_embedding):
             # spaltenweises embedding
             t = x[:, i]
-            t_ = embed(t, training= kwargs['training'])
+            t_ = embed(t, training=kwargs['training'])
             X_embed.append(t_)
         X_embed = tf.stack(X_embed, axis=2)
 
@@ -287,7 +274,7 @@ class DatasetTransformer(MeasurementEncoderDummy):
                 input=feature_index_embeddings,
                 axis=0
             )
-            #Add a batch dimension (the batches)
+            # Add a batch dimension (the batches)
             feature_index_embeddings = tf.expand_dims(
                 input=feature_index_embeddings,
                 axis=0
@@ -296,8 +283,8 @@ class DatasetTransformer(MeasurementEncoderDummy):
             # Repeats this tensor along the specified dimensions.            #
             # Unlike expand(), this function copies the tensor’s data.
             feature_index_embeddings = tf.repeat(input=feature_index_embeddings,
-                      repeats=X_embed.shape[1],
-                      axis=1)
+                                                 repeats=X_embed.shape[1],
+                                                 axis=1)
             feature_index_embeddings = tf.repeat(input=feature_index_embeddings,
                                                  repeats=X_embed.shape[0],
                                                  axis=0)
@@ -310,12 +297,12 @@ class DatasetTransformer(MeasurementEncoderDummy):
         X_embed = X_embed
 
         if self.embedding_dropout is not None:
-            X_embed = self.embedding_dropout(X_embed, training= kwargs['training'])
+            X_embed = self.embedding_dropout(X_embed, training=kwargs['training'])
 
         # apply NPT
         X_enc = X_embed
         for layer in self.enc:
-            X_enc = layer(X_enc, training= kwargs['training'])
+            X_enc = layer(X_enc, training=kwargs['training'])
 
         if X_enc.shape[2] == in_dims[1]:
             # for uneven stacking_depth, need to permute one last time
@@ -325,27 +312,24 @@ class DatasetTransformer(MeasurementEncoderDummy):
         # Dropout before final projection (follows BERT, which performs
         # dropout before e.g. projecting to logits for sentence classification)
         if self.embedding_dropout is not None:
-            X_enc = self.embedding_dropout(X_enc, training= kwargs['training'])
+            X_enc = self.embedding_dropout(X_enc, training=kwargs['training'])
 
         if self.kwargs['use_latent_vector']:
-            X_flat =  tf.reshape(X_enc, (X_enc.shape[0], -1))
-            X_flat_0 =self.last_layer_0(X_flat)
+            X_flat = tf.reshape(X_enc, (X_enc.shape[0], -1))
+            X_flat_0 = self.last_layer_0(X_flat)
             X_flat_1 = self.last_layer_1(X_flat_0)
             X_flat_2 = self.last_layer_2(X_flat_1)
-            norm = tf.linalg.norm(X_flat_2, ord='euclidean',  name=None, keepdims=True, axis =-1)
-            out = X_flat_2/norm
+            norm = tf.linalg.norm(X_flat_2, ord='euclidean', name=None, keepdims=True, axis=-1)
+            out = X_flat_2 / norm
 
-            #x_out = self.latent_measurement_norm(x_out)
+            # x_out = self.latent_measurement_norm(x_out)
             return out
         else:
             # project back to ragged (dimensions D x {(NxH_j)}_j )
             # Is already split up across D
-            x_out = [de_embed(X_enc[:, :, i], training= kwargs['training'])
+            x_out = [de_embed(X_enc[:, :, i], training=kwargs['training'])
                      for i, de_embed in enumerate(self.out_embedding)]
 
             x_out = tf.stack(x_out, axis=2)
 
             return tf.squeeze(x_out)
-
-
-

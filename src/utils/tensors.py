@@ -19,7 +19,10 @@ def tf_save_cast_to_float_32(x,logger,name):
     :return:
     """
     try:
-        x_tf = tf.convert_to_tensor(x, dtype=tf.float32, name=name )
+        if tf.is_tensor(x):
+            x_tf = tf.cast(x, tf.float32)
+        else:
+            x_tf = tf.convert_to_tensor(x, dtype=tf.float32, name=name )
 
     except RuntimeError:
         logger.error(f'Runtime error happened in converting {x_tf}')

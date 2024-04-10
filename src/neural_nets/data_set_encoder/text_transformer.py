@@ -69,16 +69,6 @@ class TextTransformer(MeasurementEncoderDummy):
                                                          attention_dropout_rate=self.attention_dropout_rate,
                                                          intermediate_dropout=self.intermediate_dropout_rate)
 
-    def prepare_data(self, data: dict) -> tf.Tensor:
-        """
-        Prepare the data for the model. For this architecture, we skip the normalization and only unpack the data and
-        add a batch dimension.
-        :param data: Dictionary containing the measurement data in a dataframe
-        """
-        tensor = tf.convert_to_tensor(data['data_frame'], dtype=tf.float32)
-        tensor = tf.expand_dims(tensor, axis=0)
-        return tensor
-
     def call(self, x: tf.Tensor, *args, **kwargs) -> tf.Tensor:
         """
         Propagate the input data forward through the model to compute a single embedding for the measurements.
