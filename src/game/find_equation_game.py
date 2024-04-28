@@ -24,16 +24,19 @@ class FindEquationGame(Game):
         self.grammar = grammar
         self.args = args
         self.max_list = MaxList(self.args)
-        if self.args == 'PandasPreprocess':
+        if self.args.equation_preprocess_class == 'PandasPreprocess':
             self.reader = PandasPreprocess(
                 args=args,
                 train_test_or_val=train_test_or_val
             )
-        elif self.args == 'GenPandasPreprocess':
+        elif self.args.equation_preprocess_class == 'GenPandasPreprocess':
             self.reader = GenPandasPreprocess(
                 args=args,
                 train_test_or_val=train_test_or_val
             )
+        else:
+            raise NotImplementedError(f"Equation preprocess not defined: "
+                                      f"{self.args.equation_preprocess_class}")
 
         self.iterator = self.reader.get_datasets()
         self.action_size = len(self.grammar._productions)
