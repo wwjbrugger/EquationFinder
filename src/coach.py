@@ -425,8 +425,8 @@ class Coach(ABC):
         introduce a significant bottleneck to the runtime of the algorithm.
         :param iteration: int Current iteration of the self-play. Used as indexing value for the data filename.
         """
-        folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                 self.args.experiment_name / str(self.args.seed)
+        folder = ROOT_DIR / 'saved_models' / self.args.data_path / \
+                          str(self.args.experiment_name) / str(self.args.seed)
 
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -452,8 +452,8 @@ class Coach(ABC):
             else:
                 self.logger.info(f"No replay buffer found. Use empty one.")
         else:
-            folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                     self.args.experiment_name / str(self.args.seed)
+            folder = ROOT_DIR / 'saved_models' / self.args.data_path / \
+                          str(self.args.experiment_name) / str(self.args.seed)
             buffer_number = highest_number_in_files(path=folder, stem='buffer_')
             filename = folder / f"buffer_{buffer_number}.examples"
 
