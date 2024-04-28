@@ -110,7 +110,7 @@ class ClassicMCTS:
         for i, a in enumerate(possible_actions):
             if (s_0, a) in source_dict:
                 action_utilities[i] = source_dict[(s_0, a)]
-        self.logger.info(f"{s_0} visit counts: {action_utilities}")
+        self.logger.info(f"{s_0.split(' _')[0]} visit counts: {action_utilities}")
 
         move_probabilities = np.zeros(self.action_size)
 
@@ -290,7 +290,10 @@ class ClassicMCTS:
                     state=next_state,
                     path=path + (a,)
                 )
-                value = (value_search + value) / 2
+                if self.args.risk_seeking:
+                    value = max(value_search, value)
+                else:
+                    value = (value_search + value) / 2
         else:
             # next state is done
             if reward >= 0.999:
@@ -353,7 +356,7 @@ class ClassicMCTS:
             q_value = self.Qsa[(state_hash, a)]
         else:
             times_s_a_visited = 0
-            q_value = 0
+            q_value = 1
 
         if self.args.use_puct:
             # Standard PUCT formula from the AlphaZero paper

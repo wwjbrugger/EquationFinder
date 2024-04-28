@@ -278,7 +278,10 @@ class AmEx_MCTS(ClassicMCTS):
                     path=path + (a,)
                 )
                 if not_subtree_completed:
-                    value = (value_search + value) / 2
+                    if self.args.risk_seeking:
+                        value = max(value_search, value)
+                    else:
+                        value = (value_search + value) / 2
                 else:
                     value = value_search
         else:
