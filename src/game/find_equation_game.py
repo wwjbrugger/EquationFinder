@@ -3,6 +3,7 @@ from src.game.game import Game, GameState
 import typing
 import numpy as np
 from src.preprocess_data.pandas_preprocess import PandasPreprocess
+from src.preprocess_data.gen_pandas_preprocess import GenPandasPreprocess
 from copy import deepcopy
 from src.utils.logging import get_log_obj
 from src.constant_fitting.contant_fitting import refit_all_constants
@@ -23,11 +24,17 @@ class FindEquationGame(Game):
         self.grammar = grammar
         self.args = args
         self.max_list = MaxList(self.args)
+        if self.args == 'PandasPreprocess':
+            self.reader = PandasPreprocess(
+                args=args,
+                train_test_or_val=train_test_or_val
+            )
+        elif self.args == 'GenPandasPreprocess':
+            self.reader = GenPandasPreprocess(
+                args=args,
+                train_test_or_val=train_test_or_val
+            )
 
-        self.reader = PandasPreprocess(
-            args=args,
-            train_test_or_val=train_test_or_val
-        )
         self.iterator = self.reader.get_datasets()
         self.action_size = len(self.grammar._productions)
         self.dataset_columns = self.reader.dataset_columns
@@ -127,7 +134,7 @@ class FindEquationGame(Game):
                     dataset=dataset,
                 )
                 y_true = dataset.loc[:, 'y'].to_numpy()
-                error = ReMSe(y_pred=y_calc, y_true=y_true)
+                error = Mse(y_pred=y_calc, y_true=y_true)#ReMSe(y_pred=y_calc, y_true=y_true)
                 #returns error in the range -1 to 1
                 r = 1 + np.maximum(self.args.minimum_reward -1, - error, dtype=np.float32)
                 self.logger.debug(f"r = {r}  {syntax_tree.rearrange_equation_prefix_notation(new_start_node_id=-1)[1]} \n")

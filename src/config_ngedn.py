@@ -88,7 +88,8 @@ class Config:
         parser.add_argument("--equation_preprocess_class", type=str,
                             default='PandasPreprocess',
                             choices=['EquationPreprocessDummy',
-                                     'PandasPreprocess'],
+                                     'PandasPreprocess',
+                                     'GenPandasPreprocess'],
                             help='Datasets can be represent in multiple ways.'
                                  'EquationPreprocessDummy is a interface and if selected, the '
                                  'system will not use any information from the equation representation.'
@@ -381,6 +382,33 @@ class Config:
         parser.add_argument("--max_percent_of_minimal_reward_runs_in_buffer", type=np.float32,
                             default=0.3,
                             help='How many percent of the examples in the buffer should maximal have a minimal reward')
+
+        ######## config datas generation
+        parser.add_argument("--grammar_to_use", default='curated_equations')
+        parser.add_argument("--number_equations", default=1,
+                            help="how many trees to generate", required=False,
+                            type=int)
+        parser.add_argument("--max_number_equation_of_one_type", default=10,
+                            help="For each syntax tree multiple constants and x values can be sampled. "
+                                 "This argument gives an upper bound on how often a syntax tree can be in the dataset.", required=False,
+                            type=int)
+        parser.add_argument("--num_calls_sampling", default=100,
+                            help="How often the sampling procedure is called per example",
+                            required=False, type=int)
+        parser.add_argument("--how_to_select_node_to_delete", default=0,
+                            type=str,
+                            help="Choose int to delete this node id in all generated trees. "
+                                 "Choose 'all' to delete one node after each other"
+                                 "Choose random to delete one random node from each tree nodes "
+                            )
+        parser.add_argument("--sample_with_noise", default=False,
+                            type=str2bool,
+                            help="Noise on x values "
+                            )
+        parser.add_argument('--store_multiple_versions_of_one_equation', type=str2bool, default=True,
+                            help='If argument is true, each generated equation gets a unique identifier'
+                                 'If argument is false. identifier is missing and a new generated '
+                                 'equation will overwrite an existing formula which has the same string representation. ')
 
         args = parser.parse_args()
         if args.seed is None:
