@@ -120,7 +120,7 @@ class RulePredictorSkeleton(tf.keras.Model):
                     target_dataset_encoding=target_dataset_encoding
                 )
             else:
-                loss_measurement_encoder = None
+                loss_measurement_encoder = 0
 
             pi_batch_loss = loss.kl_divergence(
                 real=target_pis,
@@ -204,7 +204,7 @@ class RulePredictorSkeleton(tf.keras.Model):
                     target_dataset_encoding=target_dataset_encoding
                 )
             else:
-                loss_measurement_encoder = None
+                loss_measurement_encoder = 0
         else:
             pi_batch_loss = None
             v_batch_loss = None
