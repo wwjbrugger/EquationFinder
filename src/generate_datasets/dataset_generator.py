@@ -54,6 +54,8 @@ class DatasetGenerator():
                    or self.equation_type_over_limit(new_equation)):
                 new_equation, action_sequence = self.equation_generator.create_new_equation()
                 i += 1
+                if i % 500 == 498:
+                    print("Generation of 500 equations were not successful.")
 
             try:
                 df = self.create_experiment_dataset(equation=new_equation)

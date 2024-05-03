@@ -388,7 +388,7 @@ class Config:
         parser.add_argument("--number_equations", default=1,
                             help="how many trees to generate", required=False,
                             type=int)
-        parser.add_argument("--max_number_equation_of_one_type", default=10,
+        parser.add_argument("--max_number_equation_of_one_type", default=1000000000,
                             help="For each syntax tree multiple constants and x values can be sampled. "
                                  "This argument gives an upper bound on how often a syntax tree can be in the dataset.", required=False,
                             type=int)
