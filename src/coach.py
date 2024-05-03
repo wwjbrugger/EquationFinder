@@ -190,10 +190,15 @@ class Coach(ABC):
 
         # Cleanup environment and GameHistory
         self.logger.info(f"Initial guess of NN: ")
-        for i in range(10):
-            self.logger.info(f"     {game.grammar._productions[i]._rhs},"
-                             f" {mcts.Ps[list(mcts.Ps.keys())[0]][i]:.2}")
-        #self.logger.info(f"{' '*10}equation add to buffer: r={state.reward:.2} {complete_state.syntax_tree.__str__()}")
+        initial_hash = list(mcts.Ps.keys())[0]
+        for i in np.where(mcts.valid_moves_for_s[initial_hash])[0]:
+            self.logger.info(f"     {str(game.grammar._productions[i]._rhs) :<120}|"
+                             f" Ps: {round(mcts.Ps[initial_hash][i], 2):<10.2f}|"
+                             f" mcts: {round(history.probabilities[0][i], 2):<10}|"
+                             f" Qsa: {round(mcts.Qsa[(initial_hash, i)], 2):<10}|"
+                             f" #Ssa: {mcts.times_edge_s_a_was_visited[(initial_hash, i)]:<10}"
+                             )
+            #self.logger.info(f"{' '*10}equation add to buffer: r={state.reward:.2} {complete_state.syntax_tree.__str__()}")
         if mcts.states_explored_till_perfect_fit > 0:
             wandb.log(
                 {
