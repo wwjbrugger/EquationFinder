@@ -21,7 +21,6 @@ import wandb
 import psutil
 import time
 
-
 class ClassicMCTS:
     """
     This class handles the MCTS tree while having access to the environment
@@ -49,8 +48,8 @@ class ClassicMCTS:
         self.times_s_was_visited = {}  # stores #times board s was visited
         self.Ps = {}  # stores initial policy
         self.valid_moves_for_s = {}  # stores game.getValidMoves for board s
-        self.visits_done_state = 0  # Count visits of done states.
-        self.visits_roll_out = 0  # Count how often a new state is explored
+        self.visits_done_state = 0 # Count visits of done states.
+        self.visits_roll_out = 0 # Count how often a new state is explored
         self.logger = get_log_obj(args=args)
 
         self.temperature = None  # exponentiation factor
@@ -266,6 +265,7 @@ class ClassicMCTS:
                                       f"defined")
         return prior, value
 
+
     def _search(self, state: GameState,
                 path: typing.Tuple[int, ...] = tuple(), ) -> (float, bool):
         """
@@ -361,7 +361,10 @@ class ClassicMCTS:
                     state=next_state,
                     path=path + (a,)
                 )
-                value = (value_search + value) / 2
+                if self.args.risk_seeking:
+                    value = max(value_search, value)
+                else:
+                    value = (value_search + value) / 2
         else:
             # next state is done
             if reward >= 0.9 and self.states_explored_till_0_9 < 0:
@@ -390,7 +393,7 @@ class ClassicMCTS:
         return mct_return
 
     def select_action_with_highest_upper_confidence_bound(self, state_hash):
-        q_values = []
+        q_values =[]
         explorations = []
         for a in range(self.action_size):
             q_value, exploration = self.compute_ucb(state_hash, a)
@@ -428,7 +431,7 @@ class ClassicMCTS:
             q_value = self.Qsa[(state_hash, a)]
         else:
             times_s_a_visited = 0
-            q_value = 0
+            q_value = 1
 
         if self.args.use_puct:
             # Standard PUCT formula from the AlphaZero paper
@@ -447,3 +450,4 @@ class ClassicMCTS:
             exploration = self.args.c1 * np.sqrt(denominator / times_s_a_visited)
 
         return q_value, exploration
+

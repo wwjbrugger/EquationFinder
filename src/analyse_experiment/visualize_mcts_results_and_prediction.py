@@ -99,12 +99,12 @@ def plt_3_d_histogram(Mcts_results, predictions):
     colors = ['r', 'g', 'b', 'y']
     zticks = [0,1,2,3]
     for c, k in zip(colors, zticks):
-        MCTS_result = split_string(Mcts_results[102][k])
+        MCTS_result = split_string(Mcts_results[232][k])
         MCTS_dis = MCTS_result/ np.sum(MCTS_result)
-        prediction = split_string(predictions[102][k])
+        prediction = split_string(predictions[232][k])
         x_axis = list(range(len(MCTS_dis)))
         ax.bar(x_axis, MCTS_dis, zs=k, alpha=0.7, color = 'y')
-        ax.bar(x_axis, prediction, zs=k, alpha=0.5,color ='b')
+        #ax.bar(x_axis, prediction, zs=k, alpha=0.5,color ='b')
 
 
         #ax.stairs(MCTS_dis)
@@ -164,6 +164,12 @@ if __name__ == '__main__':
         },
         164: {
             0 : '149. 103. 146.  10.  20.  28.  51.  62.   1. 127.  45.  79.  37. 105.  37.'
+        },
+        232: {
+            0: '308. 180. 122.   3.   5.   5.   5.   8.   1.  18.  10.  51. 112. 125. 47.',
+            1: '148.  92. 119.   1.   6.  13.  57.  72.   0. 157.  61. 117.  36.  75. 46.',
+            2: '194. 107. 252.   4.   5.   6.   9.  19.  21.  55.  46.  84.  53.  62.  83.',
+            3: '276. 149. 187.   2.   4.   5.  10.  20.   0. 102.  23.  69.  40.  65.  48.',
         }
     }
 
@@ -190,6 +196,12 @@ if __name__ == '__main__':
         },
         164: {
             0 : '0.13 0.09 0.13 0.01 0.02 0.03 0.05 0.06 0.01 0.13 0.05 0.08 0.04 0.12 0.04'
+        },
+        232: {
+            0: '0.24 0.15 0.16 0.01 0.02 0.02 0.02 0.02 0.01 0.03 0.02 0.07 0.08 0.09 0.06',
+            1: '0.14 0.09 0.12 0.01 0.02 0.02 0.05 0.07 0.   0.16 0.06 0.11 0.04 0.08 0.05',
+            2: '0.15 0.1  0.14 0.02 0.02 0.02 0.03 0.04 0.03 0.07 0.05 0.09 0.07 0.08 0.09',
+            3: '0.21 0.13 0.15 0.01 0.02 0.02 0.04 0.05 0.   0.09 0.04 0.08 0.04 0.08 0.05',
         }
     }
     plt_3_d_histogram(MCTS_result, prediction)

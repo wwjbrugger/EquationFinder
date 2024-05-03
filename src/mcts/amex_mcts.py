@@ -17,6 +17,7 @@ from src.utils.utils import tie_breaking_argmax
 from src.mcts.classic_mcts import ClassicMCTS
 import time
 
+
 class AmEx_MCTS(ClassicMCTS):
     """
     This class handles the MCTS tree while having access to the environment
@@ -295,7 +296,10 @@ class AmEx_MCTS(ClassicMCTS):
                     path=path + (a,)
                 )
                 if not_subtree_completed:
-                    value = (value_search + value) / 2
+                    if self.args.risk_seeking:
+                        value = max(value_search, value)
+                    else:
+                        value = (value_search + value) / 2
                 else:
                     value = value_search
         else:
@@ -350,13 +354,17 @@ class AmEx_MCTS(ClassicMCTS):
         confidence_bounds = q_values + explorations
 
         # Get masked argmax.
-        a = tie_breaking_argmax(np.where(self.not_completely_explored_moves_for_s[state_hash],
-                                         confidence_bounds,
-                                         -np.inf))  # never choose these actions!
+        a = tie_breaking_argmax(
+            np.where(self.not_completely_explored_moves_for_s[state_hash],
+                     confidence_bounds,
+                     -np.inf)
+        )  # never choose these actions!
         # Get valid arg_max
-        a_max = tie_breaking_argmax(np.where(self.valid_moves_for_s[state_hash],
-                                             confidence_bounds,
-                                             -np.inf))  # never choose these actions!
+        a_max = tie_breaking_argmax(np.where(
+            self.valid_moves_for_s[state_hash],
+            confidence_bounds,
+            -np.inf)
+        )  # never choose these actions!
         # for the unlikely event that a and a_max should be the same,
         # but because of the tie_breaking_argmax are not we have to ckeck if
         # a_max really already exist

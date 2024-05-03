@@ -1,6 +1,8 @@
+import pandas as pd
 import tensorflow as tf
 import numpy as np
-
+import seaborn as sns
+import matplotlib.pyplot as plt
 def categorical_crossentropy_loss(real, pred):
     cross_entropy = tf.keras.losses.CategoricalCrossentropy(from_logits=False, reduction='none')
     loss = cross_entropy(y_true=real, y_pred=pred)
@@ -91,19 +93,33 @@ class NT_Xent(tf.keras.layers.Layer):
             batch_size is twice the original batch_size
         """
         if not target_dataset_encoding is None:
+            if tf.executing_eagerly():
+                target_np = target_dataset_encoding.to_numpy()
+            else:
+                target_np = target_dataset_encoding
             sim = -1 * self.similarity(tf.expand_dims(zizj, 1), tf.expand_dims(zizj, 0))
             sim_activation = (sim + 1) / 2
 
             contrast_loss = self.criterion(
-                target_dataset_encoding[self.mask_contrast_dataset],
+                target_np[self.mask_contrast_dataset],
                 sim_activation[self.mask_contrast_dataset]
             )
             similarity_loss = self.criterion(
-                target_dataset_encoding[self.mask_for_same_dataset],
+                target_np[self.mask_for_same_dataset],
                 sim_activation[self.mask_for_same_dataset]
             )
 
             sim_loss = similarity_loss + 0.1 * contrast_loss
             return sim_loss
+
+    def pretty_print_matrix (self, df, np_array):
+        chart = plt.figure(figsize=(16, 8))
+
+        new_df = pd.DataFrame(np_array, index=df.index, columns=df.index )
+        sns.heatmap(new_df, annot=True)
+        plt.setp(plt.gca.xaxis.get_majorticklabels(), rotation=-45, ha="left")
+        #plt.xticks(rotation=45)
+        plt.show()
+
 
 

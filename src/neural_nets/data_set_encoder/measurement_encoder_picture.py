@@ -49,16 +49,6 @@ class MeasurementEncoderPicture(MeasurementEncoderDummy):
         out = X_flat_2 / norm
         return out
 
-    def prepare_data(self, data):
-        norm_frame = self.normalize(data_frame=data['data_frame'])
-        tensor = tf.convert_to_tensor(norm_frame, dtype=tf.float32)
-
-        # Dataset transformer expect each cell in table to be encoded.
-        # we are not doing so we add an extra dimension at the end
-        # add batch dimension
-        tensor = tf.expand_dims(tensor, axis=0)
-        return tensor
-
 
 def table_to_picture(tensor, bins):
     batch_list = []

@@ -165,6 +165,8 @@ class Coach(ABC):
         )
 
         # Take a step in the environment and observe the transition and store necessary statistics.
+        if mode == 'test':
+            state.action = np.argmax(pi)
         state.action = np.random.choice(len(pi), p=pi)
         next_state, r = game.getNextState(
             state=state,
@@ -184,15 +186,12 @@ class Coach(ABC):
         return
 
     def get_temperature(self, game):
-        if game == self.game_test:
-            temp = np.float32(0)
-        else:
-            try:
-                temp = self.args.temp_0 * np.exp(
-                    self.args.temperature_decay * np.float32(self.checkpoint.step.numpy())
-                )
-            except FloatingPointError:
-                temp = 0
+        try:
+            temp = self.args.temp_0 * np.exp(
+                self.args.temperature_decay * np.float32(self.checkpoint.step.numpy())
+            )
+        except FloatingPointError:
+            temp = self.args.temp_0
         return temp
 
     def learn(self) -> None:
@@ -301,8 +300,8 @@ class Coach(ABC):
         introduce a significant bottleneck to the runtime of the algorithm.
         :param iteration: int Current iteration of the self-play. Used as indexing value for the data filename.
         """
-        folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                 self.args.experiment_name / str(self.args.seed)
+        folder = ROOT_DIR / 'saved_models' / self.args.data_path / \
+                          str(self.args.experiment_name) / str(self.args.seed)
 
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -328,8 +327,8 @@ class Coach(ABC):
             else:
                 self.logger.info(f"No replay buffer found. Use empty one.")
         else:
-            folder = ROOT_DIR / "saved_models" / self.args.data_path.name / \
-                     self.args.experiment_name / str(self.args.seed)
+            folder = ROOT_DIR / 'saved_models' / self.args.data_path / \
+                          str(self.args.experiment_name) / str(self.args.seed)
             buffer_number = highest_number_in_files(path=folder, stem='buffer_')
             filename = folder / f"buffer_{buffer_number}.examples"
 

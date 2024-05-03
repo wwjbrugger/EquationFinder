@@ -38,11 +38,14 @@ class EquationGenerator():
                 syntax_tree=syntax_tree,
                 node_id_to_expand = node_id_to_expand
             )
-            syntax_tree.expand_node_with_action(
-                node_id=node_id_to_expand,
-                action=production_index
-            )
-            action_sequence.append(production_index)
+            try:
+                syntax_tree.expand_node_with_action(
+                    node_id=node_id_to_expand,
+                    action=production_index
+                )
+                action_sequence.append(production_index)
+            except:
+                print(f"Error with action : {production_index}")
         return syntax_tree, action_sequence
 
     def sample_production_rule(self, syntax_tree, node_id_to_expand):

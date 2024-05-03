@@ -10,18 +10,7 @@ def run():
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [
-            #''
-              # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
-              # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
-            # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
-            # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
-            # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__MeasurementEncoderDummy__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
-            # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__MeasurementEncoderDummy__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
-            # 'saved_models/run_3/train_model_no_equation__neural_net__data_grammar_1_run_3__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
-            # 'saved_models/run_3/train_model_no_equation__neural_net__data_grammar_1_run_3__Bi_LSTM_Measurement_Encoder__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
-            'saved_models/run_3/train_model_no_equation__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
-            'saved_models/run_3/train_model_no_equation__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__1000__20/1/tf_ckpts/ckpt-20',
-
+          # 'saved_models/run_3/train_model__neural_net__data_grammar_1_run_3__DatasetTransformer__abs_max_y__lin_transform__Endgame__500__20/1/tf_ckpts/ckpt-20',
         ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
@@ -29,40 +18,7 @@ def run():
         'only_test': [True],
         'max_ram': [20],
         'data': [
-            'data_grammar_1/nguyen_1',
-            'data_grammar_1/nguyen_2',
-            'data_grammar_1/nguyen_3',
-            'data_grammar_1/nguyen_4',
-            'data_grammar_1/nguyen_5',
-            'data_grammar_1/nguyen_6',
-            'data_grammar_1/nguyen_7',
-            'data_grammar_1/nguyen_8',
-            'data_grammar_1/nguyen_9',
-            'data_grammar_1/nguyen_10',
-            'data_grammar_1/nguyen_11',
-            'data_grammar_1/nguyen_12',
-            # 'data_grammar_1/self_0',
-            # 'data_grammar_1/self_1',
-            # 'data_grammar_1/self_2',
-            # 'data_grammar_1/self_3',
-            # 'data_grammar_1/self_4',
-            # 'data_grammar_1/self_5',
-            # 'data_grammar_1/self_6',
-            # 'data_grammar_1/self_7',
-            # 'data_grammar_1/self_8',
-            # 'data_grammar_1/self_9',
-            # 'data_grammar_2/nguyen_1',
-            # 'data_grammar_2/nguyen_2',
-            # 'data_grammar_2/nguyen_3',
-            # 'data_grammar_2/nguyen_4',
-            # 'data_grammar_2/nguyen_5',
-            # 'data_grammar_2/nguyen_6',
-            # 'data_grammar_2/nguyen_7',
-            # 'data_grammar_2/nguyen_8',
-            # 'data_grammar_2/nguyen_9',
-            # 'data_grammar_2/nguyen_10',
-            # 'data_grammar_2/nguyen_11',
-            # 'data_grammar_2/nguyen_12',
+            'data_grammar_1/run_2'
         ],
 
         'script_folder': ['scripts_test'],
@@ -91,8 +47,8 @@ def run():
             # 'None'
             # 'abs_max_y',
             # 'row_wise',
-            'abs_max_y__lin_transform',
-            # 'abs_max_y',
+            #'abs_max_y__lin_transform',
+             'abs_max_y',
         ],
         'num_MCTS_sims': ['300_000'],
         'MCTS_engine': [
@@ -100,6 +56,9 @@ def run():
             #'Normal'
         ],
         'c1': ['20'],
+        'average_policy_if_wrong': [True],
+        'class_equation_encoder': ['Transformer_Encoder_String'],  # EquationEncoderDummy, Transformer_Encoder_String
+
         ## General
 
         'logging_level': ['20'],
@@ -120,8 +79,6 @@ def run():
         ## Training neural net
         'batch_size_training': ['16'],
         'num_gradient_steps': ['100'],
-        'average_policy_if_wrong': [False],
-
         ## Preprocess
         'equation_preprocess_class': [
             'PandasPreprocess'
@@ -490,7 +447,7 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(f"--depth_first_search {settings_one_script['depth_first_search']} \\\n")
     ## Replay buffer
     if len(settings_one_script['replay_buffer_path']) > 5:
-        file1.writelines(f"--replay_buffer_path {settings_one_script['path_to_complete_model']} \\\n")
+        file1.writelines(f"--replay_buffer_path {settings_one_script['replay_buffer_path']} \\\n")
     file1.writelines(f"--prioritize {settings_one_script['prioritize']} \\\n")
     file1.writelines(
         f"--prioritize_alpha {settings_one_script['prioritize_alpha']} \\\n")

@@ -22,13 +22,9 @@ class  MlpMeasurementEncoder(MeasurementEncoderDummy):
                 tf.keras.layers.Dropout(self.dropout_rate)
             )
 
-    def prepare_data(self, data):
-        norm_frame = self.normalize(data_frame=data['data_frame'])
-        tensor_one_row = tf.reshape(tf.convert_to_tensor(norm_frame, dtype=tf.float32), -1)
-        tensor_one_row = tf.expand_dims(tensor_one_row, axis=0)
-        return tensor_one_row
-
     def call(self, x, *args, **kwargs):
+        x_old = x
+        x = tf.reshape(x, shape=[tf.shape(x)[0], -1])
         output = x
         for layer in self.class_layers:
             output = layer(output, training= kwargs['training'])

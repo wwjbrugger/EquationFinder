@@ -22,11 +22,11 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument("--save_folder", help="where to save data_ set",
                         required=True, type=str)
-    parser.add_argument("--grammar_to_use", default=True, type=int)
+    parser.add_argument("--grammar_to_use", default=True)
     parser.add_argument("--number_equations", default=2000,
                         help="how many trees to generate", required=False,
                         type=int)
-    parser.add_argument("--max_number_equation_of_one_type", default=5,
+    parser.add_argument("--max_number_equation_of_one_type", default=10,
                         help="For each syntax tree multiple constants and x values can be sampled. "
                              "This argument gives an upper bound on how often a syntax tree can be in the dataset.", required=False,
                         type=int)
@@ -74,8 +74,8 @@ if __name__ == '__main__':
         'x_0': {
             'distribution': np.random.uniform,
             'distribution_args': {
-                'low': -1,
-                'high': 4,
+                'low': -5,
+                'high': 5,
                 'size': args.num_calls_sampling
             },
             'min_variable_range': 2,
@@ -86,8 +86,8 @@ if __name__ == '__main__':
         'x_1': {
             'distribution': np.random.uniform,
             'distribution_args': {
-                'low': -1,
-                'high': 4,
+                'low': -5,
+                'high': 5,
                 'size': args.num_calls_sampling
             },
             'min_variable_range': 2,
