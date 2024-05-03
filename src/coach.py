@@ -167,6 +167,8 @@ class Coach(ABC):
             )
 
             # Take a step in the environment and observe the transition and store necessary statistics.
+            if  mode == 'test':
+                state.action = np.argmax(pi)
             state.action = np.random.choice(len(pi), p=pi)
             next_state, r = game.getNextState(
                 state=state,
@@ -222,15 +224,12 @@ class Coach(ABC):
         return history
 
     def get_temperature(self, game):
-        if game == self.game_test:
-            temp = np.float32(0)
-        else:
-            try:
-                temp = self.args.temp_0 * np.exp(
-                    self.args.temperature_decay * np.float32(self.checkpoint.step.numpy())
-                )
-            except FloatingPointError:
-                temp = 0
+        try:
+            temp = self.args.temp_0 * np.exp(
+                self.args.temperature_decay * np.float32(self.checkpoint.step.numpy())
+            )
+        except FloatingPointError:
+            temp = self.args.temp_0
         return temp
 
     def learn(self) -> None:
@@ -385,6 +384,7 @@ class Coach(ABC):
 
     def test_epoche(self, save_path):
         self.logger.warning(f'------------------ Test ----------------')
+        self.logger.info(f'load model to test from: {save_path}')
         self.checkpoint_test.restore(save_path)
         iteration_test_examples = self.gather_data(
             metrics=self.metrics_test,
