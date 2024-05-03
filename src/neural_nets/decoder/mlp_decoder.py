@@ -10,8 +10,8 @@ class MLP_Decoder(tf.Module):
         self.name_of_net = kwargs['name']
         #self.ln = tf.keras.layers.LayerNormalization(axis=1, name =f"{kwargs['name']}_layer_norm")
 
-        self.dense_1 = tf.keras.layers.Dense(units=32, activation='relu', dtype=tf.float32, name =f"{kwargs['name']}_Dense_1")
-        self.dense_2 = tf.keras.layers.Dense(units=32, activation='relu', dtype=tf.float32, name =f"{kwargs['name']}_Dense_2")
+        self.dense_1 = tf.keras.layers.Dense(units=64, activation='relu', dtype=tf.float32, name =f"{kwargs['name']}_Dense_1")
+        self.dense_2 = tf.keras.layers.Dense(units=64, activation='relu', dtype=tf.float32, name =f"{kwargs['name']}_Dense_2")
         self.dense_3 = tf.keras.layers.Dense(units=self.out_dim, dtype=tf.float32, name =f"{kwargs['name']}_Dense_3")
         self.softmax = tf.keras.layers.Softmax(
             axis=-1, name =f"{kwargs['name']}_Softmax"

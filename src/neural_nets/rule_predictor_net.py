@@ -4,7 +4,7 @@ from src.utils.logging import get_log_obj
 from src.contrastive_loss.contrastive_loss import (
     prepare_for_contrastive_loss, postprocess_contrastive_loss)
 from src.utils.tensors import tf_save_cast_to_float_32
-
+import numpy as np
 
 class RulePredictorNet(tf.keras.Model):
 
