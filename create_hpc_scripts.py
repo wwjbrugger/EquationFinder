@@ -81,7 +81,8 @@ def run():
         'num_gradient_steps': ['100'],
         ## Preprocess
         'equation_preprocess_class': [
-            'PandasPreprocess'
+            #'PandasPreprocess'
+            'GenPandasPreprocess'
         ],
         'max_len_datasets': [20],
         ## Encoder Equations
