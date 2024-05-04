@@ -15,7 +15,7 @@ def run():
         'run_mcts': [True],
         'only_test': [False],
         'data': [
-            'data_grammar_4/run_1',
+            'data_grammar_8/run_1',
             # 'data_grammar_1/nguyen_1',
             # 'data_grammar_1/nguyen_2',
             # 'data_grammar_1/nguyen_3',
@@ -47,22 +47,22 @@ def run():
             # 'None'
             # 'abs_max_y',
             # 'row_wise',
-            'abs_max_y__lin_transform',
+            # 'abs_max_y__lin_transform',
             'abs_max_y',
         ],
-        'num_MCTS_sims': [10],
+        'num_MCTS_sims': [10], # 500
         'sec_per_simulation': [-1],
         'MCTS_engine': ['Endgame'],
-        'c1': ['20'],
+        'c1': ['10'],
         'average_policy_if_wrong': [True],
         'class_equation_encoder': ['Transformer_Encoder_String'],  # EquationEncoderDummy, Transformer_Encoder_String
         ## General
 
-        'logging_level': ['20'],
+        'logging_level': ['30'],
         'wandb': ['offline'],
         'gpu': ['0'],
 
-        'num_selfplay_iterations': ['10'],
+        'num_selfplay_iterations': ['50'],
         'num_selfplay_iterations_test': ['10'],
         'test_network': ['True'],
         'test_every_n_steps': [10],
@@ -72,16 +72,16 @@ def run():
         'max_depth_of_tree': ['10'],
         'max_num_nodes_in_syntax_tree': ['25'],
         'max_branching_factor': [2],
-        'max_constants_in_tree': [3],
+        'max_constants_in_tree': [5],
         ## Training neural net
-        'batch_size_training': ['16'],
-        'num_gradient_steps': ['100'],
+        'batch_size_training': ['64'],
+        'num_gradient_steps': ['20'],
 
         ## Preprocess
         'equation_preprocess_class': [
-            'PandasPreprocess'
+            'GenPandasPreprocess'
         ],
-        'max_len_datasets': [20],
+        'max_len_datasets': [100],
         ## Encoder Equations
         'embedding_dim_encoder_equation': ['8'],
         'max_tokens_equation': ['64'],
@@ -99,10 +99,10 @@ def run():
         'encoder_measurements_LSTM_return_sequence': ['True'],
         ## Encoder Measurement  MLP
         'encoder_measurement_num_layer': [3],
-        'encoder_measurement_num_neurons': [64],
+        'encoder_measurement_num_neurons': [128],
 
         ######### Encoder Measurement Transformer
-        'model_dim_hidden_dataset_transformer': [64],
+        'model_dim_hidden_dataset_transformer': [128],
         'model_num_heads_dataset_transformer': [8],
         'model_stacking_depth_dataset_transformer': [4],
         'model_sep_res_embed_dataset_transformer': ['True'],
@@ -140,9 +140,9 @@ def run():
 
         'max_elements_in_list': [10],
         'use_puct': [True],
-        'temp_0': [0.1],
-        'temperature_decay': ['-0.01'],
-        'gamma': ['0.98'],
+        'temp_0': [0.5],
+        'temperature_decay': ['0'],
+        'gamma': ['1'],
         'n_steps': ['100'],
         'risk_seeking': [True],
         'depth_first_search': [True],
