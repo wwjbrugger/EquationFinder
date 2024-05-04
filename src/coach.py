@@ -287,11 +287,20 @@ class Coach(ABC):
     def test_epoche(self, save_path):
         self.logger.warning(f'------------------ Test ----------------')
         self.checkpoint_test.restore(save_path)
-        self.gather_data(mcts=self.mcts_test,
-                         game=self.game_test,
-                         logger=self.logger_test,
-                         num_selfplay_iterations=self.args.num_selfplay_iterations_test
-                         )
+        sim = []
+        states = []
+        runs = 100
+        for i in range(runs):
+            self.gather_data(mcts=self.mcts_test,
+                             game=self.game_test,
+                             logger=self.logger_test,
+                             num_selfplay_iterations=self.args.num_selfplay_iterations_test
+                             )
+            sim.append(self.mcts_test.num_simulation_till_0_999)
+            states.append(self.mcts_test.states_explored_till_0_999)
+        print(f"sim:{sim}")
+        print(f"states:{states}")
+        print(f"avg. sim: {np.mean(sim)} \n avg. states: {np.mean(states)}")
 
     def saveTrainExamples(self, iteration: int) -> None:
         """
