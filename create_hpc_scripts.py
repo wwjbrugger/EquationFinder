@@ -5,8 +5,8 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['only_dataset_encoder'],
-        'minutes_to_run': ['4320'],
+        'experiment_name': ['grammar'],
+        'minutes_to_run': ['6800'],
         'max_iteration_to_run': [300],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
@@ -30,19 +30,23 @@ def run():
             # 'data_grammar_1/nguyen_12'
         ],
 
-        'script_folder': ['scripts_only_dataset_encoder'],
+        'script_folder': ['scripts_grammar'],
         'output_folder': ['output'],
         'cold_start_iterations': [10],
         'class_measurement_encoder': [
-             'MeasurementEncoderDummy',
-             'LSTM_Measurement_Encoder',
-             'Bi_LSTM_Measurement_Encoder',
-             'MLP_Measurement_Encoder',
-             'DatasetTransformer',
-             'MeasurementEncoderPicture',
-             'TextTransformer'
+            'MeasurementEncoderDummy',
+            # 'LSTM_Measurement_Encoder',
+            # 'Bi_LSTM_Measurement_Encoder',
+            # 'MLP_Measurement_Encoder',
+            # 'DatasetTransformer',
+            # 'MeasurementEncoderPicture',
+            # 'TextTransformer'
         ],
-        'prior_source': ['neural_net'],  # 'neural_net''grammar', 'uniform'
+        'prior_source': [
+            #'neural_net',
+            'grammar',
+            'uniform'
+        ],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
             # 'None'
             # 'abs_max_y',
@@ -50,12 +54,21 @@ def run():
             # 'abs_max_y__lin_transform',
             'abs_max_y',
         ],
-        'num_MCTS_sims': [10], # 500
+        'num_MCTS_sims': [
+            5,
+            500,
+            250,
+            125,
+            50
+        ],  # 5, 500, 250, 125, 50,
         'sec_per_simulation': [-1],
         'MCTS_engine': ['Endgame'],
         'c1': ['10'],
         'average_policy_if_wrong': [True],
-        'class_equation_encoder': ['Transformer_Encoder_String'],  # EquationEncoderDummy, Transformer_Encoder_String
+        'class_equation_encoder': [
+            'EquationEncoderDummy',
+            # 'Transformer_Encoder_String'
+        ],
         ## General
 
         'logging_level': ['30'],
@@ -93,7 +106,7 @@ def run():
         'dropout_rate': ['0.1'],
         ## Encoder Measurement
 
-        'contrastive_loss': [True],
+        'contrastive_loss': ['False'],
         ## Encoder Measurement LSTM
         'encoder_measurements_LSTM_units': ['64'],
         'encoder_measurements_LSTM_return_sequence': ['True'],
@@ -185,10 +198,9 @@ def create_experiment_name(settings_one_script):
                       f"{settings_one_script['prior_source']}__" \
                       f"{settings_one_script['data'].replace('/', '_')}__" \
                       f"{settings_one_script['class_measurement_encoder']}__" \
-                      f"{settings_one_script['normalize_approach']}__" \
+                      f"{settings_one_script['class_equation_encoder']}__" \
                       f"{settings_one_script['MCTS_engine']}__" \
-                      f"{settings_one_script['num_MCTS_sims']}__" \
-                      f"{settings_one_script['c1']}"
+                      f"{settings_one_script['num_MCTS_sims']}__"
 
     return experiment_name
 
@@ -198,6 +210,7 @@ def create_output_folder(parameter_list_dict):
         f"{parameter_list_dict['script_folder'][0]}/"
         f"{parameter_list_dict['output_folder'][0]}")
     path.mkdir(exist_ok=True, parents=True)
+    print(f"Create folder: {path}")
     with open(path / 'delete_me.txt', "w") as file:
         file.writelines(
             "This file exists for Mogon to create the output folder. ")
