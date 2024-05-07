@@ -196,6 +196,7 @@ class Coach(ABC):
             if (initial_hash, i) in mcts.Qsa:
                 self.logger.info(f"     {str(game.grammar._productions[i]._rhs) :<120}|"
                                  f" Ps: {round(mcts.Ps[initial_hash][i], 2):<10.2f}|"
+                                 f"init. Qsa: {round(mcts.initial_Qsa[(initial_hash, i)], 2) if (initial_hash, i) in mcts.initial_Qsa else 0:<10}" 
                                  f" mcts: {round(history.probabilities[0][i], 2):<10}|"
                                  f" Qsa: {round(mcts.Qsa[(initial_hash, i)], 2):<10}|"
                                  f" #Ssa: {mcts.times_edge_s_a_was_visited[(initial_hash, i)]:<10}"

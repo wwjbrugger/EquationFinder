@@ -264,6 +264,10 @@ class AmEx_MCTS(ClassicMCTS):
         if not next_state.done:
             # Build network input for inference.
             prior, value = self.get_prior_and_value(state=next_state)
+            if state.previous_state:
+                self.initial_Qsa[
+                    (state.previous_state.hash, state.production_action)
+                ] = value
             self.Ps[next_state_hash] = prior
             self.valid_moves_for_s[next_state_hash] = self.game.getLegalMoves(
                 state=next_state
