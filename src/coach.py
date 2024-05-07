@@ -176,7 +176,8 @@ class Coach(ABC):
             )
             complete_state.syntax_tree.expand_node_with_action(
                 node_id=complete_state.syntax_tree.nodes_to_expand[0],
-                action=state.action
+                action=state.action, 
+                build_syntax_tree_eager=self.args.build_syntax_tree_eager
             )
 
             history.capture(

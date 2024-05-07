@@ -29,11 +29,15 @@ def  reconstruct_complete_syntax_tree(finished_state):
         syntax_tree = SyntaxTree(grammar=finished_state.syntax_tree.grammar,
                                  args=finished_state.syntax_tree.args
                                  )
-        for action in actions:
+        i = 0
+        while len(syntax_tree.nodes_to_expand) > 0:
+            action =  actions[i]
             syntax_tree.expand_node_with_action(
                 node_id=syntax_tree.nodes_to_expand[0],
-                action=action
+                action=action,
+                build_syntax_tree_eager=True
             )
+            i += 1
         syntax_tree.constants_in_tree = finished_state.syntax_tree.constants_in_tree
         return syntax_tree, initial_dataset
 

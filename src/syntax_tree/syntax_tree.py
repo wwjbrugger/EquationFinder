@@ -27,7 +27,6 @@ from src.utils.error import NonFiniteError
 import copy
 
 
-
 class SyntaxTree():
     """
     Class to represent equations as tree
@@ -70,6 +69,8 @@ class SyntaxTree():
             'num_fitted_constants': 0
         }
         self.num_constants_in_complete_tree = 0
+        self.action_buffer = []
+        self.invalid = False
 
         if not grammar is None:
             self.start_node.node_symbol = str(grammar._start)
@@ -135,7 +136,8 @@ class SyntaxTree():
                 node_to_expand = syntax_tree.nodes_to_expand[0]
                 syntax_tree.expand_node_with_action(
                     node_id=node_to_expand,
-                    action=action
+                    action=action,
+                    build_syntax_tree_eager=True
                 )
                 action_sequence_to_expand = copy.deepcopy(action_sequence)
                 action_sequence_to_expand.append(action)
@@ -259,6 +261,10 @@ class SyntaxTree():
         :return:
         """
         new_start_node = self.dict_of_nodes[new_start_node_id]
+        if len(self.action_buffer) > 0:
+            return new_start_node.node_symbol, self.action_buffer_to_string()
+        elif self.invalid:
+            return new_start_node.node_symbol, '- - -'
         if new_start_node.invertible:
             equation = new_start_node.math_class.prefix_notation(
                 call_node_id=new_start_node_id,
@@ -289,6 +295,10 @@ class SyntaxTree():
         :return:
         """
         new_start_node = self.dict_of_nodes[new_start_node_id]
+        if len(self.action_buffer) > 0:
+            return new_start_node.node_symbol, self.action_buffer_to_string()
+        elif self.invalid:
+            return new_start_node.node_symbol, '- - -'
         if new_start_node.invertible:
             equation = new_start_node.math_class.infix_notation(
                 new_start_node_id,
@@ -298,11 +308,45 @@ class SyntaxTree():
         else:
             raise AssertionError(f'Node {new_start_node_id} is not invertible')
 
-    def expand_node_with_action(self, node_id, action):
-        node = self.dict_of_nodes[node_id]
-        node.expand_node_with_action(action=action)
-        if len(self.nodes_to_expand) == 0:
-            self.complete = True
+    def expand_node_with_action(self, node_id, action,
+                                build_syntax_tree_eager=True):
+        if build_syntax_tree_eager == True:
+            node = self.dict_of_nodes[node_id]
+            node.expand_node_with_action(action=action)
+            if len(self.nodes_to_expand) == 0:
+                self.complete = True
+        else:
+            self.expand_node_with_action_lazy(action)
+
+    def expand_node_with_action_lazy(self, action):
+        if (action == self.grammar.terminal_action
+                or len(self.action_buffer) > self.max_nodes_allowed):
+            try:
+                for action in self.action_buffer:
+                    node_to_expand = self.nodes_to_expand[0]
+                    self.expand_node_with_action(
+                        node_id=node_to_expand,
+                        action=action,
+                        build_syntax_tree_eager=True
+                    )
+                if len(self.nodes_to_expand) == 0:
+                    self.complete = True
+                else:
+                    self.invalid = True
+            except:
+                self.invalid=True
+            self.action_buffer = []
+        else:
+            self.action_buffer.append(action)
+
+    def action_buffer_to_string(self):
+        string_representation = ''
+        for i, action in enumerate(self.action_buffer):
+            production = self.grammar._productions[action]
+            for token in production._rhs:
+                if str(token) != 'S' or i == len(self.action_buffer)-1:
+                    string_representation += f" {str(token)}"
+        return string_representation
 
     def get_possible_moves(self, node_id):
         symbol = self.dict_of_nodes[node_id].node_symbol
@@ -366,20 +410,5 @@ class SyntaxTree():
         min_value, max_value, depends_on_variable = node_to_evaluate.math_class.operator_data_range(variable)
         return min_value, max_value
 
-
-
     def __str__(self):
         return self.rearrange_equation_prefix_notation(new_start_node_id=-1)[1]
-
-
-if __name__ == '__main__':
-    syntax_tree = SyntaxTree(grammar=None, args=None)
-    syntax_tree.prefix_to_syntax_tree(prefix='+ / a b - c d'.split())
-    syntax_tree.print()
-    for node_id in syntax_tree.dict_of_nodes.keys():
-        if node_id >= 0:
-            try:
-                symbol, equation = syntax_tree.infix_notation(new_start_node_id=node_id)
-                print(f"{node_id}     {symbol} = {equation}")
-            except AssertionError:
-                print(f"{node_id}   is not invertible")

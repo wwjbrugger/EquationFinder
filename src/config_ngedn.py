@@ -56,6 +56,14 @@ class Config:
                             default=-1)
         parser.add_argument('--maximum_reward', type=np.float32,
                             default=1)
+        parser.add_argument('--build_syntax_tree_eager', type=str2bool,
+                            default=True,
+                            help=" When False, actions are stored in a buffer "
+                                 "and only if the end flag, "
+                                 "or maximal number of symbols is reached"
+                                 " the actions are parsed to a syntax tree."
+                                 "When true actions a directly used to buid the syntay tree"
+                            )
         parser.add_argument('--max_depth_of_tree', type=int,
                             default=10,
                             help='Maximum depth of generated equations')

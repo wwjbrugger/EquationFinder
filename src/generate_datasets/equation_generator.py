@@ -41,7 +41,8 @@ class EquationGenerator():
             try:
                 syntax_tree.expand_node_with_action(
                     node_id=node_id_to_expand,
-                    action=production_index
+                    action=production_index,
+                    build_syntax_tree_eager = True
                 )
                 action_sequence.append(production_index)
             except:

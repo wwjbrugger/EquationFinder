@@ -92,7 +92,9 @@ class DatasetGenerator():
                 node_to_expand = new_equation.nodes_to_expand[0]
                 new_equation.expand_node_with_action(
                     node_id=node_to_expand,
-                    action=action
+                    action=action,
+                    build_syntax_tree_eager = True
+
                 )
             try:
                 df = self.create_experiment_dataset(equation=new_equation)
