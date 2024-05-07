@@ -13,7 +13,7 @@ from src.generate_datasets.dataset_generator import DatasetGenerator
 from src.generate_datasets.split_dataset import split_dataset
 from definitions import ROOT_DIR
 from src.generate_datasets.save_buffer_for_supervised_learning import save_buffer_for_supervised_learning
-
+from src.utils.get_grammar import get_grammar_from_string
 
 
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     }
 
 
-    grammar = PCFG.fromstring(get_grammars(args))
+    grammar = get_grammar_from_string(get_grammars(args))
 
     save_folder = ROOT_DIR / Path(args.save_folder)
     save_folder.mkdir(exist_ok=True, parents=True)

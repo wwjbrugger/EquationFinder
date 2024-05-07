@@ -391,7 +391,7 @@ class Config:
                             default=0.3,
                             help='How many percent of the examples in the buffer should maximal have a minimal reward')
 
-        ######## config datas generation
+        ######## config data generation
         parser.add_argument("--grammar_to_use", default='curated_equations')
         parser.add_argument("--number_equations", default=1,
                             help="how many trees to generate", required=False,

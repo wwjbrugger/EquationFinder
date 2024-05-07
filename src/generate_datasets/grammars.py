@@ -219,6 +219,29 @@ def get_grammars(args):
             Variable -> 'x_0'[0.5] | 'x_1' [0.5]
                """
 
+    elif args.grammar_to_use == 'Token_Based':
+        grammar_string = \
+            """  
+            S -> '+' S [0.0625]
+            S -> '-' S [0.0625]
+            s -> '/' S [0.0625]
+            S -> '*' S [0.0625]
+            S -> 'sin' S [0.0625]
+            s -> 'cos' S [0.0625]
+            S -> '**' S [0.0625]
+            S -> 'ln' S [0.0625]
+            s -> 'x_0' S [0.0625]
+            S -> 'x_1' S [0.0625]
+            S -> 'c' S [0.0625]
+            S -> '0.33' S [0.0625]
+            S -> '0.5' S [0.0625]
+            S -> '2' S [0.0625]
+            S -> '3' S [0.0625]
+            S -> '4' S [0.0625]
+            S -> 'End' [0.0625]
+            Variable -> 'x_0'[0.5] | 'x_1' [0.5] 
+               """
+
     else:
         raise AssertionError('grammar you want to use does not exist')
 

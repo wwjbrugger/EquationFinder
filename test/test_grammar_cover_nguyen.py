@@ -5,7 +5,7 @@ import pandas as pd
 import time
 from pcfg import PCFG
 from itertools import product
-
+from src.utils.get_grammar import get_grammar_from_string
 
 class TestEvaluation(unittest.TestCase):
     def setUp(self) -> None:
@@ -23,7 +23,7 @@ class TestEvaluation(unittest.TestCase):
         Variable -> 'x_0' [0.5] | 'x_1' [0.5]
            """
 
-        self.grammar = PCFG.fromstring(grammar_string)
+        self.grammar = get_grammar_from_string(grammar_string)
 
         class Namespace():
             def __init__(self):

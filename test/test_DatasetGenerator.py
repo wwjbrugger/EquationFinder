@@ -5,6 +5,7 @@ import numpy as np
 from src.generate_datasets.dataset_generator import DatasetGenerator
 import pickle as pkl
 from definitions import ROOT_DIR
+from src.utils.get_grammar import get_grammar_from_string
 
 
 class TestEquationGenerator(unittest.TestCase):
@@ -78,7 +79,7 @@ class TestEquationGenerator(unittest.TestCase):
             }
         }
 
-        grammar = PCFG.fromstring(grammar_string)
+        grammar = get_grammar_from_string(grammar_string)
         self.generator = DatasetGenerator(
             grammar=grammar,
             args=self.args,

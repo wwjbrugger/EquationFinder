@@ -9,7 +9,11 @@ from src.preprocess_data.equation_preprocess_dummy import EquationPreprocessDumm
 from pcfg import PCFG
 from src.generate_datasets.grammars import get_grammars
 from src.generate_datasets.dataset_generator import DatasetGenerator
+from src.utils.get_grammar import get_grammar_from_string
+
+
 class GenPandasPreprocess(EquationPreprocessDummy):
+
     """
     Class to read data dynamically to transformer model
     """
@@ -63,7 +67,7 @@ class GenPandasIterator:
         self.dataset_columns = dataset_columns
         self.index = 0
         self.map_tree_representation_to_int = map_tree_representation_to_int
-        self.generation_grammar = PCFG.fromstring(get_grammars(args))
+        self.generation_grammar = get_grammar_from_string(get_grammars(args))
         self.experiment_dataset_dic = {
             'num_calls_sampling': args.num_calls_sampling,
             'x_0': {
