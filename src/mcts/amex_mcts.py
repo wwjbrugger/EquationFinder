@@ -248,8 +248,13 @@ class AmEx_MCTS(ClassicMCTS):
             production_action = next_state.production_action
             self.Rsa[(state_hash, a)] = reward
 
-            if previous_state is not None:  # start node has no previous state
-                return self.Qsa[(previous_state.hash, production_action)]
+            if previous_state is not None:
+                # start node has previous state
+                if next_state.done :
+                    # If the state is done, we only want to use the archived  reward.
+                    return 0
+                else:
+                    return self.Qsa[(previous_state.hash, production_action)]
             else:
                 return 0.0  # todo return something universally good
                 # return np.max([self.Qsa[(s, a)] for a in self.game.getLegalMoves(s)])
