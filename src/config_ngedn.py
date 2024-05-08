@@ -19,7 +19,7 @@ class Config:
         parser.add_argument("--path_to_pretrained_dataset_encoder",
                             help='Path to a pretrained model where the dataset encoder is copied from.',
                              type=str)
-        parser.add_argument("--run_mcts", type=str2bool,
+        parser.add_argument("--generate_new_training_data", type=str2bool,
                             default=True, help="If mcts should be run for training"
                                                "If False only replay buffer is used.")
         parser.add_argument("--only_test", type=str2bool,
@@ -392,7 +392,7 @@ class Config:
                             help='How many percent of the examples in the buffer should maximal have a minimal reward')
 
         ######## config data generation
-        parser.add_argument("--grammar_to_use", default='curated_equations')
+        parser.add_argument("--grammar_to_use_for_generation", default='curated_equations')
         parser.add_argument("--number_equations", default=1,
                             help="how many trees to generate", required=False,
                             type=int)

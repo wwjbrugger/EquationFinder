@@ -266,7 +266,7 @@ class Coach(ABC):
                                 f' {int(self.checkpoint.step)}----------------')
             # Self-play/ Gather training data.
             if not self.args.only_test:
-                if self.args.run_mcts:
+                if self.args.generate_new_training_data:
                     iteration_train_examples = self.gather_data(
                         metrics=self.metrics_train,
                         mcts=self.mcts,
