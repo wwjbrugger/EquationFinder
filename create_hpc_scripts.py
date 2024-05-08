@@ -5,17 +5,17 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['grammar'],
+        'experiment_name': ['token_based'],
         'minutes_to_run': ['6800'],
         'max_iteration_to_run': [300],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [''],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
-        'run_mcts': [True],
+        'generate_new_training_data': [True],
         'only_test': [False],
         'data': [
-            'data_grammar_8/run_1',
+            'data_token_based/run_1',
             # 'data_grammar_1/nguyen_1',
             # 'data_grammar_1/nguyen_2',
             # 'data_grammar_1/nguyen_3',
@@ -30,22 +30,22 @@ def run():
             # 'data_grammar_1/nguyen_12'
         ],
 
-        'script_folder': ['scripts_grammar'],
+        'script_folder': ['scripts_token'],
         'output_folder': ['output'],
         'cold_start_iterations': [10],
         'class_measurement_encoder': [
-            'MeasurementEncoderDummy',
+            #'MeasurementEncoderDummy',
             # 'LSTM_Measurement_Encoder',
             # 'Bi_LSTM_Measurement_Encoder',
             # 'MLP_Measurement_Encoder',
-            # 'DatasetTransformer',
+             'DatasetTransformer',
             # 'MeasurementEncoderPicture',
             # 'TextTransformer'
         ],
         'prior_source': [
-            #'neural_net',
-            'grammar',
-            'uniform'
+            'neural_net',
+            #'grammar',
+            #'uniform'
         ],  # 'neural_net''grammar', 'uniform'
         'normalize_approach': [
             # 'None'
@@ -66,9 +66,12 @@ def run():
         'c1': ['10'],
         'average_policy_if_wrong': [True],
         'class_equation_encoder': [
-            'EquationEncoderDummy',
-            # 'Transformer_Encoder_String'
+            #'EquationEncoderDummy',
+            'Transformer_Encoder_String'
         ],
+        'build_syntax_tree_eager' : [False],
+        'grammar_to_use_for_generation' : ['curated_equations'],
+        
         ## General
 
         'logging_level': ['30'],
@@ -283,7 +286,7 @@ def write_python_call(settings_one_script, file1):
 
     file1.writelines(
         f"--max_num_nodes_in_syntax_tree {settings_one_script['max_num_nodes_in_syntax_tree']} \\\n")
-    file1.writelines(f"--run_mcts {settings_one_script['run_mcts']} \\\n")
+    file1.writelines(f"--generate_new_training_data {settings_one_script['generate_new_training_data']} \\\n")
     file1.writelines(f"--only_test {settings_one_script['only_test']} \\\n")
     file1.writelines(f"--seed {settings_one_script['seed']} \\\n")
     file1.writelines(
@@ -305,6 +308,8 @@ def write_python_call(settings_one_script, file1):
         f"--minimum_reward {settings_one_script['minimum_reward']} \\\n")
     file1.writelines(
         f"--maximum_reward {settings_one_script['maximum_reward']} \\\n")
+    file1.writelines(
+        f"--build_syntax_tree_eager {settings_one_script['build_syntax_tree_eager']} \\\n")
     file1.writelines(
         f"--max_depth_of_tree {settings_one_script['max_depth_of_tree']} \\\n")
     file1.writelines(
@@ -466,6 +471,10 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(
         f"--use-puct"
         f" {settings_one_script['use_puct']} \\\n")
+    ## Data Generation
+    file1.writelines(
+        f"--grammar_to_use_for_generation"
+        f" {settings_one_script['grammar_to_use_for_generation']} \\\n")
 
 
 def write_experiment_names_to_file(experiment_list, script_folder):
