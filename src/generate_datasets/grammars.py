@@ -1,5 +1,5 @@
 def get_grammars(args):
-    if args.grammar_to_use == '1':
+    if args.grammar_to_use_for_generation  == '1':
         grammar_string = \
             """  
             S -> '+' S S [0.25]
@@ -32,7 +32,7 @@ def get_grammars(args):
             I -> '**' '2' 'x_1'     [0.2]
             Variable -> 'x_0'[0.5] | 'x_1' [0.5]
                """
-    elif args.grammar_to_use == '2':
+    elif args.grammar_to_use_for_generation  == '2':
         grammar_string = \
             """  
             S -> '+' S S [0.15]
@@ -59,7 +59,7 @@ def get_grammars(args):
             I ->  'c'      [0.25]
             Variable -> 'x_0'[0.5] | 'x_1' [0.5]
                """
-    elif args.grammar_to_use == 'nguyen':
+    elif args.grammar_to_use_for_generation  == 'nguyen':
         grammar_string = \
             """  
             S -> '+' '+' '**' '3'  'x_0' '**'  '2'  'x_0'  'x_0'   [0.08] 
@@ -77,7 +77,7 @@ def get_grammars(args):
             Variable -> 'x_0'[0.5] | 'x_1'  [0.5]  [0.5]
                """
 
-    elif args.grammar_to_use == '4':
+    elif args.grammar_to_use_for_generation  == '4':
         grammar_string = \
             """  
             S -> '+' S S [0.1875]
@@ -100,7 +100,7 @@ def get_grammars(args):
             Variable -> 'x_0'[0.5] | 'x_1' [0.5]
                """
 
-    elif args.grammar_to_use == '5':
+    elif args.grammar_to_use_for_generation  == '5':
         grammar_string = \
             """  
             S -> '6' S[0.05]| '5' S[0.05]| '4' S[0.05]| '3' S[0.05]| '2' S[0.05]| '0.5' S[0.05]
@@ -111,7 +111,7 @@ def get_grammars(args):
 
             Variable -> 'x_0'[0.5] | 'x_1' [0.5]
                """
-    elif args.grammar_to_use == 'curated_equations':
+    elif args.grammar_to_use_for_generation  == 'curated_equations':
         grammar_string = \
             """  
             S -> '+' 'c' Variable [0.05]
@@ -139,7 +139,7 @@ def get_grammars(args):
             Variable -> 'x_0'[0.5] | 'x_1' [0.5] 
                """
 
-    elif args.grammar_to_use == 'equation_types':
+    elif args.grammar_to_use_for_generation  == 'equation_types':
         grammar_string = \
             """  
             S -> '+' 'c' Variable [0.05]
@@ -167,7 +167,7 @@ def get_grammars(args):
             Variable -> 'x_0'[0.5] | 'x_1' [0.5] 
                """
 
-    elif args.grammar_to_use == 'curated_equations_old':
+    elif args.grammar_to_use_for_generation  == 'curated_equations_old':
         grammar_string = \
             """  
             S -> '+' 'c' 'x_0' [0.025]
@@ -219,7 +219,7 @@ def get_grammars(args):
             Variable -> 'x_0'[0.5] | 'x_1' [0.5]
                """
 
-    elif args.grammar_to_use == 'Token_Based':
+    elif args.grammar_to_use_for_generation  == 'Token_Based':
         grammar_string = \
             """  
             S -> '+' S [0.0625]

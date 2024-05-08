@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument("--save_folder", help="where to save data_ set",
                         required=True, type=str)
-    parser.add_argument("--grammar_to_use", default=True)
+    parser.add_argument("--grammar_to_use_for_generation ", default=True)
     parser.add_argument("--number_equations", default=2000,
                         help="how many trees to generate", required=False,
                         type=int)
