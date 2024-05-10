@@ -14,6 +14,7 @@ from src.generate_datasets.split_dataset import split_dataset
 from definitions import ROOT_DIR
 from src.generate_datasets.save_buffer_for_supervised_learning import save_buffer_for_supervised_learning
 from src.utils.get_grammar import get_grammar_from_string
+from src.generate_datasets.grammars import get_grammars
 
 
 
@@ -22,7 +23,7 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument("--save_folder", help="where to save data_ set",
                         required=True, type=str)
-    parser.add_argument("--grammar_to_use_for_generation ", default=True)
+    parser.add_argument("--grammar_for_generation ", default=True)
     parser.add_argument("--number_equations", default=2000,
                         help="how many trees to generate", required=False,
                         type=int)
@@ -105,7 +106,10 @@ if __name__ == '__main__':
     }
 
 
-    grammar = get_grammar_from_string(get_grammars(args))
+    grammar = get_grammar_from_string(
+        string=get_grammars(args.grammar_for_generation),
+        args =args
+    )
 
     save_folder = ROOT_DIR / Path(args.save_folder)
     save_folder.mkdir(exist_ok=True, parents=True)

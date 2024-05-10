@@ -3,9 +3,11 @@ import numpy as np
 from definitions import ROOT_DIR
 
 
-def get_grammar_from_string(string):
+def get_grammar_from_string(string, args):
     grammar = PCFG.fromstring(string)
     grammar.terminal_action = get_terminal_action_from_grammar(grammar)
+    if args.prior_source in 'grammar' or args.prior_source in 'uniform':
+        add_prior(grammar=grammar, args=args)
     return grammar
 
 
@@ -13,7 +15,7 @@ def read_grammar_file(args):
     path = ROOT_DIR / args.data_path
     with open(path / 'production_rules.txt') as file:
         content = file.read()
-    grammar = get_grammar_from_string(content)
+    grammar = get_grammar_from_string(content, args)
     if args.prior_source in 'grammar' or args.prior_source in 'uniform':
         add_prior(grammar=grammar, args=args)
 

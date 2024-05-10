@@ -86,7 +86,7 @@ if __name__ == '__main__':
         SUM -> 'x_1' [0.15]
         Variable -> 'x_0' [0.5] | 'x_1' [0.5]
            """
-    grammar = get_grammar_from_string(grammar_string)
+    grammar = get_grammar_from_string(grammar_string, args)
 
     actions_list = [[2, 11, 2, 3, 20, 4, 21]]
     experiment_dataset_dic = {

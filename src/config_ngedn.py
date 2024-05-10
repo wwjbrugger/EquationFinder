@@ -12,6 +12,12 @@ class Config:
         parser = ArgumentParser(description="A MuZero and AlphaZero implementation in Tensorflow.")
 
         parser.add_argument("--experiment_name", type=str, default='delete_me')
+        parser.add_argument("--grammar_search", type=str,
+                            default='curated_equations',
+                            help="Which grammar should be used for search. "
+                                 "Grammar can be defined in src/generate_datasets/grammars.py")
+        parser.add_argument("--grammar_for_generation", default='curated_equations',
+                            help= "Only used when equation_preprocess_class == GenPandasPreprocess")
         parser.add_argument("--job_id", type=int,default=0)
         parser.add_argument("--path_to_complete_model", type=str,
                             default='', help="Path to a complete model  which should be loaded")
@@ -32,6 +38,10 @@ class Config:
                             help="CRITICAL = 50, ERROR = 40, "
                                  "WARNING = 30, INFO = 20, "
                                  "DEBUG = 10, NOTSET = 0")
+        parser.add_argument("--training_mode", type=str,
+                            choices=['supervised', 'mcts'],
+                            help="If training data are generated in supervised way "
+                                 "or by running a MCTS")
         parser.add_argument("--wandb", type=str, default='offline',
                             choices=["online", "offline", "disabled"])
         parser.add_argument("--gpu", default=0,
@@ -56,7 +66,7 @@ class Config:
                             default=-1)
         parser.add_argument('--maximum_reward', type=np.float32,
                             default=1)
-        parser.add_argument('--build_syntax_tree_eager', type=str2bool,
+        parser.add_argument('--build_syntax_tree_token_based', type=str2bool,
                             default=True,
                             help=" When False, actions are stored in a buffer "
                                  "and only if the end flag, "
@@ -392,7 +402,6 @@ class Config:
                             help='How many percent of the examples in the buffer should maximal have a minimal reward')
 
         ######## config data generation
-        parser.add_argument("--grammar_to_use_for_generation", default='curated_equations')
         parser.add_argument("--number_equations", default=1,
                             help="how many trees to generate", required=False,
                             type=int)

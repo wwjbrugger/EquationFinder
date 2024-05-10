@@ -16,8 +16,9 @@ import tensorflow as tf
 import numpy as np
 import wandb
 from definitions import ROOT_DIR
-from src.utils.get_grammar import read_grammar_file
 from src.utils.copy_weights import copy_dataset_encoder_weights_from_pretrained_agent
+from src.utils.get_grammar import get_grammar_from_string
+from src.generate_datasets.grammars import get_grammars
 def run():
     args = Config.arguments_parser()
     args.ROOT_DIR = ROOT_DIR
@@ -43,7 +44,11 @@ def run():
     else:
         device = tf.DeviceSpec(device_type='CPU', device_index=0)
 
-    grammar = read_grammar_file(args=args)
+    grammar = get_grammar_from_string(
+        string=get_grammars(args.grammar_search),
+        args=args
+    )
+
 
     # preprocessor = get_preprocessor_class(args=args)
     # reader_train = preprocessor(args=args, train_test_or_val='train')

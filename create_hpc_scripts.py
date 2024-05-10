@@ -6,6 +6,8 @@ def run():
     parameter_list_dict = {
         # paprameter to change
         'experiment_name': ['token_based'],
+        'grammar_search': ['curated_equations'],
+        'grammar_for_generation': ['curated_equations'],
         'minutes_to_run': ['6800'],
         'max_iteration_to_run': [300],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
@@ -69,8 +71,8 @@ def run():
             #'EquationEncoderDummy',
             'Transformer_Encoder_String'
         ],
-        'build_syntax_tree_eager' : [False],
-        'grammar_to_use_for_generation' : ['curated_equations'],
+        'build_syntax_tree_token_based' : [False],
+        'training_mode': ['mcts'],  # ['supervised', 'mcts']
         
         ## General
 
@@ -279,6 +281,8 @@ def write_python_call(settings_one_script, file1):
         file1.writelines(f"--path_to_pretrained_dataset_encoder {settings_one_script['path_to_pretrained_dataset_encoder']} \\\n")
 
     file1.writelines(f"--experiment_name $SLURM_JOB_NAME \\\n")
+    file1.writelines(f"--grammar_search {settings_one_script['grammar_search']} \\\n")
+    file1.writelines(f"--grammar_for_generation {settings_one_script['grammar_for_generation']} \\\n")
     file1.writelines(f"--job_id $SLURM_JOB_ID \\\n")
     file1.writelines(f"--minutes_to_run {settings_one_script['minutes_to_run']} \\\n")
     file1.writelines(f"--max_iteration_to_run {settings_one_script['max_iteration_to_run']} \\\n")
@@ -291,6 +295,7 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(f"--seed {settings_one_script['seed']} \\\n")
     file1.writelines(
         f"--logging_level {settings_one_script['logging_level']} \\\n")
+    file1.writelines(f"--training_mode {settings_one_script['training_mode']} \\\n")
     file1.writelines(f"--wandb {settings_one_script['wandb']} \\\n")
     file1.writelines(f"--gpu {settings_one_script['gpu']} \\\n")
     file1.writelines(f"--data {settings_one_script['data']} \\\n")
@@ -309,7 +314,10 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(
         f"--maximum_reward {settings_one_script['maximum_reward']} \\\n")
     file1.writelines(
-        f"--build_syntax_tree_eager {settings_one_script['build_syntax_tree_eager']} \\\n")
+        f"--build_syntax_tree_token_based"
+        f" {settings_one_script['--build_syntax_tree_token_based']} \\\n")
+    file1.writelines(
+        f"--build_syntax_tree_token_based {settings_one_script['build_syntax_tree_token_based']} \\\n")
     file1.writelines(
         f"--max_depth_of_tree {settings_one_script['max_depth_of_tree']} \\\n")
     file1.writelines(
@@ -473,8 +481,8 @@ def write_python_call(settings_one_script, file1):
         f" {settings_one_script['use_puct']} \\\n")
     ## Data Generation
     file1.writelines(
-        f"--grammar_to_use_for_generation"
-        f" {settings_one_script['grammar_to_use_for_generation']} \\\n")
+        f"--grammar_for_generation"
+        f" {settings_one_script['grammar_for_generation']} \\\n")
 
 
 def write_experiment_names_to_file(experiment_list, script_folder):

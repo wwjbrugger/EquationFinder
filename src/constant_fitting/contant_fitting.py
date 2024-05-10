@@ -2,10 +2,8 @@ from src.syntax_tree.syntax_tree import SyntaxTree
 import pandas as pd
 
 
-def refit_all_constants(finished_state, dataset_columns):
-    complete_syntax_tree, initial_dataset = reconstruct_complete_syntax_tree(
-        finished_state=finished_state
-    )
+def refit_all_constants(finished_state, args):
+    complete_syntax_tree, initial_dataset = reconstruct_complete_syntax_tree(finished_state=finished_state, args=args)
     if complete_syntax_tree.num_constants_in_complete_tree > 0:
         complete_syntax_tree.constants_in_tree['num_fitted_constants']= 0
         complete_syntax_tree.fit_constants(
@@ -16,7 +14,7 @@ def refit_all_constants(finished_state, dataset_columns):
 
 
 
-def  reconstruct_complete_syntax_tree(finished_state):
+def  reconstruct_complete_syntax_tree(finished_state, args):
     if finished_state.previous_state is None:
         # State has no history, so we assume the dataset saved with the dataset is the initial one
         initial_dataset = finished_state.observation['data_frame']
@@ -35,7 +33,7 @@ def  reconstruct_complete_syntax_tree(finished_state):
             syntax_tree.expand_node_with_action(
                 node_id=syntax_tree.nodes_to_expand[0],
                 action=action,
-                build_syntax_tree_eager=True
+                build_syntax_tree_token_based=args.build_syntax_tree_token_based
             )
             i += 1
         syntax_tree.constants_in_tree = finished_state.syntax_tree.constants_in_tree

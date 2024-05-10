@@ -23,7 +23,7 @@ class TestEvaluation(unittest.TestCase):
         Variable -> 'x_0' [0.5] | 'x_1' [0.5]
            """
 
-        self.grammar = get_grammar_from_string(grammar_string)
+        self.grammar = get_grammar_from_string(grammar_string, self.args)
 
         class Namespace():
             def __init__(self):

@@ -32,7 +32,8 @@ from src.utils.logging import get_log_obj
 from src.utils.files import highest_number_in_files
 from definitions import ROOT_DIR
 import random
-
+from src.preprocess_data.equation_preprocess_dummy import (
+    equation_to_action_sequence, get_dict_token_to_action)
 
 class Coach(ABC):
     """
@@ -157,19 +158,16 @@ class Coach(ABC):
         num_MCTS_sims = self.args.num_MCTS_sims
         self.logger.info(f"")
         self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
-
+        i = 0
         while not state.done:
             # Compute the move probability vector and state value using MCTS for the current state of the environment.
-
-            pi, v = mcts.run_mcts(
-                state=state,
-                temperature=temp
-            )
-
-            # Take a step in the environment and observe the transition and store necessary statistics.
-            if  mode == 'test':
-                state.action = np.argmax(pi)
-            state.action = np.random.choice(len(pi), p=pi)
+            if self.args.training_mode == 'mcts' or mode=='test':
+                pi, v = self.get_mcts_action(mcts, mode, state, temp)
+            else:
+                state.action, pi, v = self.get_supervised_action(
+                iteration=i,
+                state=state
+                )
             next_state, r = game.getNextState(
                 state=state,
                 action=state.action,
@@ -177,7 +175,7 @@ class Coach(ABC):
             complete_state.syntax_tree.expand_node_with_action(
                 node_id=complete_state.syntax_tree.nodes_to_expand[0],
                 action=state.action, 
-                build_syntax_tree_eager=self.args.build_syntax_tree_eager
+                build_syntax_tree_token_based=self.args.build_syntax_tree_token_based
             )
 
             history.capture(
@@ -188,7 +186,32 @@ class Coach(ABC):
             )
             # Update state of control
             state = next_state
+            i += 1
+        if  self.args.training_mode == 'mcts' or mode=='test':
+            self.log_mcts_results(game, history, mcts, mode, next_state)
 
+        game.close(state)
+        history.terminate(
+            formula_started_from=formula_started_from,
+            found_equation=complete_state.syntax_tree.rearrange_equation_infix_notation(-1)[1]
+        )
+        history.compute_returns(self.args, gamma=self.args.gamma, look_ahead=(
+            self.args.n_steps if self.game.n_players == 1 else None
+        ))
+        return history
+
+    def get_mcts_action(self, mcts, mode, state, temp):
+        pi, v = mcts.run_mcts(
+            state=state,
+            temperature=temp
+        )
+        # Take a step in the environment and observe the transition and store necessary statistics.
+        if mode == 'test':
+            state.action = np.argmax(pi)
+        state.action = np.random.choice(len(pi), p=pi)
+        return pi, v
+
+    def log_mcts_results(self, game, history, mcts, mode, next_state):
         # Cleanup environment and GameHistory
         self.logger.info(f"Initial guess of NN: ")
         initial_hash = list(mcts.Ps.keys())[0]
@@ -196,12 +219,12 @@ class Coach(ABC):
             if (initial_hash, i) in mcts.Qsa:
                 self.logger.info(f"     {str(game.grammar._productions[i]._rhs) :<120}|"
                                  f" Ps: {round(mcts.Ps[initial_hash][i], 2):<10.2f}|"
-                                 f"init. Qsa: {round(mcts.initial_Qsa[(initial_hash, i)], 2) if (initial_hash, i) in mcts.initial_Qsa else 0:<10}" 
+                                 f"init. Qsa: {round(mcts.initial_Qsa[(initial_hash, i)], 2) if (initial_hash, i) in mcts.initial_Qsa else 0:<10}"
                                  f" mcts: {round(history.probabilities[0][i], 2):<10}|"
                                  f" Qsa: {round(mcts.Qsa[(initial_hash, i)], 2):<10}|"
                                  f" #Ssa: {mcts.times_edge_s_a_was_visited[(initial_hash, i)]:<10}"
                                  )
-            #self.logger.info(f"{' '*10}equation add to buffer: r={state.reward:.2} {complete_state.syntax_tree.__str__()}")
+            # self.logger.info(f"{' '*10}equation add to buffer: r={state.reward:.2} {complete_state.syntax_tree.__str__()}")
         if mcts.states_explored_till_perfect_fit > 0:
             wandb.log(
                 {
@@ -220,16 +243,6 @@ class Coach(ABC):
 
                 }
             )
-
-        game.close(state)
-        history.terminate(
-            formula_started_from=formula_started_from,
-            found_equation=complete_state.syntax_tree.rearrange_equation_infix_notation(-1)[1]
-        )
-        history.compute_returns(self.args, gamma=self.args.gamma, look_ahead=(
-            self.args.n_steps if self.game.n_players == 1 else None
-        ))
-        return history
 
     def get_temperature(self, game):
         try:
@@ -343,9 +356,6 @@ class Coach(ABC):
             metrics['best_reward_found'].update_state(
                 game.max_list.max_list_state[-1].reward if len(game.max_list.max_list_state)>0 else -1
             )
-            metrics['done_rollout_ratio'].update_state(
-                mcts.visits_done_state / mcts.visits_roll_out
-            )
 
         iteration_examples = self.augment_buffer(
             iteration_examples,
@@ -357,7 +367,7 @@ class Coach(ABC):
 
     def log_best_list(self, game, logger):
         logger.info(f"Best equations found:")
-        for i in range(len(game.max_list.max_list_state) - 1, 0, -1):
+        for i in range(len(game.max_list.max_list_state) -1  , - 1, -1):
             logger.info(f"{i}: found equation: {game.max_list.max_list_state[i].complete_discovered_equation:<80}"
                         f" r={round(game.max_list.max_list_keys[i], 3)}"
                         )
@@ -471,3 +481,26 @@ class Coach(ABC):
                     self.trainExamplesHistory = Unpickler(f).load()
             else:
                 self.logger.info(f"No replay buffer found. Use empty one.")
+
+    def get_supervised_action(self, iteration, state):
+        if self.args.grammar_for_generation==self.args.grammar_search:
+            action = state.observation['action_sequence'][iteration]
+        elif self.args.grammar_search == 'Token_Based':
+            if not hasattr(self, 'token_to_action'):
+                self.token_to_action = get_dict_token_to_action(
+                    grammar=self.game.reader.grammar)
+                self.equation_to_action_sequence = {}
+            action_sequence = equation_to_action_sequence(
+                equation =  state.observation['prefix_formula'],
+                token_to_action=self.token_to_action,
+                equation_to_action_sequence=self.equation_to_action_sequence,
+                grammar = self.game.reader.grammar
+            )
+            action=  action_sequence[iteration]
+        pi = np.zeros(self.mcts.action_size)
+        pi[action] = 1
+        v = 0
+
+
+        return action, pi, v
+

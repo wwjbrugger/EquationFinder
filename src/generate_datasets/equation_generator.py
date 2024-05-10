@@ -42,7 +42,7 @@ class EquationGenerator():
                 syntax_tree.expand_node_with_action(
                     node_id=node_id_to_expand,
                     action=production_index,
-                    build_syntax_tree_eager = True
+                    build_syntax_tree_token_based = False
                 )
                 action_sequence.append(production_index)
             except:

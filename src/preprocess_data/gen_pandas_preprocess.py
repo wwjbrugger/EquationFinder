@@ -18,9 +18,9 @@ class GenPandasPreprocess(EquationPreprocessDummy):
     Class to read data dynamically to transformer model
     """
 
-    def __init__(self, args, train_test_or_val):
+    def __init__(self, args, train_test_or_val, grammar):
 
-        super().__init__(args, train_test_or_val)
+        super().__init__(args, train_test_or_val, grammar)
         self.num_variables_in_grammar = self.get_num_variables_in_grammar(
             self.symbol_hash_dic
         )
@@ -67,7 +67,10 @@ class GenPandasIterator:
         self.dataset_columns = dataset_columns
         self.index = 0
         self.map_tree_representation_to_int = map_tree_representation_to_int
-        self.generation_grammar = get_grammar_from_string(get_grammars(args))
+        self.generation_grammar = get_grammar_from_string(
+            string=get_grammars(args.grammar_for_generation),
+            args=self.args
+        )
         self.experiment_dataset_dic = {
             'num_calls_sampling': args.num_calls_sampling,
             'x_0': {
@@ -130,9 +133,11 @@ class GenPandasIterator:
             n=min(dic_measurements[0]['df'].shape[0], self.args.max_len_datasets)
         )
         return {
-            'formula': dic_measurements[0]['formula'],
+            'infix_formula': dic_measurements[0]['infix_formula'],
+            'prefix_formula': dic_measurements[0]['prefix_formula'],
             'data_frame': shorten_data,
-            'dict_xi_to_variable_names': dict_xi_to_variable_names
+            'dict_xi_to_variable_names': dict_xi_to_variable_names,
+            'action_sequence': dic_measurements[0]['action_sequence']
         }
 
     def get_frame_from_disc(self):

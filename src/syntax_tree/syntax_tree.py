@@ -137,7 +137,7 @@ class SyntaxTree():
                 syntax_tree.expand_node_with_action(
                     node_id=node_to_expand,
                     action=action,
-                    build_syntax_tree_eager=True
+                    build_syntax_tree_token_based=False
                 )
                 action_sequence_to_expand = copy.deepcopy(action_sequence)
                 action_sequence_to_expand.append(action)
@@ -309,26 +309,29 @@ class SyntaxTree():
             raise AssertionError(f'Node {new_start_node_id} is not invertible')
 
     def expand_node_with_action(self, node_id, action,
-                                build_syntax_tree_eager=True):
-        if build_syntax_tree_eager == True:
+                                build_syntax_tree_token_based=False):
+        if build_syntax_tree_token_based == True:
+            self.expand_node_with_token(action)
+        else:
             node = self.dict_of_nodes[node_id]
             node.expand_node_with_action(action=action)
             if len(self.nodes_to_expand) == 0:
                 self.complete = True
-        else:
-            self.expand_node_with_action_lazy(action)
 
-    def expand_node_with_action_lazy(self, action):
+
+    def expand_node_with_token(self, action):
         if (action == self.grammar.terminal_action
                 or len(self.action_buffer) > self.max_nodes_allowed):
             try:
+                prefix = []
                 for action in self.action_buffer:
-                    node_to_expand = self.nodes_to_expand[0]
-                    self.expand_node_with_action(
-                        node_id=node_to_expand,
-                        action=action,
-                        build_syntax_tree_eager=True
-                    )
+                    production = self.grammar._productions[action]
+                    rhs = copy.deepcopy(list(production.rhs()))
+                    for symbol in rhs:
+                        symbol = str(symbol)
+                        if symbol != 'S':
+                            prefix.append(symbol)
+                self.prefix_to_syntax_tree(prefix=prefix)
                 if len(self.nodes_to_expand) == 0:
                     self.complete = True
                 else:
