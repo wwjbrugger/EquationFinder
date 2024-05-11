@@ -8,7 +8,7 @@ class EquationEncoderDummy(tf.keras.Model):
         self.column_names = []
 
     def prepare_data(self, data):
-        batch_size = tf.shape(data['formula']).numpy()[0]
+        batch_size = tf.shape(data['infix_formula']).numpy()[0]
         return tf.zeros([batch_size, 0])
 
     def call(self, x, *args, **kwargs):

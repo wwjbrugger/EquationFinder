@@ -3,29 +3,28 @@ from pathlib import Path
 import pandas as pd
 from definitions import ROOT_DIR
 import numpy as np
-from src.utils.get_grammar import read_grammar_file
+from src.utils.get_grammar import get_grammar_from_string
+from src.generate_datasets.grammars import get_grammars
+from src.generate_datasets.dataset_generator import get_all_symbols_usable
 class EquationPreprocessDummy():
     """
     Class to read data dynamically to transformer model
     """
 
-    def __init__(self, args, train_test_or_val):
+    def __init__(self, args, train_test_or_val, grammar):
         self.args = args
+        self.grammar = grammar
         self.train_test_or_val = train_test_or_val
         self.symbol_hash_dic = self.get_hash_values_for_symbols()
         self.symbol_lookup = self.cast_dic_to_lookup_table(self.symbol_hash_dic)
 
     def get_hash_values_for_symbols(self):
         symbol_hash_dic = {}
-        with open(ROOT_DIR / self.args.data_path / 'symbols.txt') as f:
-            content = f.read().splitlines()
-            symbols = content[0].split(sep=',')
-            symbols = [symbol.strip() for symbol in symbols]
-            symbols = [symbol for symbol in symbols if len(symbol)>0]
-            symbols.sort()
-            for i, symbol in enumerate(symbols):
-                symbol_hash_dic[symbol.strip()] = np.float32(i + 1)
-        self.vocab_size = len(symbols) + 1
+        all_symbols = [str(symbol) for symbol in get_all_symbols_usable(self.grammar)]
+        all_symbols.sort()
+        for i, symbol in enumerate(all_symbols):
+            symbol_hash_dic[symbol.strip()] = np.float32(i + 1)
+        self.vocab_size = len(all_symbols) + 1
 
         return symbol_hash_dic
 
@@ -56,8 +55,7 @@ class EquationPreprocessDummy():
         return iterator
 
     def get_num_production_rules(self):
-        grammar = read_grammar_file(self.args)
-        return len(grammar._productions)
+        return len(self.grammar._productions)
 
     def preprocess(self, dataset):
         RuntimeWarning('This method should be overwritten by a child class.'
@@ -96,6 +94,23 @@ class EquationPreprocessDummy():
             print("Element {}:".format(i))
             for (feature_name, feature_value) in element.items():
                 print('{:>14} = {}'.format(feature_name, feature_value))
+
+def  get_dict_token_to_action(grammar):
+    token_to_action = {}
+    for i, production in enumerate(grammar._productions):
+        token_to_action[production._rhs[0]] = i
+    return token_to_action
+
+def equation_to_action_sequence(equation, token_to_action,
+                                equation_to_action_sequence,
+                                grammar):
+    if not equation in equation_to_action_sequence:
+        action_sequence = []
+        for token in equation.split():
+            action_sequence.append(token_to_action[token])
+        action_sequence.append(grammar.terminal_action)
+        equation_to_action_sequence[equation] = action_sequence
+    return equation_to_action_sequence[equation]
 
 
 

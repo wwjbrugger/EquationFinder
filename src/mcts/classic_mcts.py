@@ -42,6 +42,7 @@ class ClassicMCTS:
         self.action_size = game.getActionSize()
 
         self.Qsa = {}  # stores Q values for s, a
+        self.initial_Qsa = {}  # stores Q values for s, a as predicted from the NN
         self.Ssa = {}  # stores state transitions for s, a
         self.Rsa = {}  # stores R values for s, a
         self.times_edge_s_a_was_visited = {}  # stores visit counts of edges
@@ -352,6 +353,10 @@ class ClassicMCTS:
         if not next_state.done:
             # Build network input for inference.
             prior, value = self.get_prior_and_value(state=next_state)
+            if state.previous_state:
+                self.initial_Qsa[
+                    (state.previous_state.hash, state.production_action)
+                ] = value
             self.Ps[next_state_hash] = prior
             self.valid_moves_for_s[next_state_hash] = self.game.getLegalMoves(
                 state=next_state

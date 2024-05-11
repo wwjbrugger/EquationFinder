@@ -6,6 +6,8 @@ def run():
     parameter_list_dict = {
         # paprameter to change
         'experiment_name': ['test_model'],
+        'grammar_search': ['curated_equations'],
+        'grammar_for_generation': ['curated_equations'],
         'minutes_to_run': ['180'],
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
@@ -56,6 +58,7 @@ def run():
         ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
+        'generate_new_training_data': [False],
         'run_mcts': [True],
         'only_test': [True],
         'max_ram': [20],
@@ -81,6 +84,8 @@ def run():
         ],
         'c1': ['10'],
         'average_policy_if_wrong': [True],
+        'build_syntax_tree_token_based': [False],
+        'training_mode': ['mcts'],  # ['supervised', 'mcts']
         ## General
 
         'logging_level': ['20'],
@@ -179,7 +184,6 @@ def run():
         'selfplay_buffer_window': ['50'],
         'balance_buffer': [False],
         'max_percent_of_minimal_reward_runs_in_buffer': [0.3],
-        'grammar_to_use': ['curated_equations']
     }
     create_output_folder(parameter_list_dict)
 
@@ -340,17 +344,20 @@ def write_python_call(settings_one_script, file1):
         file1.writelines(f"--path_to_pretrained_dataset_encoder {settings_one_script['path_to_pretrained_dataset_encoder']} \\\n")
 
     file1.writelines(f"--experiment_name $SLURM_JOB_NAME \\\n")
+    file1.writelines(f"--grammar_search {settings_one_script['grammar_search']} \\\n")
+    file1.writelines(f"--grammar_for_generation {settings_one_script['grammar_for_generation']} \\\n")
     file1.writelines(f"--job_id $SLURM_JOB_ID \\\n")
     file1.writelines(f"--minutes_to_run {settings_one_script['minutes_to_run']} \\\n")
     file1.writelines(f"--max_iteration_to_run {settings_one_script['max_iteration_to_run']} \\\n")
 
     file1.writelines(
         f"--max_num_nodes_in_syntax_tree {settings_one_script['max_num_nodes_in_syntax_tree']} \\\n")
-    file1.writelines(f"--run_mcts {settings_one_script['run_mcts']} \\\n")
+    file1.writelines(f"--generate_new_training_data {settings_one_script['generate_new_training_data']} \\\n")
     file1.writelines(f"--only_test {settings_one_script['only_test']} \\\n")
     file1.writelines(f"--seed {settings_one_script['seed']} \\\n")
     file1.writelines(
         f"--logging_level {settings_one_script['logging_level']} \\\n")
+    file1.writelines(f"--training_mode {settings_one_script['training_mode']} \\\n")
     file1.writelines(f"--wandb {settings_one_script['wandb']} \\\n")
     file1.writelines(f"--gpu {settings_one_script['gpu']} \\\n")
     file1.writelines(f"--data {settings_one_script['data']} \\\n")
@@ -374,6 +381,8 @@ def write_python_call(settings_one_script, file1):
         f"--minimum_reward {settings_one_script['minimum_reward']} \\\n")
     file1.writelines(
         f"--maximum_reward {settings_one_script['maximum_reward']} \\\n")
+    file1.writelines(
+        f"--build_syntax_tree_token_based {settings_one_script['build_syntax_tree_token_based']} \\\n")
     file1.writelines(
         f"--max_depth_of_tree {settings_one_script['max_depth_of_tree']} \\\n")
     file1.writelines(
@@ -535,9 +544,8 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(
         f"--use-puct"
         f" {settings_one_script['use_puct']} \\\n")
-    file1.writelines(
-        f"--grammar_to_use"
-        f" {settings_one_script['grammar_to_use']} \\\n")
+
+
 
 
 def write_experiment_names_to_file(experiment_list, script_folder):

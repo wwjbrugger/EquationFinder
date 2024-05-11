@@ -9,7 +9,7 @@ from pathlib import Path
 from src.utils.parse_args import str2bool
 from src.utils.files import create_file_path
 from src.generate_datasets.dataset_generator import DatasetGenerator
-
+from src.utils.get_grammar import get_grammar_from_string
 
 if __name__ == '__main__':
     parser = ArgumentParser()
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         SUM -> 'x_1' [0.15]
         Variable -> 'x_0' [0.5] | 'x_1' [0.5]
            """
-    grammar = PCFG.fromstring(grammar_string)
+    grammar = get_grammar_from_string(grammar_string, args)
 
     actions_list = [[2, 11, 2, 3, 20, 4, 21]]
     experiment_dataset_dic = {

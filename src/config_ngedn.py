@@ -12,13 +12,19 @@ class Config:
         parser = ArgumentParser(description="A MuZero and AlphaZero implementation in Tensorflow.")
 
         parser.add_argument("--experiment_name", type=str, default='delete_me')
+        parser.add_argument("--grammar_search", type=str,
+                            default='curated_equations',
+                            help="Which grammar should be used for search. "
+                                 "Grammar can be defined in src/generate_datasets/grammars.py")
+        parser.add_argument("--grammar_for_generation", default='curated_equations',
+                            help= "Only used when equation_preprocess_class == GenPandasPreprocess")
         parser.add_argument("--job_id", type=int,default=0)
         parser.add_argument("--path_to_complete_model", type=str,
                             default='', help="Path to a complete model  which should be loaded")
         parser.add_argument("--path_to_pretrained_dataset_encoder",
                             help='Path to a pretrained model where the dataset encoder is copied from.',
                              type=str)
-        parser.add_argument("--run_mcts", type=str2bool,
+        parser.add_argument("--generate_new_training_data", type=str2bool,
                             default=True, help="If mcts should be run for training"
                                                "If False only replay buffer is used.")
         parser.add_argument("--only_test", type=str2bool,
@@ -31,6 +37,10 @@ class Config:
                             help="CRITICAL = 50, ERROR = 40, "
                                  "WARNING = 30, INFO = 20, "
                                  "DEBUG = 10, NOTSET = 0")
+        parser.add_argument("--training_mode", type=str,
+                            choices=['supervised', 'mcts'],
+                            help="If training data are generated in supervised way "
+                                 "or by running a MCTS")
         parser.add_argument("--wandb", type=str, default='offline',
                             choices=["online", "offline", "disabled"])
         parser.add_argument("--gpu", default=0,
@@ -65,6 +75,14 @@ class Config:
                             default=-1)
         parser.add_argument('--maximum_reward', type=np.float32,
                             default=1)
+        parser.add_argument('--build_syntax_tree_token_based', type=str2bool,
+                            default=True,
+                            help=" When False, actions are stored in a buffer "
+                                 "and only if the end flag, "
+                                 "or maximal number of symbols is reached"
+                                 " the actions are parsed to a syntax tree."
+                                 "When true actions a directly used to buid the syntay tree"
+                            )
         parser.add_argument('--max_depth_of_tree', type=int,
                             default=10,
                             help='Maximum depth of generated equations')
@@ -392,8 +410,7 @@ class Config:
                             default=0.3,
                             help='How many percent of the examples in the buffer should maximal have a minimal reward')
 
-        ######## config datas generation
-        parser.add_argument("--grammar_to_use", default='curated_equations')
+        ######## config data generation
         parser.add_argument("--number_equations", default=1,
                             help="how many trees to generate", required=False,
                             type=int)

@@ -27,12 +27,14 @@ class FindEquationGame(Game):
         if self.args.equation_preprocess_class == 'PandasPreprocess':
             self.reader = PandasPreprocess(
                 args=args,
-                train_test_or_val=train_test_or_val
+                train_test_or_val=train_test_or_val,
+                grammar=self.grammar
             )
         elif self.args.equation_preprocess_class == 'GenPandasPreprocess':
             self.reader = GenPandasPreprocess(
                 args=args,
-                train_test_or_val=train_test_or_val
+                train_test_or_val=train_test_or_val,
+                grammar = self.grammar
             )
         else:
             raise NotImplementedError(f"Equation preprocess not defined: "
@@ -42,15 +44,17 @@ class FindEquationGame(Game):
         self.action_size = len(self.grammar._productions)
         self.dataset_columns = self.reader.dataset_columns
 
-
-
     def getInitialState(self) -> GameState:
         self.max_list = MaxList(self.args)
         batch_data = next(self.iterator)
-        observations = {'data_frame': batch_data['data_frame']}
+        observations = {'data_frame': batch_data['data_frame'],
+                        }
+        if 'action_sequence' in batch_data:
+            observations['action_sequence'] = batch_data['action_sequence']
+
         syntax_tree = SyntaxTree(
-            args=self.args,
-            grammar=self.grammar
+        args=self.args,
+        grammar=self.grammar
         )
         syntax_tree.prefix_to_syntax_tree(prefix='S'.split())
         node_symbol, equation_str = syntax_tree.rearrange_equation_prefix_notation(
@@ -63,7 +67,8 @@ class FindEquationGame(Game):
         observations['id_last_node'] = syntax_tree.nodes_to_expand[0]
         observations['last_symbol'] = \
             syntax_tree.dict_of_nodes[syntax_tree.nodes_to_expand[0]].node_symbol
-        observations['true_equation'] =batch_data['formula']
+        observations['true_equation'] = batch_data['infix_formula']
+        observations['prefix_formula'] = batch_data['prefix_formula']
         pattern = r'c_0_|___|__'
         matches = re.split(pattern, observations['true_equation'])
         observations['true_equation_hash'] = matches[0].strip()
@@ -79,7 +84,11 @@ class FindEquationGame(Game):
 
     def getNextState(self, state: GameState, action: int, **kwargs) -> typing.Tuple[GameState, float]:
         next_tree = deepcopy(state.syntax_tree)
-        next_tree.expand_node_with_action(node_id=state.syntax_tree.nodes_to_expand[0], action=action)
+        next_tree.expand_node_with_action(
+            node_id=state.syntax_tree.nodes_to_expand[0],
+            action=action,
+            build_syntax_tree_token_based=self.args.build_syntax_tree_token_based
+        )
         node_symbol, equation = next_tree.rearrange_equation_prefix_notation(
             new_start_node_id=-1
         )
@@ -89,7 +98,8 @@ class FindEquationGame(Game):
             symbol_list=equation.split())
         next_observation['current_tree_representation_int'] = current_tree_representation_int
         done = next_tree.complete or next_tree.max_depth_reached or \
-            next_tree.max_constants_reached or next_tree.max_nodes_reached
+               next_tree.max_constants_reached or next_tree.max_nodes_reached \
+               or next_tree.invalid
 
         if done:
             next_observation['id_last_node'] = []
@@ -124,11 +134,14 @@ class FindEquationGame(Game):
         elif syntax_tree.max_nodes_reached:
             self.logger.debug('done max number nodes')
             r = self.args.minimum_reward
+        elif syntax_tree.invalid:
+            self.logger.debug('Syntax tree is invalid ')
+            r = self.args.minimum_reward
         elif syntax_tree.complete:
             try:
                 complete_syntax_tree, initial_dataset = refit_all_constants(
                     finished_state=state,
-                    dataset_columns=self.dataset_columns
+                    args=self.args
                 )
                 syntax_tree.constants_in_tree = complete_syntax_tree.constants_in_tree
                 state.complete_discovered_equation = syntax_tree.rearrange_equation_prefix_notation()[1]
@@ -137,9 +150,9 @@ class FindEquationGame(Game):
                     dataset=dataset,
                 )
                 y_true = dataset.loc[:, 'y'].to_numpy()
-                error = Mse(y_pred=y_calc, y_true=y_true)#ReMSe(y_pred=y_calc, y_true=y_true)
-                #returns error in the range -1 to 1
-                r = 1 + np.maximum(self.args.minimum_reward -1, - error, dtype=np.float32)
+                error = Mse(y_pred=y_calc, y_true=y_true)  # ReMSe(y_pred=y_calc, y_true=y_true)
+                # returns error in the range -1 to 1
+                r = 1 + np.maximum(self.args.minimum_reward - 1, - error, dtype=np.float32)
                 self.logger.debug(f"r = {r}  {syntax_tree.rearrange_equation_prefix_notation(new_start_node_id=-1)[1]} \n")
 
                 if math.isfinite(r):
@@ -169,7 +182,7 @@ class FindEquationGame(Game):
         return r
 
     def getHash(self, state):
-        data =  np.ascontiguousarray(state.observation['data_frame'])
+        data = np.ascontiguousarray(state.observation['data_frame'])
         hash1 = hashlib.md5(data).hexdigest()
         string_representation = (f"{state.syntax_tree.start_node.node_id}" \
                                  f"{state.observation['current_tree_representation_str']}_"

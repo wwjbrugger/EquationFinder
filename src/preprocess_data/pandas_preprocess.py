@@ -12,9 +12,10 @@ class PandasPreprocess(EquationPreprocessDummy):
     Class to read data dynamically to transformer model
     """
 
-    def __init__(self, args, train_test_or_val):
+    def __init__(self, args, train_test_or_val, grammar):
+        self.grammar = grammar
 
-        super().__init__(args, train_test_or_val)
+        super().__init__(args, train_test_or_val, self.grammar)
         self.num_variables_in_grammar = self.get_num_variables_in_grammar(
             self.symbol_hash_dic
         )
@@ -90,7 +91,7 @@ class PandasIterator:
         input_data.rename(columns=dict_variable_names_to_xi, inplace=True)
         shorten_data = input_data.sample(n=min(input_data.shape[0], self.args.max_len_datasets))
         return {
-            'formula': path.stem,
+            'infix_formula': path.stem,
             'data_frame': shorten_data,
             'dict_xi_to_variable_names': dict_xi_to_variable_names
         }

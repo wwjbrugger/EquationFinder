@@ -7,12 +7,14 @@ import numpy as np
 import os
 from pickle import Pickler, Unpickler, HIGHEST_PROTOCOL
 from collections import deque
+from src.utils.get_grammar import get_grammar_from_string
+from src.generate_datasets.grammars import get_grammars
 
 def save_panda_dataframes(save_folder, dict_measurements, approach, args):
     save_folder = Path(save_folder) / f'{approach}'
     save_folder.mkdir(exist_ok=True, parents=True)
     for key, values in dict_measurements.items():
-        str_formula = f"{values['formula']}".replace('/', 'div')
+        str_formula = f"{values['infix_formula']}".replace('/', 'div')
         df = values['df']
         if args.store_multiple_versions_of_one_equation:
             df.to_csv(save_folder / f"{str_formula}__{key}.csv", index= False)
@@ -20,7 +22,10 @@ def save_panda_dataframes(save_folder, dict_measurements, approach, args):
             df.to_csv(save_folder / f"{str_formula}.csv", index=False)
 
 def save_supervise_buffer(args, path_to_save_buffer, dic_measurements):
-    grammar = read_grammar_file(args=args)
+    grammar = get_grammar_from_string(
+        string=get_grammars(args.grammar_for_generation),
+        args=args
+    )
     game = FindEquationGame(
         grammar,
         args,
@@ -33,8 +38,8 @@ def save_supervise_buffer(args, path_to_save_buffer, dic_measurements):
         history = GameHistory()
         state = game.getInitialState()
         state.observation['data_frame']= measurement['df']
-        state.observation['true_equation'] = measurement['formula']
-        state.observation['true_equation_hash'] = measurement['formula']
+        state.observation['true_equation'] = measurement['infix_formula']
+        state.observation['true_equation_hash'] = measurement['infix_formula']
         gamma =  0.99
         history.observed_returns = list()
         for i, action in enumerate(measurement['action_sequence']):
@@ -53,7 +58,7 @@ def save_supervise_buffer(args, path_to_save_buffer, dic_measurements):
                 v=v
             )
             history.observed_returns.append(1 * gamma**(len(measurement['action_sequence'])-i))
-            history.found_equation = measurement['formula']
+            history.found_equation = measurement['infix_formula']
 
             state=next_state
         buffer.append([history])

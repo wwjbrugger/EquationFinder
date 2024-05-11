@@ -32,7 +32,8 @@ from src.utils.logging import get_log_obj
 from src.utils.files import highest_number_in_files
 from definitions import ROOT_DIR
 import random
-
+from src.preprocess_data.equation_preprocess_dummy import (
+    equation_to_action_sequence, get_dict_token_to_action)
 
 class Coach(ABC):
     """
@@ -158,11 +159,7 @@ class Coach(ABC):
 
         # Compute the move probability vector and state value using MCTS for the current state of the environment.
 
-        pi, v = mcts.run_mcts(
-            state=state,
-            num_mcts_sims=int(num_MCTS_sims),
-            temperature=temp
-        )
+        pi, v = self.get_mcts_action(mcts, mode, state, temp)
 
         # Take a step in the environment and observe the transition and store necessary statistics.
         if mode == 'test':
@@ -174,7 +171,8 @@ class Coach(ABC):
         )
         complete_state.syntax_tree.expand_node_with_action(
             node_id=complete_state.syntax_tree.nodes_to_expand[0],
-            action=state.action
+            action=state.action,
+            build_syntax_tree_token_based=self.args.build_syntax_tree_token_based
         )
 
         wandb.log(
@@ -184,6 +182,17 @@ class Coach(ABC):
         )
 
         return
+
+    def get_mcts_action(self, mcts, mode, state, temp):
+        pi, v = mcts.run_mcts(
+            state=state,
+            temperature=temp
+        )
+        # Take a step in the environment and observe the transition and store necessary statistics.
+        if mode == 'test':
+            state.action = np.argmax(pi)
+        state.action = np.random.choice(len(pi), p=pi)
+        return pi, v
 
     def get_temperature(self, game):
         try:
@@ -250,7 +259,7 @@ class Coach(ABC):
 
     def log_best_list(self, game, logger):
         logger.info(f"Best equations found:")
-        for i in range(len(game.max_list.max_list_state) - 1, 0, -1):
+        for i in range(len(game.max_list.max_list_state) -1  , - 1, -1):
             logger.info(f"{i}: found equation: {game.max_list.max_list_state[i].complete_discovered_equation:<80}"
                         f" r={round(game.max_list.max_list_keys[i], 3)}"
                         )

@@ -63,7 +63,8 @@ class DatasetGenerator():
                 s = constant_dict_to_string(new_equation)
 
                 dic_measurements[num_sampled_equations] = {
-                    'formula': full_equation_string + s,
+                    'prefix_formula': new_equation.__str__(),
+                    'infix_formula': full_equation_string + s,
                     'df': df,
                     'action_sequence': action_sequence
                 }
@@ -92,7 +93,9 @@ class DatasetGenerator():
                 node_to_expand = new_equation.nodes_to_expand[0]
                 new_equation.expand_node_with_action(
                     node_id=node_to_expand,
-                    action=action
+                    action=action,
+                    build_syntax_tree_token_based = False
+
                 )
             try:
                 df = self.create_experiment_dataset(equation=new_equation)
@@ -100,7 +103,7 @@ class DatasetGenerator():
                 s = constant_dict_to_string(new_equation)
 
                 dic_measurements[num_sampled_equations] = {
-                    'formula': full_equation_string + s,
+                    'infix_formula': full_equation_string + s,
                     'df': df
                 }
                 num_sampled_equations += 1
@@ -260,18 +263,18 @@ class DatasetGenerator():
 
     def save_used_symbols_to_file(self, save_folder, additional_symbols):
         save_folder.mkdir(exist_ok=True, parents=True)
-        all_symbols_from_grammar = self.get_all_symbols_usable()
+        all_symbols_from_grammar = get_all_symbols_usable(self.grammar)
         all_symbols = all_symbols_from_grammar.union(set(additional_symbols))
         all_symbols = [str(symbol) for symbol in all_symbols]
         all_symbols.sort()
         with open(save_folder / 'symbols.txt', "a") as file:
             file.writelines(str(symbol) + ', ' for symbol in all_symbols)
 
-    def get_all_symbols_usable(self):
-        terminal_symbols = set(self.grammar._lexical_index.keys())
-        non_terminal_symbols = set(self.grammar._lhs_index.keys())
-        all_symbols = terminal_symbols.union(non_terminal_symbols)
-        return all_symbols
+def get_all_symbols_usable(grammar):
+    terminal_symbols = set(grammar._lexical_index.keys())
+    non_terminal_symbols = set(grammar._lhs_index.keys())
+    all_symbols = terminal_symbols.union(non_terminal_symbols)
+    return all_symbols
 
 def constant_dict_to_string(new_equation):
     s = ''
