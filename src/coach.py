@@ -236,16 +236,15 @@ class Coach(ABC):
             if self.args.contrastive_loss:
                 wandb.log({f"Contrastive loss": contrastive_loss})
 
-    def gather_data(self, mcts, game, logger, num_selfplay_iterations):
+    def gather_data(self, mcts, game, logger):
         minimal_reward_runs = 0
-        for i in range(num_selfplay_iterations):
-            mcts.clear_tree()
-            result_episode = self.execute_one_game(
-                game=game,
-                mcts=mcts
-            )
+        mcts.clear_tree()
+        result_episode = self.execute_one_game(
+            game=game,
+            mcts=mcts
+        )
 
-            self.log_best_list(game, logger)
+        self.log_best_list(game, logger)
 
         return
 
@@ -289,18 +288,29 @@ class Coach(ABC):
         self.checkpoint_test.restore(save_path)
         sim = []
         states = []
-        runs = 100
-        for i in range(runs):
+        unsuccessful_runs = 0
+        for i in range(self.args.num_selfplay_iterations_test):
             self.gather_data(mcts=self.mcts_test,
                              game=self.game_test,
                              logger=self.logger_test,
-                             num_selfplay_iterations=self.args.num_selfplay_iterations_test
                              )
-            sim.append(self.mcts_test.num_simulation_till_0_999)
-            states.append(self.mcts_test.states_explored_till_0_999)
+            sim_0_999 = self.mcts_test.num_simulation_till_0_999
+            states_0_999 = self.mcts_test.states_explored_till_0_999
+            if sim_0_999 > 0:
+                sim.append(sim_0_999)
+                states.append(states_0_999)
+            else:
+                unsuccessful_runs += 1
+
         print(f"sim:{sim}")
         print(f"states:{states}")
         print(f"avg. sim: {np.mean(sim)} \n avg. states: {np.mean(states)}")
+        wandb.log({
+            'sim': sim,
+            'states': states,
+            "avg. sim": np.mean(sim),
+            "avg. states": np.mean(states)
+        })
 
     def saveTrainExamples(self, iteration: int) -> None:
         """
