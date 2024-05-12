@@ -61,7 +61,7 @@ class ClassicMCTS:
         self.num_simulation_till_0_99 = -1
         self.num_simulation_till_0_999 = -1
 
-    def run_mcts(self, state: GameState, num_mcts_sims,
+    def run_mcts(self, state: GameState,
                  temperature: float) -> typing.Tuple[np.ndarray, float]:
         """
         This function performs 'num_MCTS_sims' simulations of MCTS starting
@@ -96,7 +96,7 @@ class ClassicMCTS:
         mct_return_list = []
         ram_free = True
         start_time = time.time()
-        for num_sim in range(1, num_mcts_sims, 1):
+        for num_sim in range(1, self.args.num_MCTS_sims, 1):
             if (self.states_explored_till_0_999 < 0
                     and ram_free
                     and start_time + self.args.max_run_time * 60 > time.time()
@@ -130,7 +130,7 @@ class ClassicMCTS:
             s_0,
             self.times_edge_s_a_was_visited
         )
-        v = (np.max(mct_return_list) * num_mcts_sims + v_0) / (num_mcts_sims + 1)
+        v = (np.max(mct_return_list) * self.args.num_MCTS_sims + v_0) / (self.args.num_MCTS_sims + 1)
         return move_probabilities, v
 
     def enough_ram_free(self):

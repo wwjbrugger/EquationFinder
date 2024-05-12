@@ -153,7 +153,7 @@ class Coach(ABC):
         else:
             mode = 'train'
         wandb.log({f"temperature_{mode}": temp})
-        num_MCTS_sims = self.args.num_MCTS_sims
+
         self.logger.info(f"")
         self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
 
@@ -318,7 +318,8 @@ class Coach(ABC):
             'sim': sim,
             'states': states,
             "avg. sim": np.mean(sim),
-            "avg. states": np.mean(states)
+            "avg. states": np.mean(states),
+            'unsuccessful_runs': unsuccessful_runs
         })
 
     def saveTrainExamples(self, iteration: int) -> None:

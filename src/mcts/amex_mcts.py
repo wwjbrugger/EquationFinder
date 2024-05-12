@@ -35,7 +35,7 @@ class AmEx_MCTS(ClassicMCTS):
         self.not_completely_explored_moves_for_s = {}
         self.states = {}
 
-    def run_mcts(self, state: GameState, num_mcts_sims,
+    def run_mcts(self, state: GameState,
                  temperature: float) -> typing.Tuple[np.ndarray, float]:
         """
         This function performs 'num_MCTS_sims' simulations of MCTS starting
@@ -71,7 +71,7 @@ class AmEx_MCTS(ClassicMCTS):
         ram_free = True
         not_completely_explored = np.any(self.not_completely_explored_moves_for_s[state.hash])
         start_time = time.time()
-        for num_sim in range(1, num_mcts_sims, 1):
+        for num_sim in range(1, self.args.num_MCTS_sims, 1):
             if (not_completely_explored
                     and self.states_explored_till_0_999 < 0
                     and ram_free
@@ -105,7 +105,7 @@ class AmEx_MCTS(ClassicMCTS):
                 s_0_hash,
                 self.times_edge_s_a_was_visited
             )
-            v = (np.max(mct_return_list) * num_mcts_sims + v_0) / (num_mcts_sims + 1)
+            v = (np.max(mct_return_list) * self.args.num_MCTS_sims + v_0) / (self.args.num_MCTS_sims + 1)
         else:
             self.update_full_exploration_to_root_node(state_hash=s_0_hash)
             # MCTS q-values array for each edge 'a' from root node 's_0_hash'.
