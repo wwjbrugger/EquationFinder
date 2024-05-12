@@ -76,7 +76,7 @@ class Config:
         parser.add_argument('--maximum_reward', type=np.float32,
                             default=1)
         parser.add_argument('--build_syntax_tree_token_based', type=str2bool,
-                            default=True,
+                            default=False,
                             help=" When False, actions are stored in a buffer "
                                  "and only if the end flag, "
                                  "or maximal number of symbols is reached"
