@@ -97,6 +97,12 @@ class AmEx_MCTS(ClassicMCTS):
                     self.log_states_and_simulation_to_wandb(state, threshold='0_999')
             else:
                 mct_return_list = [1]
+                if not not_completely_explored:
+                    print(f'aborted because all states are explores: num states {len(self.states)}')
+                if not ram_free:
+                    print(f'run is aborted: because no ram free')
+                if start_time + self.args.max_run_time * 60 < time.time():
+                    print(f'run is aborted: because no time left ')
                 break
 
         if not_completely_explored:

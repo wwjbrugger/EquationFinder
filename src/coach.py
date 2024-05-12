@@ -301,6 +301,7 @@ class Coach(ABC):
                 states.append(states_0_999)
             else:
                 unsuccessful_runs += 1
+                print('unsuccessful run')
 
         print(f"sim:{sim}")
         print(f"states:{states}")
