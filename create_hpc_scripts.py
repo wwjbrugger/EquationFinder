@@ -6,7 +6,7 @@ def run():
     parameter_list_dict = {
         # paprameter to change
         'experiment_name': ['token_based'],
-        'grammar_search': ['curated_equations'],
+        'grammar_search': ['Token_Based'],  #'curated_equations',
         'grammar_for_generation': ['curated_equations'],
         'minutes_to_run': ['6800'],
         'max_iteration_to_run': [300],
@@ -32,7 +32,7 @@ def run():
             # 'data_grammar_1/nguyen_12'
         ],
 
-        'script_folder': ['scripts_token'],
+        'script_folder': ['scripts_token_new'],
         'output_folder': ['output'],
         'cold_start_iterations': [10],
         'class_measurement_encoder': [
@@ -57,11 +57,12 @@ def run():
             'abs_max_y',
         ],
         'num_MCTS_sims': [
-            5,
+            # 1,
             500,
             250,
             125,
-            50
+            50,
+            5,
         ],  # 5, 500, 250, 125, 50,
         'sec_per_simulation': [-1],
         'MCTS_engine': ['Endgame'],
@@ -71,7 +72,7 @@ def run():
             #'EquationEncoderDummy',
             'Transformer_Encoder_String'
         ],
-        'build_syntax_tree_token_based' : [False],
+        'build_syntax_tree_token_based' : [True],
         'training_mode': ['mcts'],  # ['supervised', 'mcts']
         
         ## General
@@ -313,9 +314,6 @@ def write_python_call(settings_one_script, file1):
         f"--minimum_reward {settings_one_script['minimum_reward']} \\\n")
     file1.writelines(
         f"--maximum_reward {settings_one_script['maximum_reward']} \\\n")
-    file1.writelines(
-        f"--build_syntax_tree_token_based"
-        f" {settings_one_script['--build_syntax_tree_token_based']} \\\n")
     file1.writelines(
         f"--build_syntax_tree_token_based {settings_one_script['build_syntax_tree_token_based']} \\\n")
     file1.writelines(

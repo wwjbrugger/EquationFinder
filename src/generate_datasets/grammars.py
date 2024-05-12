@@ -111,7 +111,7 @@ def get_grammars(grammar_to_use):
 
             Variable -> 'x_0'[0.5] | 'x_1' [0.5]
                """
-    elif grammar_to_use  == 'curated_equations':
+    elif grammar_to_use  == 'curated_equations':  # grammar from data_grammar_8
         grammar_string = \
             """  
             S -> '+' 'c' Variable [0.05]
@@ -139,33 +139,6 @@ def get_grammars(grammar_to_use):
             Variable -> 'x_0'[0.5] | 'x_1' [0.5] 
                """
 
-    elif grammar_to_use  == 'equation_types':
-        grammar_string = \
-            """  
-            S -> '+' 'c' Variable [0.05]
-            S -> '+' 'c' '**' Power Variable [0.05]
-            S -> '+' 'c' 'sin' Variable [0.05]
-            S -> '+' 'c' 'cos' Variable [0.05]
-            S -> '+' 'c' '**' Power Variable [0.05]
-            S -> '-' 'c' '*' 'c' '/' 1 '+'  '**' '2' Variable '1' [0.05]
-            S -> '/' 'c'  Variable [0.05]
-            S -> '/' 'c' '**' Variable 'c'  [0.05]
-            S -> '+' 'c' 'ln' Variable [0.05]
-            S -> '**' '0.5' '*' 'c' '**' Power Variable [0.05]
-            S -> '**' '**' '3' Variable  'c' [0.05]
-            S -> '+' 'c'  '**' '-' '0' '**' Power Variable '2'   [0.04]
-            S -> '/' '1' '+' '1' '**' Variable 'c'  [0.04]
-            S -> '+' 'c' '**' Power Variable [0.04]
-            S -> '-' '1' '+' '*' 'c' '**' '3' Variable '+' '*' 'c' '**' '2' Variable  '*' 'c' Variable [0.04]
-            S -> '+' 'c' 'sin' '*' '2' Variable [0.04]
-            S -> '+' 'c' 'cos' '*' '2' Variable [0.05]
-            S ->  '+' '*' 'c' '**' Power Variable '+' '*' 'c' '**' Power Variable  '*' 'c' Variable [0.05]
-            S ->  '+' '*' 'c' '**' Power Variable  '+' '*' 'c' '**' Power Variable '+' '*' 'c' '**' Power Variable  '*' 'c' Variable  [0.05]           
-            S -> '-' 'c' Variable [0.05]
-            S -> '-' 'c' '**' Power Variable [0.05]
-            Power -> '0.33' [0.2]| '0.5' [0.2]| '2' [0.2] | '3' [0.2] | '4' [0.2]
-            Variable -> 'x_0'[0.5] | 'x_1' [0.5] 
-               """
 
     elif grammar_to_use  == 'curated_equations_old':
         grammar_string = \
