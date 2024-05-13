@@ -5,8 +5,8 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['token_based'],
-        'grammar_search': ['Token_Based'],  #'curated_equations',
+        'experiment_name': ['supervised'],
+        'grammar_search': ['curated_equations'],  #'curated_equations',
         'grammar_for_generation': ['curated_equations'],
         'minutes_to_run': ['6800'],
         'max_iteration_to_run': [300],
@@ -17,7 +17,7 @@ def run():
         'generate_new_training_data': [True],
         'only_test': [False],
         'data': [
-            'data_token_based/run_1',
+            'data_grammar_8/run_1',
             # 'data_grammar_1/nguyen_1',
             # 'data_grammar_1/nguyen_2',
             # 'data_grammar_1/nguyen_3',
@@ -32,7 +32,7 @@ def run():
             # 'data_grammar_1/nguyen_12'
         ],
 
-        'script_folder': ['scripts_token_new'],
+        'script_folder': ['scripts_train_complete_model'],
         'output_folder': ['output'],
         'cold_start_iterations': [10],
         'class_measurement_encoder': [
@@ -57,12 +57,12 @@ def run():
             'abs_max_y',
         ],
         'num_MCTS_sims': [
-            # 1,
-            500,
-            250,
-            125,
-            50,
-            5,
+            1,
+            # 500,
+            # 250,
+            # 125,
+            # 50,
+            # 5,
         ],  # 5, 500, 250, 125, 50,
         'sec_per_simulation': [-1],
         'MCTS_engine': ['Endgame'],
@@ -72,8 +72,8 @@ def run():
             #'EquationEncoderDummy',
             'Transformer_Encoder_String'
         ],
-        'build_syntax_tree_token_based' : [True],
-        'training_mode': ['mcts'],  # ['supervised', 'mcts']
+        'build_syntax_tree_token_based' : [False],
+        'training_mode': ['supervised'],  # ['supervised', 'mcts']
         
         ## General
 
