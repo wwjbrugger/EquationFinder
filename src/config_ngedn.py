@@ -67,7 +67,7 @@ class Config:
         parser.add_argument('--maximum_reward', type=np.float32,
                             default=1)
         parser.add_argument('--build_syntax_tree_token_based', type=str2bool,
-                            default=True,
+                            default=False,
                             help=" When False, actions are stored in a buffer "
                                  "and only if the end flag, "
                                  "or maximal number of symbols is reached"
@@ -426,6 +426,10 @@ class Config:
                             help='If argument is true, each generated equation gets a unique identifier'
                                  'If argument is false. identifier is missing and a new generated '
                                  'equation will overwrite an existing formula which has the same string representation. ')
+
+        parser.add_argument("--old_run", type=str2bool, default=False,
+                            help='old runs have more symbols in symbols.txt than needed.'
+                                 'If true this symbols are added to the symbols from the grammar  ')
 
         args = parser.parse_args()
         if args.seed is None:
