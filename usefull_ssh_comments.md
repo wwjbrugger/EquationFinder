@@ -24,7 +24,7 @@ mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest \
 
 ## Load saved models from computer to mogon
 
-rsync -avz -L --include='*/' --include='*ckpt-9*' --exclude='*' \
+rsync -avz -L -n --include='*/' --include='*ckpt-21*' --exclude='*' \
 -e ssh /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/saved_models/data_grammar_8 \
 mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest/saved_models
 
