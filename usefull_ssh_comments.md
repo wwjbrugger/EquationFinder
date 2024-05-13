@@ -29,6 +29,10 @@ rsync -avz -L --include='*/' --include='*ckpt-21*' --exclude='*' \
 mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest/saved_models
 
 
+rsync -avz -L --include='*/' --include='*ckpt-21*' --exclude='*' \
+-e ssh /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/saved_models/data_token_based \
+mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest/saved_models
+
 ## Load sbatch scripts to Mogon
 rsync -a --verbose  \
 /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/scripts_final_nn \

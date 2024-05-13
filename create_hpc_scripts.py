@@ -5,14 +5,14 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['test_model'],
-        'grammar_search': ['curated_equations'],
+        'experiment_name': ['test_model_token'],
+        'grammar_search': ['Token_Based'],
         'grammar_for_generation': ['curated_equations'],
         'minutes_to_run': ['180'],
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [
-            'saved_models/data_grammar_8/run_1/supervised__neural_net__data_grammar_8_run_1__DatasetTransformer__Transformer_Encoder_String__Endgame__1__/1/tf_ckpts/ckpt-21',
+            'saved_models/data_token_based/run_1/supervised_token__neural_net__data_token_based_run_1__DatasetTransformer__Transformer_Encoder_String__Endgame__1__/1/tf_ckpts/ckpt-21',
              ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
@@ -36,14 +36,14 @@ def run():
             # 'abs_max_y__lin_transform',
             'abs_max_y',
         ],
-        'num_MCTS_sims': ['300_000'],
+        'num_MCTS_sims': ['10_000'],
         'MCTS_engine': [
             'Endgame',
             # 'Normal'
         ],
         'c1': ['10'],
         'average_policy_if_wrong': [True],
-        'build_syntax_tree_token_based': [False],
+        'build_syntax_tree_token_based': [True],
         'training_mode': ['mcts'],  # ['supervised', 'mcts']
         'old_run' : [False],
         ## General
@@ -223,6 +223,8 @@ def get_class_equation_encoder(settings):
 
 def get_mcts_steps(settings):
     path_to_complete_model = settings['path_to_complete_model']
+    if '__1__' in path_to_complete_model:
+        return 'supervised'
     if '__5__' in path_to_complete_model:
         return int(5)
     if '__50__' in path_to_complete_model:
