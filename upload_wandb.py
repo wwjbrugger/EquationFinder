@@ -9,9 +9,9 @@ from definitions import ROOT_DIR
 def run():
 
     wandb_entity_name = 'wwjbrugger'#'jgu-wandb'
-    wandb_project = "Test_NGSR_10_05"
+    wandb_project = "Test_NGSR_10_05_21_ckpt"
     Path_to_experiments = Path(
-        f"{ROOT_DIR}/.wandb"
+        f"{ROOT_DIR}/.wandb_test"
     )
 
 
