@@ -5,7 +5,7 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['supervised'],
+        'experiment_name': ['no_syntax_tree'],
         'grammar_search': ['curated_equations'],  #'curated_equations',
         'grammar_for_generation': ['curated_equations'],
         'minutes_to_run': ['6800'],
@@ -36,13 +36,13 @@ def run():
         'output_folder': ['output'],
         'cold_start_iterations': [10],
         'class_measurement_encoder': [
-            #'MeasurementEncoderDummy',
-            # 'LSTM_Measurement_Encoder',
-            # 'Bi_LSTM_Measurement_Encoder',
-            # 'MLP_Measurement_Encoder',
-             'DatasetTransformer',
-            # 'MeasurementEncoderPicture',
-            # 'TextTransformer'
+            'MeasurementEncoderDummy',
+            'LSTM_Measurement_Encoder',
+            'Bi_LSTM_Measurement_Encoder',
+            'MLP_Measurement_Encoder',
+            'DatasetTransformer',
+            'MeasurementEncoderPicture',
+            'TextTransformer'
         ],
         'prior_source': [
             'neural_net',
@@ -57,23 +57,23 @@ def run():
             'abs_max_y',
         ],
         'num_MCTS_sims': [
-            1,
-            # 500,
-            # 250,
-            # 125,
-            # 50,
-            # 5,
+            #1,
+             500,
+             250,
+             125,
+             50,
+             5,
         ],  # 5, 500, 250, 125, 50,
         'sec_per_simulation': [-1],
         'MCTS_engine': ['Endgame'],
         'c1': ['10'],
         'average_policy_if_wrong': [True],
         'class_equation_encoder': [
-            #'EquationEncoderDummy',
-            'Transformer_Encoder_String'
+            'EquationEncoderDummy',
+            #'Transformer_Encoder_String'
         ],
         'build_syntax_tree_token_based' : [False],
-        'training_mode': ['supervised'],  # ['supervised', 'mcts']
+        'training_mode': ['mcts'],  # ['supervised', 'mcts']
         
         ## General
 
