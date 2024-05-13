@@ -21,6 +21,8 @@ class EquationPreprocessDummy():
     def get_hash_values_for_symbols(self):
         symbol_hash_dic = {}
         all_symbols = [str(symbol) for symbol in get_all_symbols_usable(self.grammar)]
+        if self.args.old_run:
+            all_symbols = all_symbols + ['5', '6', 'Exponent', 'I', 'Inner_Function', 'log']
         all_symbols.sort()
         for i, symbol in enumerate(all_symbols):
             symbol_hash_dic[symbol.strip()] = np.float32(i + 1)

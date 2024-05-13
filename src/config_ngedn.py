@@ -440,6 +440,10 @@ class Config:
                             help="Noise on x values ")
         parser.add_argument("--grammar_to_use", type=str,
                             help="Noise on x values ")
+        parser.add_argument("--old_run", type=str2bool,
+                            help='old runs have more symbols in symbols.txt than needed.'
+                                 'If true this symbols are added to the symbols from the grammar  ')
+
 
         args = parser.parse_args()
         if args.seed is None:

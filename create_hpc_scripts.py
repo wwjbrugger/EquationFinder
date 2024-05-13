@@ -12,50 +12,8 @@ def run():
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__Bi_LSTM_Measurement_Encoder__EquationEncoderDummy__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__Bi_LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__5__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__Bi_LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__50__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__Bi_LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__125__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__Bi_LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__250__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__Bi_LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__DatasetTransformer__EquationEncoderDummy__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__DatasetTransformer__Transformer_Encoder_String__Endgame__5__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__DatasetTransformer__Transformer_Encoder_String__Endgame__50__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__DatasetTransformer__Transformer_Encoder_String__Endgame__125__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__DatasetTransformer__Transformer_Encoder_String__Endgame__250__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__DatasetTransformer__Transformer_Encoder_String__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__LSTM_Measurement_Encoder__EquationEncoderDummy__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__5__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__50__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__125__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__250__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__LSTM_Measurement_Encoder__Transformer_Encoder_String__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderDummy__EquationEncoderDummy__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderDummy__Transformer_Encoder_String__Endgame__5__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderDummy__Transformer_Encoder_String__Endgame__50__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderDummy__Transformer_Encoder_String__Endgame__125__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderDummy__Transformer_Encoder_String__Endgame__250__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderDummy__Transformer_Encoder_String__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderPicture__EquationEncoderDummy__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderPicture__Transformer_Encoder_String__Endgame__5__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderPicture__Transformer_Encoder_String__Endgame__50__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderPicture__Transformer_Encoder_String__Endgame__125__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderPicture__Transformer_Encoder_String__Endgame__250__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MeasurementEncoderPicture__Transformer_Encoder_String__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MLP_Measurement_Encoder__EquationEncoderDummy__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MLP_Measurement_Encoder__Transformer_Encoder_String__Endgame__5__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MLP_Measurement_Encoder__Transformer_Encoder_String__Endgame__50__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MLP_Measurement_Encoder__Transformer_Encoder_String__Endgame__125__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MLP_Measurement_Encoder__Transformer_Encoder_String__Endgame__250__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__MLP_Measurement_Encoder__Transformer_Encoder_String__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__EquationEncoderDummy__Endgame__500__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__5__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__50__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__125__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__250__/1/tf_ckpts/ckpt-9',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__500__/1/tf_ckpts/ckpt-9',
-        ],
+            'saved_models/data_grammar_8/run_1/supervised__neural_net__data_grammar_8_run_1__DatasetTransformer__Transformer_Encoder_String__Endgame__1__/1/tf_ckpts/ckpt-21',
+             ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
         'generate_new_training_data': [False],
@@ -66,7 +24,8 @@ def run():
             'data_grammar_8/run_1'
         ],
 
-        'script_folder': ['scripts_test'],
+
+        'script_folder': ['scripts_test_next'],
         'output_folder': ['output'],
         'cold_start_iterations': [0],
 
@@ -74,18 +33,19 @@ def run():
             # 'None'
             # 'abs_max_y',
             # 'row_wise',
-            #'abs_max_y__lin_transform',
-             'abs_max_y',
+            # 'abs_max_y__lin_transform',
+            'abs_max_y',
         ],
         'num_MCTS_sims': ['300_000'],
         'MCTS_engine': [
             'Endgame',
-            #'Normal'
+            # 'Normal'
         ],
         'c1': ['10'],
         'average_policy_if_wrong': [True],
         'build_syntax_tree_token_based': [False],
         'training_mode': ['mcts'],  # ['supervised', 'mcts']
+        'old_run' : [False],
         ## General
 
         'logging_level': ['20'],
@@ -108,7 +68,7 @@ def run():
         'num_gradient_steps': ['100'],
         ## Preprocess
         'equation_preprocess_class': [
-            #'PandasPreprocess'
+            # 'PandasPreprocess'
             'GenPandasPreprocess'
         ],
         'max_len_datasets': [100],
@@ -222,6 +182,7 @@ def create_experiment_name(settings_one_script):
                       f"{settings_one_script['MCTS_engine']}__"
     return experiment_name
 
+
 def get_prior_source(settings):
     path_to_complete_model = settings['path_to_complete_model']
     if 'neural_net' in path_to_complete_model:
@@ -230,6 +191,7 @@ def get_prior_source(settings):
         return 'uniform'
     if 'grammar' in path_to_complete_model:
         return 'grammar'
+
 
 def get_class_measurement_encoder(settings):
     path_to_complete_model = settings['path_to_complete_model']
@@ -249,12 +211,15 @@ def get_class_measurement_encoder(settings):
         return 'TextTransformer'
     else:
         raise AssertionError(f" {path_to_complete_model} Could not be passed")
+
+
 def get_class_equation_encoder(settings):
     path_to_complete_model = settings['path_to_complete_model']
     if 'EquationEncoderDummy' in path_to_complete_model:
         return 'EquationEncoderDummy'
     if 'Transformer_Encoder_String' in path_to_complete_model:
         return 'Transformer_Encoder_String'
+
 
 def get_mcts_steps(settings):
     path_to_complete_model = settings['path_to_complete_model']
@@ -268,10 +233,6 @@ def get_mcts_steps(settings):
         return int(250)
     if '__500__' in path_to_complete_model:
         return int(500)
-
-
-
-
 
 
 def create_output_folder(parameter_list_dict):
@@ -544,8 +505,9 @@ def write_python_call(settings_one_script, file1):
     file1.writelines(
         f"--use-puct"
         f" {settings_one_script['use_puct']} \\\n")
-
-
+    file1.writelines(
+        f"--old_run"
+        f" {settings_one_script['old_run']} \\\n")
 
 
 def write_experiment_names_to_file(experiment_list, script_folder):
