@@ -436,6 +436,11 @@ class Config:
                                  'If argument is false. identifier is missing and a new generated '
                                  'equation will overwrite an existing formula which has the same string representation. ')
 
+        parser.add_argument("--run_mcts", type=str2bool,
+                            help="Noise on x values ")
+        parser.add_argument("--grammar_to_use", type=str,
+                            help="Noise on x values ")
+
         args = parser.parse_args()
         if args.seed is None:
             args.seed = int(time.time())

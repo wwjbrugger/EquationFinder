@@ -180,6 +180,17 @@ class Coach(ABC):
                 "successful": True if mcts.states_explored_till_0_999 >= 0 else False
             }
         )
+        self.log_mcts_results(self.game,mcts )
+
+    def log_mcts_results(self, game, mcts):
+        # Cleanup environment and GameHistory
+        self.logger.info(f"Initial guess of NN: ")
+        initial_hash = list(mcts.Ps.keys())[0]
+        print(np.around(mcts.Ps[initial_hash], 2))
+        for i in np.where(mcts.valid_moves_for_s[initial_hash])[0]:
+                self.logger.info(f"     {str(game.grammar._productions[i]._rhs) :<120}|"
+                                 f" Ps: {round(mcts.Ps[initial_hash][i], 2):<10.2f}|"
+                                 )
 
         return
 
