@@ -1,5 +1,5 @@
 ## Load scripts and data to mogon
-rsync -a --verbose  \
+rsync -a  --verbose  \
 /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery \
 mogon:/home/bruggerj \
 --exclude=.idea --exclude=venv --exclude=.git \
@@ -8,9 +8,9 @@ mogon:/home/bruggerj \
 --exclude=data --exclude=out  --exclude=saved_models \
 --exclude=.wandb --exclude=old --exclude=create_hpc_scripts.py\
 --exclude=upload_wandb.py --exclude=data_grammar_2 --exclude=out \
---exclude=data_grammar_1  --exclude=data_grammar_4\
+--exclude=data_grammar_1  --exclude=data_grammar_4 \
 --exclude=data_grammar_5 --exclude=data_grammar_6 \
---exclude=data_grammar_7\
+--exclude=data_grammar_7 \
 --exclude=old_wandb --exclude=.wandb_test \
 --exclude=old_saved_models --exclude=old_data
 
