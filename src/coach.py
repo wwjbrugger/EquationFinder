@@ -186,7 +186,7 @@ class Coach(ABC):
         # Cleanup environment and GameHistory
         self.logger.info(f"Initial guess of NN: ")
         initial_hash = list(mcts.Ps.keys())[0]
-        print(np.around(mcts.Ps[initial_hash], 2))
+        self.logger.info(np.around(mcts.Ps[initial_hash], 2))
         for i in np.where(mcts.valid_moves_for_s[initial_hash])[0]:
                 self.logger.info(f"     {str(game.grammar._productions[i]._rhs) :<120}|"
                                  f" Ps: {round(mcts.Ps[initial_hash][i], 2):<10.2f}|"
@@ -310,6 +310,7 @@ class Coach(ABC):
         states = []
         unsuccessful_runs = 0
         for i in range(self.args.num_selfplay_iterations_test):
+            self.logger_test.info(f"iteration: {i}")
             self.gather_data(mcts=self.mcts_test,
                              game=self.game_test,
                              logger=self.logger_test,
@@ -322,9 +323,9 @@ class Coach(ABC):
             else:
                 unsuccessful_runs += 1
 
-        print(f"sim:{sim}")
-        print(f"states:{states}")
-        print(f"avg. sim: {np.mean(sim)} \n avg. states: {np.mean(states)}")
+        self.logger_test.info(f"sim:{sim}")
+        self.logger_test.info(f"states:{states}")
+        self.logger_test.info(f"avg. sim: {np.mean(sim)} \n avg. states: {np.mean(states)}")
         wandb.log({
             'sim': sim,
             'states': states,

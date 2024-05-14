@@ -51,7 +51,7 @@ class ClassicMCTS:
         self.valid_moves_for_s = {}  # stores game.getValidMoves for board s
         self.visits_done_state = 0 # Count visits of done states.
         self.visits_roll_out = 0 # Count how often a new state is explored
-        self.logger = get_log_obj(args=args)
+        self.logger = get_log_obj(args=args, name='MCTS')
 
         self.temperature = None  # exponentiation factor
         self.states_explored_till_0_9 = -1
@@ -145,7 +145,7 @@ class ClassicMCTS:
             return True
 
     def log_states_and_simulation_to_wandb(self, state, threshold):
-        print(
+        self.logger.info(
             f"first equation with r > {threshold} :"
             f" {self.game.max_list.max_list_state[-1].complete_discovered_equation:<80}"
         )
@@ -154,7 +154,7 @@ class ClassicMCTS:
         for node in self.game.max_list.max_list_state[-1].syntax_tree.dict_of_nodes.values():
             if len(node.selected_production) > 0:
                 productions = productions + node.selected_production
-        print(f"num productions {threshold}: {len(productions)} : {productions} ")
+        self.logger.info(f"num productions {threshold}: {len(productions)} : {productions} ")
         num_simulation = getattr(self, f"num_simulation_till_{threshold}")
         num_states = getattr(self, f"states_explored_till_{threshold}")
         print(f"Explored states = {num_states}  Number simulation = {num_simulation}")
