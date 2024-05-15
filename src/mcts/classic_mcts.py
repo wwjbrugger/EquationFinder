@@ -157,7 +157,7 @@ class ClassicMCTS:
         self.logger.info(f"num productions {threshold}: {len(productions)} : {productions} ")
         num_simulation = getattr(self, f"num_simulation_till_{threshold}")
         num_states = getattr(self, f"states_explored_till_{threshold}")
-        print(f"Explored states = {num_states}  Number simulation = {num_simulation}")
+        self.logger.info(f"Explored states = {num_states}  Number simulation = {num_simulation}")
         wandb.log(
             {
                 f"num_states_to_{threshold}":
