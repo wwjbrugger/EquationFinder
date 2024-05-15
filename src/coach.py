@@ -85,7 +85,7 @@ class Coach(ABC):
         self.checkpoint_test = checkpoint_test
         self.logger = get_log_obj(args=args, name='coach')
         self.logger_test = get_log_obj(args=args, name='coach_test')
-        self.prior_from_NN ={}
+        self.final_Qsa ={}
 
     @staticmethod
     def getCheckpointFile(iteration: int) -> str:
@@ -205,15 +205,16 @@ class Coach(ABC):
                                  f" Ps: {round(mcts.Ps[initial_hash][i], 2):<10.2f}|"
                                  )
         state = mcts.states[initial_hash]
-        if state.observation['prefix_formula'] not in self.prior_from_NN:
-            self.prior_from_NN[state.observation['prefix_formula']] = {}
-        self.prior_from_NN[state.observation['prefix_formula']][self.i] = [float(p) for p in mcts.Ps[initial_hash]]
+        if state.observation['prefix_formula'] not in self.final_Qsa:
+            self.final_Qsa[state.observation['prefix_formula']] = {}
+        self.final_Qsa[state.observation['prefix_formula']][self.i] = \
+            [float(p) for p in mcts.calculate_move_probabilities(initial_hash,mcts.Qsa, True)]
         key = get_key_containing_substring(dict=mcts.Ps, substring='+ c  sin Variable')
         if key:
             new_key = state.observation['prefix_formula'] + '+ c  sin Variable'
-            if new_key not in self.prior_from_NN:
-                self.prior_from_NN[new_key] = {}
-            self.prior_from_NN[new_key][self.i] = [float(p) for p in mcts.Ps[key]]
+            if new_key not in self.final_Qsa:
+                self.final_Qsa[new_key] = {}
+            self.final_Qsa[new_key][self.i] = [float(p) for p in mcts.calculate_move_probabilities(key, mcts.Qsa, True)]
         return
 
     def get_mcts_action(self, mcts, mode, state, temp):
@@ -346,7 +347,7 @@ class Coach(ABC):
             else:
                 unsuccessful_runs += 1
         with open(ROOT_DIR/f'priors/{self.args.experiment_name}.json', 'w') as file:
-            json.dump(self.prior_from_NN, file,indent=4)
+            json.dump(self.final_Qsa, file,indent=4)
 
         self.logger_test.info(f"sim:{sim}")
         self.logger_test.info(f"states:{states}")
