@@ -34,7 +34,7 @@ from definitions import ROOT_DIR
 import random
 from src.preprocess_data.equation_preprocess_dummy import (
     equation_to_action_sequence, get_dict_token_to_action)
-
+import json
 class Coach(ABC):
     """
     This class controls the self-play and learning loop.
@@ -85,6 +85,7 @@ class Coach(ABC):
         self.checkpoint_test = checkpoint_test
         self.logger = get_log_obj(args=args, name='coach')
         self.logger_test = get_log_obj(args=args, name='coach_test')
+        self.prior_from_NN ={}
 
     @staticmethod
     def getCheckpointFile(iteration: int) -> str:
@@ -143,44 +144,56 @@ class Coach(ABC):
         :return: GameHistory Data structure containing all observed states and statistics required for network training.
         """
         history = GameHistory()
+        np.random.seed(self.i)
         state = game.getInitialState()  # Always from perspective of player 1 for boardgames.
-        complete_state = copy.deepcopy(state)
-        formula_started_from = state.observation['current_tree_representation_str']
-        # Update MCTS visit count temperature according to an episode or weight update schedule.
-        temp = self.get_temperature(game)
-        if game == self.game_test:
-            mode = 'test'
-        else:
-            mode = 'train'
-        wandb.log({f"temperature_{mode}": temp})
+        self.logger_test.info(f"\n\n iteration: {self.i}   "
+                              f"equation prefix: {state.observation['prefix_formula']}"
+                              f"equation infix: {state.observation['true_equation'] }")
+        if (' +  * c  ** 2 x_0    +  * c  ** 3 x_0    * c x_1   ' == state.observation['prefix_formula']
+                or ' + c  sin x_0 ' in state.observation['prefix_formula']
+                or ' + c  sin x_1 ' == state.observation['prefix_formula']
+                or ' + c  ** 2 x_0  ' == state.observation['prefix_formula']
+                or ' / c x_1 ' == state.observation['prefix_formula']
 
-        self.logger.info(f"")
-        self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
+        ):
 
-        # Compute the move probability vector and state value using MCTS for the current state of the environment.
+            complete_state = copy.deepcopy(state)
+            formula_started_from = state.observation['current_tree_representation_str']
+            # Update MCTS visit count temperature according to an episode or weight update schedule.
+            temp = self.get_temperature(game)
+            if game == self.game_test:
+                mode = 'test'
+            else:
+                mode = 'train'
+            wandb.log({f"temperature_{mode}": temp})
 
-        pi, v = self.get_mcts_action(mcts, mode, state, temp)
+            self.logger.info(f"")
+            self.logger.info(f"{mode}: equation for {state.observation['true_equation_hash']} is searched")
 
-        # Take a step in the environment and observe the transition and store necessary statistics.
-        if mode == 'test':
-            state.action = np.argmax(pi)
-        state.action = np.random.choice(len(pi), p=pi)
-        next_state, r = game.getNextState(
-            state=state,
-            action=state.action,
-        )
-        complete_state.syntax_tree.expand_node_with_action(
-            node_id=complete_state.syntax_tree.nodes_to_expand[0],
-            action=state.action,
-            build_syntax_tree_token_based=self.args.build_syntax_tree_token_based
-        )
+            # Compute the move probability vector and state value using MCTS for the current state of the environment.
 
-        wandb.log(
-            {
-                "successful": True if mcts.states_explored_till_0_999 >= 0 else False
-            }
-        )
-        self.log_mcts_results(self.game,mcts )
+            pi, v = self.get_mcts_action(mcts, mode, state, temp)
+
+            # Take a step in the environment and observe the transition and store necessary statistics.
+            if mode == 'test':
+                state.action = np.argmax(pi)
+            state.action = np.random.choice(len(pi), p=pi)
+            next_state, r = game.getNextState(
+                state=state,
+                action=state.action,
+            )
+            complete_state.syntax_tree.expand_node_with_action(
+                node_id=complete_state.syntax_tree.nodes_to_expand[0],
+                action=state.action,
+                build_syntax_tree_token_based=self.args.build_syntax_tree_token_based
+            )
+
+            wandb.log(
+                {
+                    "successful": True if mcts.states_explored_till_0_999 >= 0 else False
+                }
+            )
+            self.log_mcts_results(self.game,mcts )
 
     def log_mcts_results(self, game, mcts):
         # Cleanup environment and GameHistory
@@ -191,7 +204,16 @@ class Coach(ABC):
                 self.logger.info(f"     {str(game.grammar._productions[i]._rhs) :<120}|"
                                  f" Ps: {round(mcts.Ps[initial_hash][i], 2):<10.2f}|"
                                  )
-
+        state = mcts.states[initial_hash]
+        if state.observation['prefix_formula'] not in self.prior_from_NN:
+            self.prior_from_NN[state.observation['prefix_formula']] = {}
+        self.prior_from_NN[state.observation['prefix_formula']][self.i] = [float(p) for p in mcts.Ps[initial_hash]]
+        key = get_key_containing_substring(dict=mcts.Ps, substring='+ c  sin Variable')
+        if key:
+            new_key = state.observation['prefix_formula'] + '+ c  sin Variable'
+            if new_key not in self.prior_from_NN:
+                self.prior_from_NN[new_key] = {}
+            self.prior_from_NN[new_key][self.i] = [float(p) for p in mcts.Ps[key]]
         return
 
     def get_mcts_action(self, mcts, mode, state, temp):
@@ -310,7 +332,8 @@ class Coach(ABC):
         states = []
         unsuccessful_runs = 0
         for i in range(self.args.num_selfplay_iterations_test):
-            self.logger_test.info(f"iteration: {i}")
+            self.i = i
+
             self.gather_data(mcts=self.mcts_test,
                              game=self.game_test,
                              logger=self.logger_test,
@@ -322,6 +345,8 @@ class Coach(ABC):
                 states.append(states_0_999)
             else:
                 unsuccessful_runs += 1
+        with open(ROOT_DIR/f'priors/{self.args.experiment_name}.json', 'w') as file:
+            json.dump(self.prior_from_NN, file,indent=4)
 
         self.logger_test.info(f"sim:{sim}")
         self.logger_test.info(f"states:{states}")
@@ -333,6 +358,7 @@ class Coach(ABC):
             "avg. states": np.mean(states),
             'unsuccessful_runs': unsuccessful_runs
         })
+
 
     def saveTrainExamples(self, iteration: int) -> None:
         """
@@ -379,3 +405,9 @@ class Coach(ABC):
                     self.trainExamplesHistory = Unpickler(f).load()
             else:
                 self.logger.info(f"No replay buffer found. Use empty one.")
+
+def get_key_containing_substring(dict, substring):
+    for key in dict:
+        if substring in key:
+            return key
+    return None
