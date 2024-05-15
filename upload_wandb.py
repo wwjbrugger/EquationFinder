@@ -9,7 +9,7 @@ from definitions import ROOT_DIR
 def run():
 
     wandb_entity_name = 'wwjbrugger'#'jgu-wandb'
-    wandb_project = "11_04_only_dataset"
+    wandb_project = "NGSR_10_05"
     Path_to_experiments = Path(
         f"{ROOT_DIR}/.wandb"
     )
