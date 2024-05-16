@@ -162,8 +162,6 @@ class AmEx_MCTS(ClassicMCTS):
             self.not_completely_explored_moves_for_s[s_0_hash] = \
                 self.game.getLegalMoves(state).astype(bool)
 
-            self.Ps[s_0_hash] *= self.valid_moves_for_s[s_0_hash]
-            self.Ps[s_0_hash] = self.Ps[s_0_hash] / (1e-8 + np.sum(self.Ps[s_0_hash]))
 
             # Sum of visit counts of the edges/ children and legal moves.
             self.times_s_was_visited[s_0_hash] = 0
