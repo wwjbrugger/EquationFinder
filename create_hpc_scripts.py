@@ -5,20 +5,15 @@ from pathlib import Path
 def run():
     parameter_list_dict = {
         # paprameter to change
-        'experiment_name': ['test_model'],
+        'experiment_name': ['test_model_new'],
         'grammar_search': ['curated_equations'],   #'Token_Based',
         'grammar_for_generation': ['curated_equations'],
         'minutes_to_run': ['300'],
         'max_iteration_to_run': [1],
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [
-            'saved_models/data_grammar_8/run_1/no_syntax_tree__neural_net__data_grammar_8_run_1__Bi_LSTM_Measurement_Encoder__EquationEncoderDummy__Endgame__50__/1/tf_ckpts/ckpt-21',
-            'saved_models/data_grammar_8/run_1/no_syntax_tree__neural_net__data_grammar_8_run_1__DatasetTransformer__EquationEncoderDummy__Endgame__50__/1/tf_ckpts/ckpt-21',
-            'saved_models/data_grammar_8/run_1/no_syntax_tree__neural_net__data_grammar_8_run_1__LSTM_Measurement_Encoder__EquationEncoderDummy__Endgame__50__/1/tf_ckpts/ckpt-21',
-            'saved_models/data_grammar_8/run_1/no_syntax_tree__neural_net__data_grammar_8_run_1__MeasurementEncoderDummy__EquationEncoderDummy__Endgame__50__/1/tf_ckpts/ckpt-21',
-            'saved_models/data_grammar_8/run_1/no_syntax_tree__neural_net__data_grammar_8_run_1__MeasurementEncoderPicture__EquationEncoderDummy__Endgame__50__/1/tf_ckpts/ckpt-21',
-            'saved_models/data_grammar_8/run_1/no_syntax_tree__neural_net__data_grammar_8_run_1__MLP_Measurement_Encoder__EquationEncoderDummy__Endgame__50__/1/tf_ckpts/ckpt-21',
-            'saved_models/data_grammar_8/run_1/no_syntax_tree__neural_net__data_grammar_8_run_1__TextTransformer__EquationEncoderDummy__Endgame__50__/1/tf_ckpts/ckpt-21',
+            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__5__/1/tf_ckpts/ckpt-21',
+            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__250__/1/tf_ckpts/ckpt-21',
             ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],
@@ -51,7 +46,7 @@ def run():
         'average_policy_if_wrong': [True],
         'build_syntax_tree_token_based': [False],
         'training_mode': ['mcts'],  # ['supervised', 'mcts']
-        'old_run' : [False],
+        'old_run' : [True],
         ## General
 
         'logging_level': ['20'],
