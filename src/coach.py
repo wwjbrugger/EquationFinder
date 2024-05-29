@@ -309,6 +309,7 @@ class Coach(ABC):
         sim = []
         states = []
         unsuccessful_runs = 0
+        start_time = time.time()
         for i in range(self.args.num_selfplay_iterations_test):
             self.logger_test.info(f"iteration: {i}")
             self.gather_data(mcts=self.mcts_test,
@@ -327,6 +328,7 @@ class Coach(ABC):
         self.logger_test.info(f"states:{states}")
         self.logger_test.info(f"avg. sim: {np.mean(sim)} \n avg. states: {np.mean(states)}")
         wandb.log({
+            'run_time': time.time() - start_time,
             'sim': sim,
             'states': states,
             "avg. sim": np.mean(sim),
