@@ -34,13 +34,13 @@ rsync -avz -L --include='*/' --include='*ckpt-21*' --exclude='*' \
 mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest/saved_models
 
 ## Load sbatch scripts to Mogon
-rsync -a --verbose  \
-/home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/scripts_final_nn \
-mogon:/home/bruggerj/NeuralGuidedEquationDiscovery/ \
+rsync -a --verbose   \
+/home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/data_grammar_1/nguyen* \
+mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest/data_grammar_1/ \
 
 ## Load saved models from mogon to computer 
 rsync -a  -L --verbose    mogon:/home/bruggerj/NeuralGuidedEquationDiscovery/\
-saved_models/  /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/saved_models
+saved_models/  /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscoveryTest/saved_models
 
 
 
@@ -49,7 +49,7 @@ saved_models/  /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/save
 
 ##  copy wandb files from mogon to computer
 rsync  -a  -L --verbose  mogon:/home/bruggerj/NeuralGuidedEquationDiscoveryTest/\
-.wandb/  /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/.wandb_test \
+.wandb/  /home/jbrugger/PycharmProjects/NeuralGuidedEquationDiscovery/.wandb_test 
 
 
 

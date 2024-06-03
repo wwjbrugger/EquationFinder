@@ -321,6 +321,12 @@ class Coach(ABC):
             if sim_0_999 > 0:
                 sim.append(sim_0_999)
                 states.append(states_0_999)
+                productions=[]
+                for node in self.game_test.max_list.max_list_state[-1].syntax_tree.dict_of_nodes.values():
+                    if len(node.selected_production) > 0:
+                        productions.append(  str(node.selected_production))
+                print(f"num productions: {len(productions)} : {productions} ")
+
             else:
                 unsuccessful_runs += 1
 
@@ -328,6 +334,8 @@ class Coach(ABC):
         self.logger_test.info(f"states:{states}")
         self.logger_test.info(f"avg. sim: {np.mean(sim)} \n avg. states: {np.mean(states)}")
         wandb.log({
+            'equation_found': self.game_test.max_list.max_list_state[-1].syntax_tree.__str__(),
+            'productions': productions,
             'run_time': time.time() - start_time,
             'sim': sim,
             'states': states,
