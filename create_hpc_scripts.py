@@ -13,7 +13,6 @@ def run():
         'seed': ['$SLURM_ARRAY_TASK_ID'],
         'path_to_complete_model': [
             'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__5__/1/tf_ckpts/ckpt-21',
-            'saved_models/data_grammar_8/run_1/train_complete_model__neural_net__data_grammar_8_run_1__TextTransformer__Transformer_Encoder_String__Endgame__250__/1/tf_ckpts/ckpt-21',
             ],
         'path_to_pretrained_dataset_encoder': [''],
         'replay_buffer_path': [''],

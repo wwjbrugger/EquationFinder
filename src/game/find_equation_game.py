@@ -68,7 +68,7 @@ class FindEquationGame(Game):
         observations['last_symbol'] = \
             syntax_tree.dict_of_nodes[syntax_tree.nodes_to_expand[0]].node_symbol
         observations['true_equation'] = batch_data['infix_formula']
-        observations['prefix_formula'] = batch_data['prefix_formula']
+        observations['prefix_formula'] = batch_data['prefix_formula'] if  'prefix_formula' in batch_data else ''
         pattern = r'c_0_|___|__'
         matches = re.split(pattern, observations['true_equation'])
         observations['true_equation_hash'] = matches[0].strip()
