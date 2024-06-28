@@ -11,29 +11,37 @@ class Config:
         ### General
         parser = ArgumentParser(description="A MuZero and AlphaZero implementation in Tensorflow.")
 
-        parser.add_argument("--experiment_name", type=str, default='delete_me')
+        parser.add_argument("--experiment_name", type=str, default='delete_me',
+                            help='Give the experiment an informative Name. ')
         parser.add_argument("--grammar_search", type=str,
                             default='curated_equations',
-                            help="Which grammar should be used for search. "
+                            help="Which grammar should be used for the search. "
                                  "Grammar can be defined in src/generate_datasets/grammars.py")
         parser.add_argument("--grammar_for_generation", default='curated_equations',
-                            help= "Only used when equation_preprocess_class == GenPandasPreprocess")
-        parser.add_argument("--job_id", type=int,default=0)
+                            help= "Which grammar is used to generate equations?"
+                                  "Only used when equation_preprocess_class == GenPandasPreprocess")
+        parser.add_argument("--job_id", type=int,default=0,
+                            help= 'Give the experiment an unique ID')
         parser.add_argument("--path_to_complete_model", type=str,
                             default='', help="Path to a complete model  which should be loaded")
-        parser.add_argument('--sec_per_simulation', type=int,default=1)
+        parser.add_argument('--sec_per_simulation', type=int,default=1,
+                            help="Maximal time to spend with a simulation at the moment not in use")
         parser.add_argument("--path_to_pretrained_dataset_encoder",
-                            help='Path to a pretrained model where the dataset encoder is copied from.',
+                            help='Path to a pre-trained model'
+                                 ' from which the weights of the dataset encoder are copied.',
                              type=str)
         parser.add_argument("--generate_new_training_data", type=str2bool,
-                            default=True, help="If mcts should be run for training"
-                                               "If False only replay buffer is used.")
+                            default=True, help="If MCTS should be run for training."
+                                               "If False, only replay buffer is used.")
         parser.add_argument("--only_test", type=str2bool,
                             default=False, help="If only test mode should be run")
-        parser.add_argument("--seed", type=int, required=True)
-        parser.add_argument("--minutes_to_run", type=int)
+        parser.add_argument("--seed", type=int, required=True,
+                            help='Seed for expeiment')
+        parser.add_argument("--minutes_to_run", type=int,
+                            help='Maximal time the experiment is allowed to run')
         parser.add_argument("--max_iteration_to_run", type=int,
-                            default=200)
+                            default=200,
+                            help='Number of itertion')
         parser.add_argument("--logging_level", type=int, default=30,
                             help="CRITICAL = 50, ERROR = 40, "
                                  "WARNING = 30, INFO = 20, "
@@ -43,17 +51,22 @@ class Config:
                             help="If training data are generated in supervised way "
                                  "or by running a MCTS")
         parser.add_argument("--wandb", type=str, default='offline',
-                            choices=["online", "offline", "disabled"])
+                            choices=["online", "offline", "disabled"],
+                            help="Mode to run WandB in."
+                                 " WandB is used to log the results of the experiments ")
         parser.add_argument("--gpu", default=0,
                             help="Set which device to use (-1 for CPU). Equivalent "
                                  "to/overrides the CUDA_VISIBLE_DEVICES environment variable.")
 
         parser.add_argument("--data", dest="data_path", type=Path,
-                            help="path to preprocessed dataset", required=False)
+                            help="path to preprocessed dataset. "
+                                 "Used with PandasPreprocess and EquationPreprocessDummy ",
+                            required=False
+                            )
         parser.add_argument("--num_selfplay_iterations", type=int, default=10,
-                            help="(int) Number of games played in one iteration")
+                            help="(int) Number of games played in one train iteration")
         parser.add_argument("--num_selfplay_iterations_test", type=int, default=2,
-                            help="(int) Number of games played in one iteration")
+                            help="(int) Number of games played in one test iteration")
         parser.add_argument("--test_network", type=str2bool, default=True,
                             help="If the network should be tested with a "
                                  "separate network")
@@ -63,16 +76,19 @@ class Config:
 
         ### Infos about Tree
         parser.add_argument('--minimum_reward', type=np.float32,
-                            default=-1)
+                            default=-1,
+                            help='Set minimum reward for proposed equations')
         parser.add_argument('--maximum_reward', type=np.float32,
-                            default=1)
+                            default=1,
+                            help='Set maximum reward for proposed equations'
+                            )
         parser.add_argument('--build_syntax_tree_token_based', type=str2bool,
                             default=False,
                             help=" When False, actions are stored in a buffer "
-                                 "and only if the end flag, "
-                                 "or maximal number of symbols is reached"
-                                 " the actions are parsed to a syntax tree."
-                                 "When true actions a directly used to buid the syntay tree"
+                                 "and only if the end flag "
+                                 "or a maximal number of symbols is reached"
+                                 "are  the actions  parsed to a syntax tree."
+                                 "When true actions a directly used to build the syntax tree"
                             )
         parser.add_argument('--max_depth_of_tree', type=int,
                             default=10,
@@ -81,7 +97,7 @@ class Config:
                             help='Maximum nodes of generated equations', default=25)
         parser.add_argument('--max_branching_factor', type=np.float32,
                             default=2,
-                            help='Estimate how many children a node will have at average')
+                            help='How many children a node will maximal have')
         parser.add_argument('--max_constants_in_tree', type=int,
                             default=3,
                             help='Maximum number of constants allowed in  equation'
@@ -96,8 +112,8 @@ class Config:
                             help="(int) Number of weight updates to perform in the backpropagation step in one iteration")
         parser.add_argument("--average_policy_if_wrong", type=str2bool,
                             default=False,
-                            help='If network found equation which gets minimum reward_should it learn '
-                                 'as policy an uniform distribution')
+                            help='If training data which lead to a bad equation should be added to the replay buffer'
+                                 'with an uniform distribution istead of the MCTS result. ')
         parser.add_argument("--cold_start_iterations", type=int,
                             default=20,
                             help='How many iterations should be searched without training the network ')
@@ -312,7 +328,8 @@ class Config:
         ## Actor Decoder
         parser.add_argument("--actor_decoder_class", type=str,
                             default='mlp_decoder',
-                            choices=['mlp_decoder'])
+                            choices=['mlp_decoder'],
+                            help="Architecture used for the policy prediction")
         parser.add_argument('--actor_decoder_normalize_way', type=str,
                             default='soft_max',
                             choices=['soft_max', 'positive_sum_1', 'sigmoid', 'None', 'tanh'],
@@ -321,7 +338,8 @@ class Config:
         ## Critic Decoder
         parser.add_argument("--critic_decoder_class", type=str,
                             default='mlp_decoder',
-                            choices=['mlp_decoder'])
+                            choices=['mlp_decoder'],
+                            help="Architecture used for the critic prediction" )
         parser.add_argument('--critic_decoder_normalize_way', type=str,
                             default= 'tanh',
                             choices=['soft_max', 'positive_sum_1', 'sigmoid', 'None', 'tanh'],
